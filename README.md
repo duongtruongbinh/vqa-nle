@@ -7,7 +7,6 @@ This project is a research environment for fine-tuning Vision Language Models (V
 ## Project Structure
 
 ```
-.
 ├── configs/            # Experiment configuration files (e.g., hyperparameters)
 ├── data/               # Datasets (raw and processed)
 ├── models/             # Saved model checkpoints (local)
