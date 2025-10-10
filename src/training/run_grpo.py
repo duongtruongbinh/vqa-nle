@@ -1,25 +1,66 @@
 # -*- coding: utf-8 -*-
+import os
 import torch
 
 from peft import LoraConfig, get_peft_model
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from transformers import AutoTokenizer, AutoModel
 from trl import GRPOConfig, GRPOTrainer
-
+import json
 # We will create the get_dataset function in the next step inside src/data/dataset_loader.py
 from src.data.dataset_loader import get_dataset
+from src.data.dataset_collator import VinternDataCollator
+from src.trainers.custom_grpo_trainer import VinternGRPOTrainer
 from src.rewards.outcome_rewards import format_reward, accuracy_reward
+from dotenv import load_dotenv
+
+load_dotenv()
+
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 def main():
     model_id = "5CD-AI/Vintern-3B-R-beta"
+    hf_token = os.getenv("HF_TOKEN")
 
     # --- Load Model and Processor ---
-    processor = AutoProcessor.from_pretrained(model_id, use_fast=True, padding_side="left")
-    model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+    processor = AutoTokenizer.from_pretrained(
+        model_id, use_fast=True, trust_remote_code=True)
+
+    print(f"DEBUG - Tokenizer special tokens: {processor.special_tokens_map}")
+    print(f"DEBUG - Vocab size: {len(processor)}")
+
+    # Test tokenize
+    test_text = "<IMG_CONTEXT>\nTest prompt"
+    test_tokens = processor(test_text, return_tensors="pt")
+    print(f"DEBUG - Test tokenized: {test_tokens['input_ids']}")
+    print(
+        f"DEBUG - Decoded back: {processor.decode(test_tokens['input_ids'][0])}")
+
+    # ✅ Load model TRƯỚC KHI check attribute
+    model = AutoModel.from_pretrained(
         pretrained_model_name_or_path=model_id,
         torch_dtype=torch.bfloat16,
-        device_map="auto",
-    )
+        trust_remote_code=True,
+    ).cuda()
+
+    # ✅ Set img_context_token_id từ tokenizer
+    img_context_token = '<IMG_CONTEXT>'
+    if img_context_token in processor.get_vocab():
+        img_context_token_id = processor.convert_tokens_to_ids(
+            img_context_token)
+        print(f"DEBUG - Found IMG_CONTEXT token ID: {img_context_token_id}")
+
+        if hasattr(model, 'img_context_token_id'):
+            model.img_context_token_id = img_context_token_id
+            print(
+                f"DEBUG - Set model.img_context_token_id = {img_context_token_id}")
+        else:
+            print("WARNING - Model doesn't have img_context_token_id attribute!")
+    else:
+        print(f"WARNING - {img_context_token} not in tokenizer vocab!")
+        # Fallback
+        if hasattr(model, 'img_context_token_id'):
+            model.img_context_token_id = len(processor) - 1
 
     # --- LoRA Configuration ---
     lora_config = LoraConfig(
@@ -33,12 +74,12 @@ def main():
     model.print_trainable_parameters()
 
     # --- Load Dataset ---
-    # Load the custom ViVQA-X dataset for the 'train' split
-    train_dataset = get_dataset(processor, split="train")
+    train_dataset = get_dataset(split="train")
 
     # --- GRPO Training Configuration ---
+    data_collator = VinternDataCollator(processor=processor, max_num=6)
     training_args = GRPOConfig(
-        output_dir=f"/results/checkpoints/{model_id}-ViVQA-X",
+        output_dir=f"results/checkpoints/{model_id}-ViVQA-X",
         learning_rate=1e-5,
         remove_unused_columns=False,
         num_train_epochs=1,
@@ -47,30 +88,28 @@ def main():
         max_completion_length=1024,
         num_generations=2,
         max_prompt_length=2048,
-        report_to=["tensorboard"],
+        report_to=["none"],
         logging_steps=10,
         push_to_hub=True,
         save_strategy="steps",
         save_steps=10,
+        gradient_checkpointing=False,
+        hub_token=hf_token,
     )
 
-    # --- Initialize and Run Trainer ---
-    # IMPORTANT: Ensure your reward functions in 'src/rewards/outcome_rewards.py'
-    # can parse the 'solution' field (<answer>...</answer><explain>...</explain>)
-    # to calculate rewards correctly.
-    trainer = GRPOTrainer(
+    trainer = VinternGRPOTrainer(
         model=model,
         processing_class=processor,
         reward_funcs=[format_reward, accuracy_reward],
         args=training_args,
         train_dataset=train_dataset,
+        data_collator=data_collator,
     )
 
     print("Starting GRPO training...")
     trainer.train()
     print("Training finished.")
 
-    # --- Save Model ---
     print("Saving model...")
     trainer.save_model(training_args.output_dir)
     trainer.push_to_hub(dataset_name="VLAI-AIVN/ViVQA-X")

@@ -42,3 +42,11 @@ This project is a research environment for fine-tuning Vision Language Models (V
     ```bash
     pip install -r requirements.txt
     ```
+
+## Training
+
+To run the GRPO training script, execute the following command from the project's root directory:
+
+```bash
+python -m src.training.run_grpo
+```
