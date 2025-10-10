@@ -11,9 +11,7 @@ from src.rewards.outcome_rewards import format_reward, accuracy_reward
 
 
 def main():
-    """Main function to run the GRPO training."""
-    model_id = "Qwen/Qwen2.5-VL-3B-Instruct"
-    dataset_id = 'lmms-lab/multimodal-open-r1-8k-verified'
+    model_id = "5CD-AI/Vintern-3B-R-beta"
 
     # --- Load Model and Processor ---
     processor = AutoProcessor.from_pretrained(model_id, use_fast=True, padding_side="left")
@@ -35,11 +33,12 @@ def main():
     model.print_trainable_parameters()
 
     # --- Load Dataset ---
-    train_dataset = get_dataset(dataset_id, processor)
+    # Load the custom ViVQA-X dataset for the 'train' split
+    train_dataset = get_dataset(processor, split="train")
 
     # --- GRPO Training Configuration ---
     training_args = GRPOConfig(
-        output_dir="Qwen2.5-VL-3B-Instruct-Thinking",
+        output_dir=f"/results/checkpoints/{model_id}-ViVQA-X",
         learning_rate=1e-5,
         remove_unused_columns=False,
         num_train_epochs=1,
@@ -56,6 +55,9 @@ def main():
     )
 
     # --- Initialize and Run Trainer ---
+    # IMPORTANT: Ensure your reward functions in 'src/rewards/outcome_rewards.py'
+    # can parse the 'solution' field (<answer>...</answer><explain>...</explain>)
+    # to calculate rewards correctly.
     trainer = GRPOTrainer(
         model=model,
         processing_class=processor,
@@ -71,7 +73,7 @@ def main():
     # --- Save Model ---
     print("Saving model...")
     trainer.save_model(training_args.output_dir)
-    trainer.push_to_hub(dataset_name=dataset_id)
+    trainer.push_to_hub(dataset_name="VLAI-AIVN/ViVQA-X")
     print(f"Model saved to {training_args.output_dir} and pushed to hub.")
 
 
