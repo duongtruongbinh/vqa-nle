@@ -11,6 +11,7 @@ This project is a research environment for fine-tuning Vision Language Models (V
 ├── data/               # Datasets (raw and processed)
 ├── models/             # Saved model checkpoints (local)
 ├── notebooks/          # Jupyter notebooks for exploration and analysis
+├── results/            # Experiment results, logs, and outputs
 ├── src/                # Reusable source code
 │   ├── data/           # Data loading and preprocessing
 │   ├── evaluation/     # Model evaluation scripts
@@ -28,7 +29,7 @@ This project is a research environment for fine-tuning Vision Language Models (V
 1.  **Clone the repository:**
     ```bash
     git clone <your-repo-url>
-    cd grpo-vlm-research
+    cd vqa-nle
     ```
 
 2.  **Create and activate a virtual environment (recommended):**
@@ -38,4 +39,6 @@ This project is a research environment for fine-tuning Vision Language Models (V
     ```
 
 3.  **Install dependencies:**
+    ```bash
+    pip install -r requirements.txt
     ```
