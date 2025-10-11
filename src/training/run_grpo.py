@@ -22,46 +22,6 @@ def main():
     model_id = "5CD-AI/Vintern-3B-R-beta"
     hf_token = os.getenv("HF_TOKEN")
 
-    # --- Load Model and Processor ---
-    processor = AutoTokenizer.from_pretrained(
-        model_id, use_fast=True, trust_remote_code=True)
-
-    print(f"DEBUG - Tokenizer special tokens: {processor.special_tokens_map}")
-    print(f"DEBUG - Vocab size: {len(processor)}")
-
-    # Test tokenize
-    test_text = "<IMG_CONTEXT>\nTest prompt"
-    test_tokens = processor(test_text, return_tensors="pt")
-    print(f"DEBUG - Test tokenized: {test_tokens['input_ids']}")
-    print(
-        f"DEBUG - Decoded back: {processor.decode(test_tokens['input_ids'][0])}")
-
-    # ✅ Load model TRƯỚC KHI check attribute
-    model = AutoModel.from_pretrained(
-        pretrained_model_name_or_path=model_id,
-        torch_dtype=torch.bfloat16,
-        trust_remote_code=True,
-    ).cuda()
-
-    # ✅ Set img_context_token_id từ tokenizer
-    img_context_token = '<IMG_CONTEXT>'
-    if img_context_token in processor.get_vocab():
-        img_context_token_id = processor.convert_tokens_to_ids(
-            img_context_token)
-        print(f"DEBUG - Found IMG_CONTEXT token ID: {img_context_token_id}")
-
-        if hasattr(model, 'img_context_token_id'):
-            model.img_context_token_id = img_context_token_id
-            print(
-                f"DEBUG - Set model.img_context_token_id = {img_context_token_id}")
-        else:
-            print("WARNING - Model doesn't have img_context_token_id attribute!")
-    else:
-        print(f"WARNING - {img_context_token} not in tokenizer vocab!")
-        # Fallback
-        if hasattr(model, 'img_context_token_id'):
-            model.img_context_token_id = len(processor) - 1
-
     # --- LoRA Configuration ---
     lora_config = LoraConfig(
         task_type="CAUSAL_LM",
@@ -70,14 +30,11 @@ def main():
         lora_dropout=0.1,
         target_modules=["q_proj", "v_proj"],
     )
-    model = get_peft_model(model, lora_config)
-    model.print_trainable_parameters()
 
     # --- Load Dataset ---
     train_dataset = get_dataset(split="train")
 
     # --- GRPO Training Configuration ---
-    data_collator = VinternDataCollator(processor=processor, max_num=6)
     training_args = GRPOConfig(
         output_dir=f"results/checkpoints/{model_id}-ViVQA-X",
         learning_rate=1e-5,
@@ -98,12 +55,11 @@ def main():
     )
 
     trainer = VinternGRPOTrainer(
-        model=model,
-        processing_class=processor,
+        model=model_id,
         reward_funcs=[format_reward, accuracy_reward],
         args=training_args,
         train_dataset=train_dataset,
-        data_collator=data_collator,
+        peft_config=lora_config,
     )
 
     print("Starting GRPO training...")
