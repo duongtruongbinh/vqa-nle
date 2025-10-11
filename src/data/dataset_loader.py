@@ -72,11 +72,11 @@ def get_dataset(split="train"):
 
     # Tạo một đối tượng Dataset của Hugging Face
     dataset = Dataset.from_dict({
-        "images": processed_data["image_path"],
+        "image": processed_data["image_path"],
         "prompt": processed_data["prompt"],
         "solution": processed_data["solution"],
     })
 
-    dataset = dataset.cast_column("images", Image(decode=True))
+    dataset = dataset.cast_column("image", Image(decode=True))
 
     return dataset
