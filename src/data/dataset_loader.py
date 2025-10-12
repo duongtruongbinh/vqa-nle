@@ -37,7 +37,7 @@ def get_dataset(split="train"):
     with open(data_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    raw_data = raw_data[:10]
+    raw_data = raw_data[:4]
 
     # Xử lý dữ liệu thô
     processed_data = {

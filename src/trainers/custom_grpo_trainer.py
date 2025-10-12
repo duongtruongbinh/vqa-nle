@@ -46,8 +46,10 @@ from trl.trainer.grpo_config import GRPOConfig
 from trl.trainer.utils import generate_model_card, get_comet_experiment_url
 
 import copy
-from src.inference.models.utils import load_image
-
+import json
+import os
+from src.data.image_preprocessing import load_image
+import math
 if is_peft_available():
     from peft import PeftConfig, get_peft_model
 
@@ -60,62 +62,142 @@ RewardFunc = Union[str, PreTrainedModel, Callable[[list, list], list[float]]]
 
 
 class VinternProcessor:
-    def __init__(self, tokenizer, image_size=448, max_num=12):
+    """
+    Đóng vai 'processing_class' cho Vintern (tokenizer + tiền xử lý ảnh + build prompt).
+    Trả về: {input_ids, attention_mask, pixel_values, image_flags}
+    """
+
+    def __init__(self, model, tokenizer, image_size=448, max_num_tiles=12, use_thumbnail=True):
+        self.model = model
         self.tokenizer = tokenizer
         self.image_size = image_size
-        self.max_num = max_num
-        self.pad_token_id = tokenizer.pad_token_id
-        self.eos_token_id = tokenizer.eos_token_id
+        self.max_num_tiles = max_num_tiles
+        self.use_thumbnail = use_thumbnail
 
-    def __call__(self, text=None, images=None, return_tensors="pt",
-                 padding=True, padding_side="left", add_special_tokens=False):
-        # Text tokenization
-        if text:
-            text_inputs = self.tokenizer(
-                text,
-                return_tensors=return_tensors,
-                padding=padding,
-                add_special_tokens=add_special_tokens
-            )
-            if padding_side == "left":
-                text_inputs = self._left_pad(text_inputs)
+        # thiết lập pad/eos cho Trainer
+        if self.tokenizer.pad_token_id is None:
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+        self.pad_token_id = self.tokenizer.pad_token_id
+        self.eos_token_id = self.tokenizer.eos_token_id
+
+        # id của <IMG_CONTEXT> để model biết chỗ cắm features
+        img_ctx_id = self.tokenizer.convert_tokens_to_ids("<IMG_CONTEXT>")
+        self.model.img_context_token_id = img_ctx_id
+        if self.model.img_context_token_id is None:
+            raise ValueError(
+                "Vintern: không tìm thấy <IMG_CONTEXT> trong tokenizer.")
+
+        # số token ảnh mỗi tile (thường 256)
+        if not hasattr(self.model, "num_image_token"):
+            raise ValueError(
+                "Vintern: thiếu thuộc tính model.num_image_token.")
+        self.num_image_token = int(self.model.num_image_token)
+
+    def _encode_one(self, text: str, image) -> dict:
+        pixel_values = load_image(image, self.image_size, self.max_num_tiles)
+        num_patches = pixel_values.shape[0]
+        num_img_tokens = self.num_image_token * num_patches
+
+        # 2) build image span + prompt
+        image_span = "<img>" + "<IMG_CONTEXT>" * num_img_tokens + "</img>"
+        prompt = f"<|im_start|>user\n{image_span}\n{text}<|im_end|>\n<|im_start|>assistant\n"
+
+        enc = self.tokenizer(prompt, return_tensors="pt",
+                             padding=False, add_special_tokens=False)
+        image_flags = torch.ones((num_patches, 1), dtype=torch.long)
+
+        return {
+            "input_ids": enc["input_ids"][0],           # (L,)
+            "attention_mask": enc["attention_mask"][0],  # (L,)
+            "pixel_values": pixel_values,               # (T, 3, H, W)
+            "image_flags": image_flags,                 # (T, 1)
+        }
+
+    def __call__(self, text, images, return_tensors="pt", padding=True, padding_side="left", add_special_tokens=False):
+        """
+        Batching đơn giản: xử lý từng mẫu rồi pad text theo 'left'.
+        """
+        assert padding_side == "left", "Vintern cần left padding cho causal LM."
+        batch = [self._encode_one(t, im) for t, im in zip(text, images)]
+
+        # pad input_ids/attention_mask (left)
+        maxL = max(x["input_ids"].size(0) for x in batch)
+        input_ids, attn_masks = [], []
+        for x in batch:
+            pad_len = maxL - x["input_ids"].size(0)
+            if pad_len > 0:
+                pad_ids = torch.full(
+                    (pad_len,), self.pad_token_id, dtype=torch.long)
+                pad_ms = torch.zeros((pad_len,), dtype=torch.long)
+                input_ids.append(torch.cat([pad_ids, x["input_ids"]], dim=0))
+                attn_masks.append(
+                    torch.cat([pad_ms,  x["attention_mask"]], dim=0))
+            else:
+                input_ids.append(x["input_ids"])
+                attn_masks.append(x["attention_mask"])
+
+        # concat ảnh theo batch: Vintern forward kỳ vọng (sum_T, 3, H, W) + image_flags (sum_T, 1)
+        pixel_values = torch.cat([x["pixel_values"] for x in batch], dim=0)
+        image_flags = torch.cat([x["image_flags"] for x in batch], dim=0)
+
+        out = {
+            "input_ids": torch.stack(input_ids, dim=0),
+            "attention_mask": torch.stack(attn_masks, dim=0),
+            "pixel_values": pixel_values,
+            "image_flags": image_flags,
+        }
+        return out
+
+    def save_pretrained(self, save_directory: str):
+        """
+        Save tokenizer plus the few processor-specific fields so Trainer
+        can checkpoint/push without errors.
+        """
+        os.makedirs(save_directory, exist_ok=True)
+
+        # 1) save underlying tokenizer (standard HF way)
+        if hasattr(self.tokenizer, "save_pretrained"):
+            self.tokenizer.save_pretrained(save_directory)
+
+        # 2) save minimal processor config
+        cfg = {
+            "_processor_class": "VinternProcessor",
+            "image_size": self.image_size,
+            "max_num_tiles": self.max_num_tiles,
+            "use_thumbnail": self.use_thumbnail,
+            # optional: record special token id for sanity
+            "img_context_token_id": int(getattr(self.model, "img_context_token_id", -1)),
+            "num_image_token": int(getattr(self, "num_image_token", 256)),
+        }
+        with open(os.path.join(save_directory, "vintern_processor_config.json"), "w") as f:
+            json.dump(cfg, f, indent=2)
+
+    @classmethod
+    def from_pretrained(cls, save_directory: str, model, **kwargs):
+        """
+        Optional loader so you (or someone else) can restore the processor
+        from a checkpoint/hub repo later.
+        """
+        tok = AutoTokenizer.from_pretrained(
+            save_directory, trust_remote_code=True, use_fast=False
+        )
+        cfg_path = os.path.join(
+            save_directory, "vintern_processor_config.json")
+        if os.path.exists(cfg_path):
+            with open(cfg_path) as f:
+                cfg = json.load(f)
         else:
-            text_inputs = {}
+            cfg = {}
 
-        # Image processing
-        if images:
-            pixel_values_list = []
-            for image in images:
-                if isinstance(image, str):
-                    pv = load_image(image, input_size=self.image_size,
-                                    max_num=self.max_num)
-                else:
-                    pv = load_image(image, input_size=self.image_size,
-                                    max_num=self.max_num)
-                pixel_values_list.append(pv)
-
-            # Stack all pixel values
-            pixel_values = torch.cat(pixel_values_list, dim=0)
-            text_inputs["pixel_values"] = pixel_values
-
-        return text_inputs
-
-    def _left_pad(self, inputs):
-        # Convert right padding to left padding
-        input_ids = inputs["input_ids"]
-        attention_mask = inputs["attention_mask"]
-
-        # Flip sequences for left padding
-        input_ids = torch.flip(input_ids, dims=[1])
-        attention_mask = torch.flip(attention_mask, dims=[1])
-
-        inputs["input_ids"] = input_ids
-        inputs["attention_mask"] = attention_mask
-        return inputs
-
-    def batch_decode(self, sequences, skip_special_tokens=True):
-        return self.tokenizer.batch_decode(sequences,
-                                           skip_special_tokens=skip_special_tokens)
+        return cls(
+            model=model,
+            tokenizer=tok,
+            image_size=cfg.get("image_size", kwargs.get("image_size", 448)),
+            max_num_tiles=cfg.get(
+                "max_num_tiles", kwargs.get("max_num_tiles", 12)),
+            use_thumbnail=cfg.get(
+                "use_thumbnail", kwargs.get("use_thumbnail", True)),
+        )
 
 
 class VinternGRPOTrainer(Trainer):
@@ -236,7 +318,6 @@ class VinternGRPOTrainer(Trainer):
                 torch_dtype=torch_dtype,
                 low_cpu_mem_usage=True,
                 trust_remote_code=True,
-                use_flash_attn=False,
                 **model_init_kwargs
             )
         else:
@@ -252,7 +333,6 @@ class VinternGRPOTrainer(Trainer):
                 torch_dtype=torch_dtype,
                 low_cpu_mem_usage=True,
                 trust_remote_code=True,
-                use_flash_attn=False,
             )
         elif peft_config is None:
             self.ref_model = create_reference_model(model)
@@ -267,11 +347,18 @@ class VinternGRPOTrainer(Trainer):
                 use_fast=False
             )
             processing_class = VinternProcessor(
-                tokenizer,
+                model=model,
+                tokenizer=tokenizer,
                 image_size=image_size,
-                max_num=max_num_images
+                max_num_tiles=max_num_images,
+                use_thumbnail=False,
             )
-            pad_token_id = tokenizer.pad_token_id
+
+        _img_tid = self._set_img_ctx_token(model, processing_class.tokenizer)
+        if self.ref_model is not None:
+            self._set_img_ctx_token(self.ref_model, processing_class.tokenizer)
+
+        pad_token_id = tokenizer.pad_token_id
 
         # Reward functions
         if not isinstance(reward_funcs, list):
@@ -316,8 +403,10 @@ class VinternGRPOTrainer(Trainer):
         self.num_generations = args.num_generations  # = G in the GRPO paper
         self.generation_config = GenerationConfig(
             max_new_tokens=self.max_completion_length,
-            do_sample=True,
-            temperature=1,  # HACK
+            do_sample=getattr(args, "do_sample", True),
+            temperature=getattr(args, "temperature", 0.7),
+            top_p=getattr(args, "top_p", 0.9),
+            top_k=getattr(args, "top_k", None),
             num_return_sequences=self.num_generations,
             pad_token_id=pad_token_id,
         )
@@ -363,6 +452,21 @@ class VinternGRPOTrainer(Trainer):
                 self.reward_funcs[i] = self.accelerator.prepare_model(
                     reward_func, evaluation_mode=True)
 
+    @staticmethod
+    def _set_img_ctx_token(model_like, tokenizer):
+        tid = tokenizer.convert_tokens_to_ids("<IMG_CONTEXT>")
+        # đặt lên wrapper
+        setattr(model_like, "img_context_token_id", tid)
+        # đặt lên base peft nếu có
+        base = getattr(model_like, "base_model", None)
+        if base is not None:
+            setattr(base, "img_context_token_id", tid)
+            # một số wrapper có .model
+            inner = getattr(base, "model", None)
+            if inner is not None:
+                setattr(inner, "img_context_token_id", tid)
+        return tid
+
     def _set_signature_columns_if_needed(self):
         # If `self.args.remove_unused_columns` is True, non-signature columns are removed.
         # By default, this method sets `self._signature_columns` to the model's expected inputs.
@@ -373,29 +477,32 @@ class VinternGRPOTrainer(Trainer):
 
     # Get the per-token log probabilities for the completions for the model and the reference model
 
-    def _get_per_token_logps(self, model, input_ids, attention_mask, pixel_values):
-        # Vintern forward pass
-        outputs = model(
+    def _get_per_token_logps(self, model, input_ids, attention_mask, pixel_values, image_flags, **_):
+        # Bóc các wrapper (Accelerate/PEFT) để lấy core model không chèn inputs_embeds
+        core = self.accelerator.unwrap_model(model)
+        # PeftModel -> .base_model (PeftModelForCausalLM) -> .model (InternVLChatForCausalLM/InternVLChatModel)
+        base = getattr(core, "base_model", None)
+        if base is not None:
+            core_inner = getattr(base, "model", None)
+            if core_inner is not None:
+                core = core_inner
+
+        # Gọi trực tiếp forward của InternVLChat*, chỉ với input_ids (không inputs_embeds)
+        out = core(
             input_ids=input_ids,
             attention_mask=attention_mask,
             pixel_values=pixel_values,
-            return_dict=True
+            image_flags=image_flags,
+            use_cache=False,          # an toàn cho tính log-prob
+            return_dict=True,
         )
-
-        logits = outputs.logits  # (B, L, V)
-        logits = logits[:, :-1, :]  # Exclude last logit
-        input_ids = input_ids[:, 1:]  # Exclude first token
-
-        # Compute per-token log probabilities
-        per_token_logps = []
-        for logits_row, input_ids_row in zip(logits, input_ids):
-            log_probs = logits_row.log_softmax(dim=-1)
-            token_log_prob = torch.gather(
-                log_probs, dim=1, index=input_ids_row.unsqueeze(1)
-            ).squeeze(1)
-            per_token_logps.append(token_log_prob)
-
-        return torch.stack(per_token_logps)
+        logits = out.logits  # (B, L, V)
+        logits = logits[:, :-1, :]
+        input_ids = input_ids[:, 1:]
+        log_probs = logits.log_softmax(dim=-1)
+        token_log_prob = torch.gather(
+            log_probs, dim=2, index=input_ids.unsqueeze(-1)).squeeze(-1)
+        return token_log_prob
 
     def _log_metrics(self, completion_mask, rewards, std_grouped_rewards, per_token_kl):
         """Log training metrics"""
@@ -477,161 +584,210 @@ class VinternGRPOTrainer(Trainer):
 
     def compute_loss(self, model, inputs, return_outputs=False, num_items_in_batch=None):
         if return_outputs:
-            raise ValueError(
-                "VinternGRPOTrainer does not support returning outputs")
+            raise ValueError("GRPOTrainer does not support return_outputs")
 
-        prompts = [x["prompt"] for x in inputs]
-        images = [x["image"] for x in inputs]
-
-        # Apply chat template nếu cần
-        prompts_text = [
-            maybe_apply_chat_template(
-                example, self.processing_class.tokenizer)["prompt"]
-            for example in inputs
-        ]
-
-        # Process prompts với images
-        prompt_inputs = self.processing_class(
-            text=prompts_text,
-            images=images,
-            return_tensors="pt",
-            padding=True,
-            padding_side="left",
-            add_special_tokens=False,
-        )
-        prompt_inputs = super()._prepare_inputs(prompt_inputs)
-
-        prompt_ids = prompt_inputs["input_ids"]
-        prompt_mask = prompt_inputs["attention_mask"]
-        pixel_values = prompt_inputs["pixel_values"]
-
-        # Truncate if needed
-        if self.max_prompt_length is not None:
-            prompt_ids = prompt_ids[:, -self.max_prompt_length:]
-            prompt_mask = prompt_mask[:, -self.max_prompt_length:]
-
-        # Generate completions
-        with unwrap_model_for_generation(model, self.accelerator) as unwrapped_model:
-            all_completions = []
-
-            # Prepare inputs for generation
-            gen_inputs = {
-                "input_ids": prompt_ids,
-                "attention_mask": prompt_mask,
-                "pixel_values": pixel_values,
-            }
-
-            for i in range(self.num_generations):
-                temp_generation_config = copy.deepcopy(self.generation_config)
-                temp_generation_config.num_return_sequences = 1
-
-                completion = unwrapped_model.generate(
-                    **gen_inputs,
-                    generation_config=temp_generation_config
-                )
-                all_completions.append(completion)
-
-            # Pad and stack completions
-            max_length = max(c.size(1) for c in all_completions)
-            padded_completions = []
-
-            for completion in all_completions:
-                if completion.size(1) < max_length:
-                    padding = torch.full(
-                        (completion.size(0), max_length - completion.size(1)),
-                        self.processing_class.tokenizer.pad_token_id,
-                        dtype=completion.dtype,
-                        device=completion.device
-                    )
-                    padded_completion = torch.cat([completion, padding], dim=1)
-                else:
-                    padded_completion = completion
-                padded_completions.append(padded_completion)
-
-            prompt_completion_ids = torch.cat(padded_completions, dim=0)
-
-        # Extract completions
-        prompt_length = prompt_ids.size(1)
-        completion_ids = prompt_completion_ids[:, prompt_length:]
-
-        # Replicate pixel_values for num_generations
-        pixel_values = pixel_values.repeat_interleave(
-            self.num_generations, dim=0)
-
-        # Mask after EOS token
-        is_eos = completion_ids == self.processing_class.eos_token_id
         device = self.accelerator.device
-        eos_idx = torch.full((is_eos.size(0),), is_eos.size(
-            1), dtype=torch.long, device=device)
-        eos_idx[is_eos.any(dim=1)] = is_eos.int().argmax(dim=1)[
-            is_eos.any(dim=1)]
-        sequence_indices = torch.arange(is_eos.size(
-            1), device=device).expand(is_eos.size(0), -1)
-        completion_mask = (sequence_indices <= eos_idx.unsqueeze(1)).int()
 
-        # Concatenate masks
-        prompt_mask = prompt_mask.repeat_interleave(
-            self.num_generations, dim=0)
-        attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)
+        # Lấy text (question/prompt) & image
+        if "question" in inputs[0]:
+            texts = [ex["question"] for ex in inputs]
+        else:
+            texts = [ex["prompt"] for ex in inputs]
+        images = [ex["image"] for ex in inputs]
+        image_ids = [ex.get("image_id", None) for ex in inputs]
+        problems = [ex.get("problem", None) for ex in inputs]
 
-        # Compute log probabilities
+        # Encode bằng processing_class (build prompt + tiles)
+        enc = self.processing_class(text=texts, images=images, return_tensors="pt",
+                                    padding=True, padding_side="left", add_special_tokens=False)
+        device = self.accelerator.device
+        input_ids = enc["input_ids"].to(device)
+        attention_mask = enc["attention_mask"].to(device)
+        pixel_values = enc["pixel_values"].to(
+            device, dtype=self.model.dtype)  # bf16/float16 tùy model
+        image_flags = enc["image_flags"].to(device)
+
+        if self.max_prompt_length is not None:
+            img_tid = getattr(self.model, "img_context_token_id", None)
+            if img_tid is not None:
+                B, L = input_ids.size()
+                new_ids, new_mask = [], []
+                for b in range(B):
+                    ids = input_ids[b]
+                    ms = attention_mask[b]
+                    positions = (ids == img_tid).nonzero(
+                        as_tuple=False).flatten()
+                    if L <= self.max_prompt_length or positions.numel() == 0:
+                        new_ids.append(ids[-self.max_prompt_length:])
+                        new_mask.append(ms[-self.max_prompt_length:])
+                        continue
+                    img_start = int(positions[0])
+                    img_end = int(positions[-1]) + 1
+                    img_len = img_end - img_start
+                    if img_len > self.max_prompt_length:
+                        # too many image tokens: rely on fewer tiles
+                        keep_start = img_end - self.max_prompt_length
+                        keep_end = img_end
+                    else:
+                        # prefer to keep the tail, but never cut the image block
+                        keep_start = max(0, L - self.max_prompt_length)
+                        if keep_start > img_start:
+                            keep_start = img_start
+                        keep_end = keep_start + self.max_prompt_length
+                    new_ids.append(ids[keep_start:keep_end])
+                    new_mask.append(ms[keep_start:keep_end])
+                input_ids = torch.stack(new_ids, dim=0)
+                attention_mask = torch.stack(new_mask, dim=0)
+            else:
+                input_ids = input_ids[:, -self.max_prompt_length:]
+                attention_mask = attention_mask[:, -self.max_prompt_length:]
+
+        # === Generate completions ===
+        unwrapped = self.accelerator.unwrap_model(model)
+
+        num_generations = self.generation_config.num_return_sequences
+        temp_gc = copy.deepcopy(self.generation_config)
+        temp_gc.num_return_sequences = 1
+
+        # ép sinh tối thiểu 1 token + cấu hình dừng và cache
+        temp_gc.use_cache = True
+        setattr(temp_gc, "min_new_tokens", 1)
+        temp_gc.pad_token_id = self.processing_class.pad_token_id
+        eos_id = self.processing_class.tokenizer.convert_tokens_to_ids(
+            "<|im_end|>")
+        if eos_id is None:
+            eos_id = self.processing_class.tokenizer.eos_token_id
+        temp_gc.eos_token_id = eos_id
+
+        all_completions = []
+        for _ in range(num_generations):
+            gen_ids = unwrapped.generate(
+                input_ids=input_ids,
+                attention_mask=attention_mask,
+                generation_config=temp_gc,
+                pixel_values=pixel_values,
+            )
+            all_completions.append(gen_ids)
+
+        # pad & stack completions
+        max_len = max(x.size(1) for x in all_completions)
+        padded = [torch.cat([g, torch.full((g.size(0), max_len-g.size(1)),
+                                           self.processing_class.pad_token_id,
+                                           dtype=g.dtype, device=g.device)], dim=1) if g.size(1) < max_len else g
+                  for g in all_completions]
+        prompt_completion_ids = torch.cat(padded, dim=0)
+
+        prompt_len = input_ids.size(1)
+        prompt_ids = prompt_completion_ids[:, :prompt_len]
+        completion_ids = prompt_completion_ids[:, prompt_len:]
+        prompt_mask = attention_mask.repeat_interleave(num_generations, dim=0)
+
+        # Mask theo EOS (loại EOS khỏi loss)
+        if completion_ids.size(1) == 0:
+            # Không có token sinh mới → mask rỗng, tránh argmax lỗi
+            completion_mask = torch.zeros(
+                (completion_ids.size(0), 0), dtype=torch.int, device=device
+            )
+        else:
+            is_eos = completion_ids == self.processing_class.eos_token_id
+            eos_idx = torch.full((is_eos.size(0),), is_eos.size(
+                1), dtype=torch.long, device=device)
+            has_eos = is_eos.any(dim=1)
+            eos_idx[has_eos] = is_eos.int().argmax(dim=1)[has_eos]
+            seq_idx = torch.arange(is_eos.size(
+                1), device=device).expand_as(is_eos)
+            completion_mask = (seq_idx < eos_idx.unsqueeze(1)).int()
+
+        attn_mask_full = torch.cat([prompt_mask, completion_mask], dim=1)
+
+        pv = pixel_values.repeat_interleave(num_generations, dim=0)
+        img_flags = image_flags.repeat_interleave(num_generations, dim=0)
+
         per_token_logps = self._get_per_token_logps(
-            model, prompt_completion_ids, attention_mask, pixel_values
-        )
-        per_token_logps = per_token_logps[:, prompt_length - 1:]
+            model, prompt_completion_ids, attn_mask_full,
+            pixel_values=pv, image_flags=img_flags
+        )[:, prompt_len-1:]
 
         with torch.inference_mode():
             if self.ref_model is not None:
-                ref_per_token_logps = self._get_per_token_logps(
-                    self.ref_model, prompt_completion_ids, attention_mask, pixel_values
-                )
+                ref_token_logps = self._get_per_token_logps(
+                    self.ref_model, prompt_completion_ids, attn_mask_full,
+                    pixel_values=pv, image_flags=img_flags
+                )[:, prompt_len-1:]
             else:
                 with self.accelerator.unwrap_model(model).disable_adapter():
-                    ref_per_token_logps = self._get_per_token_logps(
-                        model, prompt_completion_ids, attention_mask, pixel_values
-                    )
-            ref_per_token_logps = ref_per_token_logps[:, prompt_length - 1:]
+                    ref_token_logps = self._get_per_token_logps(
+                        model, prompt_completion_ids, attn_mask_full,
+                        pixel_values=pv, image_flags=img_flags
+                    )[:, prompt_len-1:]
 
-        # Compute KL divergence
-        per_token_kl = torch.exp(ref_per_token_logps - per_token_logps) - \
-            (ref_per_token_logps - per_token_logps) - 1
+        delta = (ref_token_logps - per_token_logps).clamp(-20, 20)
+        per_token_kl = torch.exp(delta) - delta - 1
 
-        # Decode completions
-        completions = self.processing_class.batch_decode(
-            completion_ids, skip_special_tokens=True
-        )
+        # Decode completions cho reward
+        completions = self.processing_class.tokenizer.batch_decode(
+            completion_ids, skip_special_tokens=True)
+        prompts_rep = [t for t in texts for _ in range(num_generations)]
 
-        # Compute rewards
-        prompts = [prompt for prompt in prompts for _ in range(
-            self.num_generations)]
-        images = [img for img in images for _ in range(self.num_generations)]
+        # Tính reward (giữ nguyên code reward_funcs hiện có của bạn)
+        rewards_per_func = torch.zeros(
+            len(prompts_rep), len(self.reward_funcs), device=device)
+        for i, (rf, rproc) in enumerate(zip(self.reward_funcs, self.reward_processing_classes)):
+            if isinstance(rf, PreTrainedModel):
+                # nối text+comp (non-chat)
+                texts_for_rm = [p + c for p,
+                                c in zip(prompts_rep, completions)]
+                rm_inputs = rproc(texts_for_rm, return_tensors="pt", padding=True,
+                                  padding_side="right", add_special_tokens=False)
+                rm_inputs = super()._prepare_inputs(rm_inputs)
+                with torch.inference_mode():
+                    rewards_per_func[:, i] = rf(**rm_inputs).logits[:, 0]
+            else:
+                # custom function
+                reward_kwargs = {k: [] for k in inputs[0].keys() if k not in [
+                    "prompt", "completion", "image"]}
+                for k in reward_kwargs:
+                    for ex in inputs:
+                        reward_kwargs[k].extend([ex[k]] * num_generations)
+                out_r = rf(prompts=prompts_rep, completions=completions, image_ids=image_ids * num_generations,
+                           problems=problems * num_generations, **reward_kwargs)
+                rewards_per_func[:, i] = torch.tensor(
+                    out_r, dtype=torch.float32, device=device)
 
-        rewards = self._compute_rewards(prompts, completions, images)
+        rewards = rewards_per_func.sum(dim=1)
+        mean_group = rewards.view(-1, num_generations).mean(dim=1)
+        std_group = rewards.view(-1, num_generations).std(dim=1)
 
-        # Group-wise normalization
-        mean_grouped_rewards = rewards.view(-1,
-                                            self.num_generations).mean(dim=1)
-        std_grouped_rewards = rewards.view(-1, self.num_generations).std(dim=1)
+        mean_group = mean_group.repeat_interleave(num_generations, dim=0)
+        std_group = std_group.repeat_interleave(num_generations, dim=0)
 
-        mean_grouped_rewards = mean_grouped_rewards.repeat_interleave(
-            self.num_generations)
-        std_grouped_rewards = std_grouped_rewards.repeat_interleave(
-            self.num_generations)
+        # safeguard std=0 + clip advantage (tùy chọn)
+        std_eps = 1e-6
+        zero_std = (std_group < std_eps)
+        eff_std = torch.where(zero_std, torch.ones_like(std_group), std_group)
+        advantages = (rewards - mean_group) / (eff_std + 1e-8)
+        advantages = torch.where(
+            zero_std, torch.zeros_like(advantages), advantages)
+        advantages = advantages.clamp(-getattr(self.args, "adv_clip", 5.0),
+                                      getattr(self.args, "adv_clip", 5.0))
 
-        advantages = (rewards - mean_grouped_rewards) / \
-            (std_grouped_rewards + 1e-4)
+        # beta schedule (tuỳ chọn)
+        beta = self.beta
+        if hasattr(self, "state") and getattr(self.state, "max_steps", None):
+            prog = self.state.global_step / max(1, self.state.max_steps)
+            bmin = getattr(self.args, "beta_min", beta)
+            bmax = getattr(self.args, "beta_max", beta)
+            beta = float(bmin + 0.5*(bmax - bmin) *
+                         (1 - math.cos(prog * 3.14159)))
 
-        # Compute loss
-        per_token_loss = torch.exp(per_token_logps - per_token_logps.detach()) * \
-            advantages.unsqueeze(1)
-        per_token_loss = -(per_token_loss - self.beta * per_token_kl)
-
+        ratio = torch.exp(per_token_logps - per_token_logps.detach())
+        per_token_loss = - \
+            (ratio * advantages.unsqueeze(1) - beta * per_token_kl)
         loss = ((per_token_loss * completion_mask).sum(dim=1) /
-                completion_mask.sum(dim=1)).mean()
+                (completion_mask.sum(dim=1).clamp(min=1))).mean()
 
         # Log metrics
-        self._log_metrics(completion_mask, rewards,
-                          std_grouped_rewards, per_token_kl)
+        self._log_metrics(completion_mask, rewards, std_group, per_token_kl)
 
         return loss
 
