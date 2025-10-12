@@ -42,9 +42,9 @@ def main():
         num_train_epochs=1,
         bf16=True,
         per_device_train_batch_size=2,
-        max_completion_length=1024,
+        max_completion_length=512,
         num_generations=2,
-        max_prompt_length=2048,
+        max_prompt_length=1536,
         report_to=["none"],
         logging_steps=10,
         push_to_hub=True,
@@ -60,6 +60,8 @@ def main():
         args=training_args,
         train_dataset=train_dataset,
         peft_config=lora_config,
+        image_size=448,
+        max_num_images=4,  # try 3 if still long
     )
 
     print("Starting GRPO training...")
