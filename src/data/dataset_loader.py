@@ -1,6 +1,5 @@
 import os
 import json
-from datasets import Dataset, Image
 
 SYSTEM_PROMPT_VIVQA_ENHANCED = (
     "<image>\nBạn là một trợ lý AI chuyên gia, có khả năng phân tích hình ảnh một cách cẩn thận và đa nghi. "
@@ -20,63 +19,82 @@ SYSTEM_PROMPT_VIVQA_ENHANCED = (
 )
 
 
-def get_dataset(split="train"):
+def create_jsonl_for_grpo(split="train", output_file=None):
+    """
+    Tạo file JSONL theo format của VLM-R1 GRPO
+    """
     data_dir = "/mnt/VLAI_data/ViVQA-X"
 
     if split == 'train':
         data_path = os.path.join(data_dir, 'ViVQA-X_train.json')
-        image_dir = '/mnt/VLAI_data/COCO_Images/train2014'
+        image_dir = 'train2014'  # Đường dẫn tương đối
     elif split == 'val':
         data_path = os.path.join(data_dir, 'ViVQA-X_val.json')
-        image_dir = '/mnt/VLAI_data/COCO_Images/val2014'
+        image_dir = 'val2014'
     else:  # 'test'
         data_path = os.path.join(data_dir, 'ViVQA-X_test.json')
-        image_dir = '/mnt/VLAI_data/COCO_Images/val2014'
+        image_dir = 'val2014'
 
     # Tải dữ liệu từ file JSON
     with open(data_path, 'r', encoding='utf-8') as f:
         raw_data = json.load(f)
 
-    raw_data = raw_data[:4]
+    # Đặt tên file output
+    if output_file is None:
+        output_dir = 'data/processed'
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, f'ViVQA-X_{split}_grpo.jsonl')
 
-    # Xử lý dữ liệu thô
-    processed_data = {
-        "image_path": [],
-        "prompt": [],
-        "solution": []
-    }
+    # Xử lý và ghi vào JSONL
+    with open(output_file, 'w', encoding='utf-8') as f_out:
+        for idx, item in enumerate(raw_data):
+            image_name = item.get('image_name')
+            question = item.get('question')
+            answer = item.get('answer')
+            explanations = item.get('explanation')
 
-    for item in raw_data:
-        image_name = item.get('image_name')
-        question = item.get('question')
-        answer = item.get('answer')
-        explanations = item.get('explanation')
+            if not all([image_name, question, answer, explanations, explanations[0]]):
+                continue
 
-        if not all([image_name, question, answer, explanations, explanations[0]]):
-            continue
+            explanation = explanations[0]
 
-        explanation = explanations[0]
-        # Tạo chuỗi solution theo định dạng trong system prompt
-        solution = f"<answer> {answer} </answer><explain> {explanation} </explain>"
+            # Tạo đường dẫn tương đối (chỉ tên file hoặc thư mục con)
+            # VLM-R1 sẽ tự động ghép với image_folders
+            relative_image_path = os.path.join(image_dir, image_name)
 
-        image_path = os.path.join(image_dir, image_name)
-        if not os.path.exists(image_path):
-            continue
+            # Tạo prompt với format của bạn
+            question_with_prompt = SYSTEM_PROMPT_VIVQA_ENHANCED.format(
+                question=question)
 
-        # Tạo prompt trực tiếp bằng cách format string
-        prompt = SYSTEM_PROMPT_VIVQA_ENHANCED.format(question=question)
+            # Format solution với thinking tags nếu cần RL training
+            # Hoặc đơn giản chỉ là answer + explain
+            solution = f"<answer>{answer}</answer><explain>{explanation}</explain>"
 
-        processed_data["image_path"].append(image_path)
-        processed_data["prompt"].append(prompt)
-        processed_data["solution"].append(solution)
+            # Tạo entry theo format VLM-R1
+            entry = {
+                "id": idx + 1,
+                "image": image_name,  # CHỈ TÊN FILE, không có đường dẫn đầy đủ
+                "conversations": [
+                    {
+                        "from": "human",
+                        "value": f"<image>{question_with_prompt}"
+                    },
+                    {
+                        "from": "gpt",
+                        "value": solution
+                    }
+                ]
+            }
 
-    # Tạo một đối tượng Dataset của Hugging Face
-    dataset = Dataset.from_dict({
-        "image": processed_data["image_path"],
-        "prompt": processed_data["prompt"],
-        "solution": processed_data["solution"],
-    })
+            # Ghi một dòng JSONL
+            f_out.write(json.dumps(entry, ensure_ascii=False) + '\n')
 
-    dataset = dataset.cast_column("image", Image(decode=True))
+    print(f"✅ Đã tạo file JSONL: {output_file}")
+    return output_file
 
-    return dataset
+
+if __name__ == "__main__":
+    # Tạo file JSONL cho train và val
+    create_jsonl_for_grpo("train")
+    create_jsonl_for_grpo("val")
+    create_jsonl_for_grpo("test")
