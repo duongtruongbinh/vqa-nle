@@ -3,7 +3,7 @@ import os
 import torch
 
 from peft import LoraConfig, get_peft_model
-from transformers import AutoTokenizer, AutoModel
+from transformers import AutoTokenizer, AutoModel, AutoProcessor
 from trl import GRPOConfig, GRPOTrainer
 import json
 # We will create the get_dataset function in the next step inside src/data/dataset_loader.py
@@ -15,7 +15,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 
 def main():
