@@ -2,20 +2,11 @@ import os
 import json
 
 SYSTEM_PROMPT_VIVQA_ENHANCED = (
-    "<image>\nBạn là một trợ lý AI chuyên gia, có khả năng phân tích hình ảnh một cách cẩn thận và đa nghi. "
-    "Nhiệm vụ của bạn là trả lời câu hỏi của người dùng dựa trên hình ảnh được cung cấp. "
-    "Trước tiên, hãy thực hiện một chuỗi suy luận chi tiết bên trong cặp thẻ <thinking></thinking>. "
-    "Sau khi hoàn tất quá trình suy luận, hãy cung cấp câu trả lời cuối cùng theo đúng định dạng yêu cầu.\n\n"
-    "Câu hỏi: {question}\n\n"
-    "ĐỊNH DẠNG BẮT BUỘC:\n"
-    "<thinking>\n"
-    "<SUMMARY>[Tóm tắt ngắn gọn về hình ảnh và yêu cầu của câu hỏi]</SUMMARY>\n"
-    "<ANALYSIS>[Phân tích các chi tiết, vật thể, văn bản trong ảnh có liên quan trực tiếp đến câu hỏi. Liệt kê các bằng chứng quan sát được.]</ANALYSIS>\n"
-    "<REASONING_STEPS>[Trình bày quá trình lập luận logic từng bước một. Từ các bằng chứng đã phân tích, làm thế nào để đi đến câu trả lời? Giải thích các mối liên hệ.]</REASONING_STEPS>\n"
-    "<CONCLUSION>[Đưa ra kết luận cuối cùng từ quá trình lập luận trên.]</CONCLUSION>\n"
-    "</thinking>\n"
-    "<answer>[Điền câu trả lời trực tiếp và ngắn gọn vào đây]</answer>\n"
-    "<explain>[Dựa vào quá trình suy luận trong <thinking>, giải thích cực kỳ ngắn gọn (trong khoảng 10-15 từ)]</explain>"
+    "<image>Câu hỏi: {question}\n"
+    "ĐỊNH DẠNG:\n"
+    "<thinking>[Suy luận ngắn gọn]</thinking>\n"
+    "<answer>[Câu trả lời]</answer>\n"
+    "<explain>[Giải thích 10-15 từ]</explain>"
 )
 
 
@@ -46,8 +37,14 @@ def create_jsonl_for_grpo(split="train", output_file=None):
         output_file = os.path.join(output_dir, f'ViVQA-X_{split}_grpo.jsonl')
 
     # Xử lý và ghi vào JSONL
+    sample_count = 0
+    max_samples = 50
     with open(output_file, 'w', encoding='utf-8') as f_out:
         for idx, item in enumerate(raw_data):
+            # Kiểm tra giới hạn số lượng samples
+            if max_samples is not None and sample_count >= max_samples:
+                break
+
             image_name = item.get('image_name')
             question = item.get('question')
             answer = item.get('answer')
@@ -77,7 +74,7 @@ def create_jsonl_for_grpo(split="train", output_file=None):
                 "conversations": [
                     {
                         "from": "human",
-                        "value": f"<image>{question_with_prompt}"
+                        "value": f"{question_with_prompt}"
                     },
                     {
                         "from": "gpt",
@@ -88,8 +85,9 @@ def create_jsonl_for_grpo(split="train", output_file=None):
 
             # Ghi một dòng JSONL
             f_out.write(json.dumps(entry, ensure_ascii=False) + '\n')
+            sample_count += 1
 
-    print(f"✅ Đã tạo file JSONL: {output_file}")
+    print(f"✅ Đã tạo file JSONL: {output_file} với {sample_count} samples")
     return output_file
 
 

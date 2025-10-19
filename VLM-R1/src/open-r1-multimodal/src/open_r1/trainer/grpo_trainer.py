@@ -325,8 +325,15 @@ class VLMGRPOTrainer(Trainer):
                 assert isinstance(processing_class, PreTrainedTokenizerBase), "processing_class must be an instance of PreTrainedTokenizerBase if it has no tokenizer attribute"
                 pad_token_id = processing_class.pad_token_id
 
-        self.vlm_module.post_model_init(model, processing_class)
-        self.vlm_module.post_model_init(self.ref_model, processing_class)
+        if is_peft_model(model):
+            self.vlm_module.post_model_init(model.base_model.model, processing_class)
+        else:
+            self.vlm_module.post_model_init(model, processing_class)
+        if self.ref_model is not None:
+            if is_peft_model(self.ref_model):
+                self.vlm_module.post_model_init(self.ref_model.base_model.model, processing_class)
+            else:
+                self.vlm_module.post_model_init(self.ref_model, processing_class)
 
         # Reward functions
         if not isinstance(reward_funcs, list):
