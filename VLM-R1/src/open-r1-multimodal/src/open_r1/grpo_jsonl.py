@@ -59,7 +59,7 @@ tokenizer = None
 def initialize_tokenizer(model_path):
     global tokenizer
     if tokenizer is None:
-        tokenizer = AutoTokenizer.from_pretrained(model_path)
+        tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     return tokenizer
 
 

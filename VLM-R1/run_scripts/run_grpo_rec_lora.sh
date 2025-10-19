@@ -1,18 +1,16 @@
-export DS_SKIP_CUDA_CHECK=1
-
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 export REPO_HOME="${PROJECT_ROOT}"
 echo "REPO_HOME: $REPO_HOME"
 # on remote
-data_paths="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ViVQA-X_train_grpo.jsonl"
-image_folders="/mnt/VLAI_data/COCO_Images/train2014"
-model_path="5CD-AI/Vintern-3B-R-beta"
-is_reward_customized_from_vlm_module=False
+data_paths="/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcoco_train.jsonl:/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcocop_train.jsonl:/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcocog_train.jsonl" 
+image_folders="/training/shz/dataset/coco:/training/shz/dataset/coco:/training/shz/dataset/coco"
+model_path="/training/models/Qwen2.5-VL-3B-Instruct"
+is_reward_customized_from_vlm_module=True
 echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
-export EXP_NAME="Vintern-3B-R-beta-ViVQA-X" # TODO: change this to your own experiment name
-TASK_TYPE="reasoning"
+export EXP_NAME="Qwen2.5-VL-3B-Instruct-rec-lora" # TODO: change this to your own experiment name
+TASK_TYPE="rec"
 cd ${REPO_HOME}/src/open-r1-multimodal
 
 export DEBUG_MODE="true" # Enable Debug if you want to see the rollout of model during RL
@@ -23,8 +21,8 @@ export LOG_PATH="${REPO_HOME}/runs/${EXP_NAME}/log/debug_log.$(date +%Y-%m-%d-%H
 
 
 # export WANDB_DISABLED=true
-CUDA_VISIBLE_DEVICES=0,1
-torchrun --nproc_per_node="2" \
+# CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6
+torchrun --nproc_per_node="8" \
     --nnodes="1" \
     --node_rank="0" \
     --master_addr="127.0.0.1" \
@@ -40,7 +38,7 @@ torchrun --nproc_per_node="2" \
     --task_type $TASK_TYPE \
     --per_device_train_batch_size 8 \
     --gradient_accumulation_steps 2 \
-    --gradient_checkpointing false \
+    --gradient_checkpointing true \
     --logging_steps 1 \
     --num_train_epochs 2 \
     --bf16 \
@@ -61,8 +59,6 @@ torchrun --nproc_per_node="2" \
     --lora_alpha 128 \
     --lora_dropout 0.05 \
     --lora_task_type CAUSAL_LM \
-    --freeze_vision_modules true \
-    --push_to_hub true \
-    --hub_model_id "TSunm/Vintern-3B-R-beta-ViVQA-X"
+    --freeze_vision_modules true
 
 echo "Training completed for ${EXP_NAME}"
