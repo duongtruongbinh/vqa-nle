@@ -7,12 +7,12 @@ echo "REPO_HOME: $REPO_HOME"
 # on remote
 data_paths="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ViVQA-X_train_grpo.jsonl"
 image_folders="/mnt/VLAI_data/COCO_Images/train2014"
-model_path="OpenGVLab/InternVL2-1B"
+model_path="OpenGVLab/InternVL3-1B"
 is_reward_customized_from_vlm_module=False
 echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
-export EXP_NAME="InternVL2-1B-ViVQA-X" # TODO: change this to your own experiment name
+export EXP_NAME="InternVL3-1B-ViVQA-X-reward-deepseek" # TODO: change this to your own experiment name
 TASK_TYPE="rec"
 cd ${REPO_HOME}/src/open-r1-multimodal
 
@@ -43,7 +43,8 @@ torchrun --nproc_per_node="1" \
     --gradient_accumulation_steps 8 \
     --gradient_checkpointing true \
     --logging_steps 1 \
-    --num_train_epochs 1 \
+    --max_steps 10000 \
+    --num_train_epochs 11 \
     --bf16 \
     --attn_implementation flash_attention_2 \
     --run_name ${EXP_NAME} \
@@ -52,13 +53,13 @@ torchrun --nproc_per_node="1" \
     --num_generations 4 \
     --max_completion_length 256 \
     --reward_funcs accuracy format \
-    --beta 0.04 \
+    --beta 0.1 \
     --report_to wandb \
     --dataset-name this_is_not_used \
     --deepspeed ${REPO_HOME}/src/open-r1-multimodal/local_scripts/zero2.json \
-    --learning_rate 1e-5 \
+    --learning_rate 2e-5 \
     --freeze_vision_modules true \
     --push_to_hub true \
-    --hub_model_id "TSunm/InternVL2-1B-ViVQA-X"
+    --hub_model_id "TSunm/InternVL3-1B-ViVQA-X"
 
 echo "Training completed for ${EXP_NAME}"

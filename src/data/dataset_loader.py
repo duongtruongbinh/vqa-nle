@@ -36,14 +36,14 @@ def create_jsonl_for_grpo(split="train", output_file=None):
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f'ViVQA-X_{split}_grpo.jsonl')
 
-    # Xử lý và ghi vào JSONL
-    sample_count = 0
-    max_samples = 50
+    # # Xử lý và ghi vào JSONL
+    # sample_count = 0
+    # max_samples = 50
     with open(output_file, 'w', encoding='utf-8') as f_out:
         for idx, item in enumerate(raw_data):
-            # Kiểm tra giới hạn số lượng samples
-            if max_samples is not None and sample_count >= max_samples:
-                break
+            # # Kiểm tra giới hạn số lượng samples
+            # if max_samples is not None and sample_count >= max_samples:
+            #     break
 
             image_name = item.get('image_name')
             question = item.get('question')
@@ -85,9 +85,9 @@ def create_jsonl_for_grpo(split="train", output_file=None):
 
             # Ghi một dòng JSONL
             f_out.write(json.dumps(entry, ensure_ascii=False) + '\n')
-            sample_count += 1
+            # sample_count += 1
 
-    print(f"✅ Đã tạo file JSONL: {output_file} với {sample_count} samples")
+    # print(f"✅ Đã tạo file JSONL: {output_file} với {sample_count} samples")
     return output_file
 
 

@@ -1,6 +1,7 @@
 import string
 import re
 from typing import Optional, List
+from explanation_rewards import ExplanationRewardScorer
 
 
 def format_reward(completions: List[str], **kwargs) -> List[float]:
@@ -67,3 +68,14 @@ def accuracy_reward(completions, solution, image_ids, problems, **kwargs):
         rewards.append(reward)
 
     return rewards
+
+
+def explation_reward(ground_truths: list, predictions: list, image_paths: list, alpha = 0.5):
+    scorer = ExplanationRewardScorer(alpha = alpha)
+    rewards = score.explanation_rewards(
+        ground_truths=ground_truths,
+        predictions=predictions,
+        image_paths=image_paths
+    )
+    return rewards
+

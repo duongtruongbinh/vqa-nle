@@ -244,3 +244,7 @@ if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
 else:
     trainer.train()
 ```
+
+
+    --max_steps 10000 \  # Training sẽ dừng ở điều kiện nào đến trước
+    --num_train_epochs 11 \
