@@ -16,3 +16,5 @@ pip install matplotlib
 pip install pycocotools
 pip install openai
 pip install httpx[socks]
+pip install torchmetrics==1.8.2
+pip install pycocoevalcap==1.2  

@@ -4,15 +4,6 @@ from typing import Optional, List
 from explanation_rewards import ExplanationRewardScorer
 
 
-def format_reward(completions: List[str], **kwargs) -> List[float]:
-    """Reward function that checks if the completion has a specific format."""
-    pattern = r"^<think>\n.*?\n</think>\n<answer>\n.*?\n</answer>$"
-    matches = [re.match(pattern, content, re.DOTALL | re.MULTILINE)
-               for content in completions]
-    rewards = [1.0 if match else 0.0 for match in matches]
-    return rewards
-
-
 def accuracy_reward(completions, solution, image_ids, problems, **kwargs):
     """
     Reward function cho short-text answers:
@@ -72,7 +63,7 @@ def accuracy_reward(completions, solution, image_ids, problems, **kwargs):
 
 def explation_reward(ground_truths: list, predictions: list, image_paths: list, alpha = 0.5):
     scorer = ExplanationRewardScorer(alpha = alpha)
-    rewards = score.explanation_rewards(
+    rewards = scorer.explanation_rewards(
         ground_truths=ground_truths,
         predictions=predictions,
         image_paths=image_paths
