@@ -897,22 +897,60 @@ def accuracy_reward(completions, solution, **kwargs):
     return rewards
 
 
-def format_reward(completions, **kwargs):
-    """Reward function that checks if the completion has a specific format."""
-    pattern = r"<think>.*?</think>\s*<answer>.*?</answer>"
-    completion_contents = [completion[0]["content"] for completion in completions]
-    matches = [re.fullmatch(pattern, content, re.DOTALL) for content in completion_contents]
+# def format_reward(completions, **kwargs):
+#     """Reward function that checks if the completion has a specific format."""
+#     pattern = r"<think>.*?</think>\s*<answer>.*?</answer>\s*<explain>.*?</explain>"
+#     completion_contents = [completion[0]["content"] for completion in completions]
+#     matches = [re.fullmatch(pattern, content, re.DOTALL) for content in completion_contents]
 
-    current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
+#     current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
+#     if os.getenv("DEBUG_MODE") == "true":
+#         log_path = os.getenv("LOG_PATH")
+#         with open(log_path.replace(".txt", "_format.txt"), "a", encoding='utf-8') as f:
+#             f.write(f"------------- {current_time} Format reward -------------\n")
+#             for content, match in zip(completion_contents, matches):
+#                 f.write(f"Content: {content}\n")
+#                 f.write(f"Has format: {bool(match)}\n")
+
+#     return [1.0 if match else 0.0 for match in matches]
+
+def format_reward(completions, **kwargs):
+    """Reward: +1 nếu có ít nhất 1 cặp hợp lệ cho mỗi tag think/answer/explain. 
+    Lặp thêm không được cộng thêm điểm (chống spam). Tổng điểm 0..3."""
+    # Tách nội dung completion (giữ nguyên cấu trúc đầu vào của bạn)
+    completion_contents = [completion[0]["content"] for completion in completions]
+
+    # Regex cho từng cặp thẻ
+    pat_think = re.compile(r"<think>.*?</think>", re.DOTALL)
+    pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+    pat_explain = re.compile(r"<explain>.*?</explain>", re.DOTALL)
+
+    scores = []
+    for content in completion_contents:
+        n_think = len(pat_think.findall(content))
+        n_answer = len(pat_answer.findall(content))
+        n_explain = len(pat_explain.findall(content))
+
+        # per-tag score: 0 / 0.5 / 1.0
+        s_think = 1.0 if n_think >= 2 else (0.5 if n_think == 1 else 0.0)
+        s_answer = 1.0 if n_answer >= 2 else (0.5 if n_answer == 1 else 0.0)
+        s_explain = 1.0 if n_explain >= 2 else (0.5 if n_explain == 1 else 0.0)
+
+        total = float(s_think + s_answer + s_explain)
+        scores.append(total)
+
+    # Logging giữ nguyên cấu trúc cơ bản của bạn
     if os.getenv("DEBUG_MODE") == "true":
         log_path = os.getenv("LOG_PATH")
+        current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
         with open(log_path.replace(".txt", "_format.txt"), "a", encoding='utf-8') as f:
             f.write(f"------------- {current_time} Format reward -------------\n")
-            for content, match in zip(completion_contents, matches):
+            for content, score in zip(completion_contents, scores):
                 f.write(f"Content: {content}\n")
-                f.write(f"Has format: {bool(match)}\n")
+                # "Has format" = có đủ cả 3 cặp (đúng tinh thần 3 điểm)
+                f.write(f"Has format: {bool(score == 3.0)}\n")
 
-    return [1.0 if match else 0.0 for match in matches]
+    return scores
 
 
 reward_funcs_registry = {
