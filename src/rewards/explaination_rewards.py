@@ -4,7 +4,7 @@ from pycocoevalcap.cider.cider import Cider
 from pycocoevalcap.tokenizer.ptbtokenizer import PTBTokenizer
 from PIL import Image
 import warnings
-
+import numpy as np 
 warnings.filterwarnings("ignore", category=UserWarning, module='transformers.modeling_utils')
 
 class ExplanationRewardScorer:
@@ -69,13 +69,13 @@ class ExplanationRewardScorer:
         preds_dict = {i: pred for i, pred in enumerate(predictions)}
         paths_dict = {i: path for i, path in enumerate(image_paths)}
 
-        print("Calculating CIDEr scores...")
+        # print("Calculating CIDEr scores...")
         cider_scores = self.calculate_cider_batch(gts_dict, preds_dict)
 
-        print("Calculating CLIP scores...")
+        # print("Calculating CLIP scores...")
         clip_scores = self.calculate_clip_batch(paths_dict, preds_dict)
 
-        print("Combining scores to generate final rewards...")
+        # print("Combining scores to generate final rewards...")
         final_rewards = []
         for i in range(len(predictions)):
             cider_score = cider_scores.get(i, 0.0)
@@ -86,8 +86,17 @@ class ExplanationRewardScorer:
             reward = self.alpha * cider_score + (1.0 - self.alpha) * clip_score_normalized
             final_rewards.append(reward) 
             
-            print(f"  Index {i}: CIDEr={cider_score:.2f}, CLIP={clip_score_raw:.2f} -> Reward={reward:.4f}")
+            # print(f"  Index {i}: CIDEr={cider_score:.2f}, CLIP={clip_score_raw:.2f} -> Reward={reward:.4f}")
 
+        rewards_array = np.array(final_rewards)
+        min_reward = np.min(rewards_array)
+        max_reward = np.max(rewards_array)
+        reward_range = np.max(rewards_array) - np.min(rewards_array)
+        if reward_range == 0:
+            scaled_rewards_list = [0.0] * len(rewards_array)
+        else:
+            scaled_rewards = (rewards_array - min_reward) / reward_range
+            scaled_rewards_list = scaled_rewards.tolist()
         return final_rewards
 
 # if __name__ == "__main__":
