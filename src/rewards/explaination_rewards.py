@@ -90,7 +90,6 @@ class ExplanationRewardScorer:
 
         rewards_array = np.array(final_rewards)
         min_reward = np.min(rewards_array)
-        max_reward = np.max(rewards_array)
         reward_range = np.max(rewards_array) - np.min(rewards_array)
         if reward_range == 0:
             final_rewards = [0.0] * len(rewards_array)

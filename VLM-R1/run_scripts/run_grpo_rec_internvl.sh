@@ -12,7 +12,7 @@ is_reward_customized_from_vlm_module=False
 echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
-export EXP_NAME="InternVL3-1B-ViVQA-X-reward-deepseek" # TODO: change this to your own experiment name
+export EXP_NAME="InternVL3-1B-ViVQA-X-101" # TODO: change this to your own experiment name
 TASK_TYPE="vqa"
 cd ${REPO_HOME}/src/open-r1-multimodal
 
@@ -49,10 +49,10 @@ torchrun --nproc_per_node="1" \
     --attn_implementation flash_attention_2 \
     --run_name ${EXP_NAME} \
     --data_seed 42 \
-    --save_steps 100 \
+    --save_steps 50 \
     --num_generations 3 \
     --max_completion_length 1024 \
-    --reward_funcs accuracy format \
+    --reward_funcs accuracy format explanation\
     --beta 0.1 \
     --report_to wandb \
     --dataset-name this_is_not_used \

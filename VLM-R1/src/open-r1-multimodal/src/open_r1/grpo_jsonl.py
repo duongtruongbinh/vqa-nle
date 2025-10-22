@@ -43,6 +43,11 @@ from transformers import AutoProcessor, AutoTokenizer
 
 from openai import OpenAI
 
+import sys
+# Add the parent directory to sys.path to import from src/rewards
+sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../../src/rewards'))
+from explaination_rewards import ExplanationRewardScorer
+
 logger = logging.get_logger(__name__)
 
 client = OpenAI(
@@ -55,13 +60,22 @@ monkey_patch_torch_load()
 
 tokenizer = None
 
-
 def initialize_tokenizer(model_path):
     global tokenizer
     if tokenizer is None:
         tokenizer = AutoTokenizer.from_pretrained(model_path, trust_remote_code=True)
     return tokenizer
 
+explanation_scorer = None  # Global scorer instance
+
+def initialize_explanation_scorer(alpha=0.5):
+    """Initialize explanation scorer once and reuse it."""
+    global explanation_scorer
+    if explanation_scorer is None:
+        print("Initializing ExplanationRewardScorer (CLIP + CIDEr)...")
+        explanation_scorer = ExplanationRewardScorer(alpha=alpha)
+        print("ExplanationRewardScorer initialized successfully!")
+    return explanation_scorer
 
 @dataclass
 class GRPOScriptArguments(ScriptArguments):
@@ -936,7 +950,7 @@ def format_reward(completions, **kwargs):
         s_answer = 1.0 if n_answer >= 2 else (0.5 if n_answer == 1 else 0.0)
         s_explain = 1.0 if n_explain >= 2 else (0.5 if n_explain == 1 else 0.0)
 
-        total = float(s_think + s_answer + s_explain)
+        total = float(s_think + s_answer + s_explain) / 3.0
         scores.append(total)
 
     # Logging giữ nguyên cấu trúc cơ bản của bạn
@@ -947,17 +961,89 @@ def format_reward(completions, **kwargs):
             f.write(f"------------- {current_time} Format reward -------------\n")
             for content, score in zip(completion_contents, scores):
                 f.write(f"Content: {content}\n")
-                # "Has format" = có đủ cả 3 cặp (đúng tinh thần 3 điểm)
-                f.write(f"Has format: {bool(score == 3.0)}\n")
+                f.write(f"Has format: {bool(score == 1.0)}\n")
 
     return scores
 
+def explanation_reward(completions, solution, **kwargs):
+    """
+    Calculate explanation reward using CIDEr + CLIP score.
+    
+    Args:
+        completions: List of completion objects
+        solution: List of ground truth solutions
+        **kwargs: Must contain 'image_path' key with list of image paths
+    
+    Returns:
+        list[float]: Reward scores for each completion
+    """
+    contents = [completion[0]["content"] for completion in completions]
+    rewards = []
+    
+    # Initialize scorer (alpha=0.5 means equal weight for CIDEr and CLIP)
+    scorer = initialize_explanation_scorer(alpha=0.5)
+    
+    # Extract explanations from content and solution
+    ground_truths_list = []
+    predictions_list = []
+    image_paths_list = []
+    
+    for content, sol in zip(contents, solution):
+        # Extract explanation from solution
+        sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
+        if sol_match:
+            # Ground truth can have multiple reference explanations
+            gt_explanation = sol_match.group(1).strip()
+            ground_truths_list.append([gt_explanation])
+        else:
+            ground_truths_list.append([""])
+        
+        # Extract explanation from content
+        content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
+        if content_match:
+            pred_explanation = content_match.group(1).strip()
+        else:
+            pred_explanation = ""
+        predictions_list.append(pred_explanation)
+    
+    # Get image paths from kwargs
+    if 'image_path' in kwargs:
+        image_paths_list = [img_path[0] if isinstance(img_path, list) else img_path 
+                           for img_path in kwargs['image_path']]
+    else:
+        # If no image paths provided, return 0 rewards
+        return [0.0] * len(contents)
+    
+    try:
+        # Calculate rewards using the scorer
+        rewards = scorer.explanation_rewards(
+            ground_truths=ground_truths_list,
+            predictions=predictions_list,
+            image_paths=image_paths_list
+        )
+    except Exception as e:
+        print(f"Error in explanation_reward: {e}")
+        rewards = [0.0] * len(contents)
+    
+    # Debug logging
+    if os.getenv("DEBUG_MODE") == "true":
+        log_path = os.getenv("LOG_PATH")
+        current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
+        with open(log_path.replace(".txt", "_explanation.txt"), "a", encoding='utf-8') as f:
+            f.write(f"------------- {current_time} Explanation reward -------------\n")
+            for i, (content, sol, reward) in enumerate(zip(contents, solution, rewards)):
+                f.write(f"Sample {i}: Reward={reward:.4f}\n")
+                f.write(f"Content: {content}\n")
+                f.write(f"Solution: {sol}\n")
+    
+    return rewards
 
 reward_funcs_registry = {
     "accuracy": accuracy_reward,
     "format": format_reward,
     "length": cosine_rewards,
     "repetition": repetition_rewards,
+    "explanation": explanation_reward, 
 }
 
 
@@ -1037,7 +1123,9 @@ def main(script_args, training_args, model_args):
                 # Handle solution that could be a float or string
                 solution_value = item['conversations'][1]['value']
                 if isinstance(solution_value, str):
-                    item['solution'] = solution_value.replace('<answer>', '').replace('</answer>', '').strip()
+                    # xử lý tag từ trước
+                    # item['solution'] = solution_value.replace('<answer>', '').replace('</answer>', '').strip()
+                    item['solution'] = solution_value
                 else:
                     # If it's a float or other non-string type, keep it as is
                     item['solution'] = str(solution_value)
@@ -1055,7 +1143,7 @@ def main(script_args, training_args, model_args):
             return {
                 'image_path': [p for p in example['image_path']],  # Store path instead of loaded image
                 'problem': example['problem'],
-                'solution': f"<answer> {example['solution']} </answer>",
+                'solution': example['solution'], # xử lý tag từ trước
                 'accu_reward_method': example['accu_reward_method'],
                 'prompt': [{
                     'role': 'user',
@@ -1068,7 +1156,7 @@ def main(script_args, training_args, model_args):
         else:
             return {
                 'problem': example['problem'],
-                'solution': f"<answer> {example['solution']} </answer>",
+                'solution': example['solution'], # xử lý tag từ trước
                 'accu_reward_method': example['accu_reward_method'],
                 'prompt': [{
                     'role': 'user',
