@@ -13,7 +13,7 @@ echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
 export EXP_NAME="InternVL3-1B-ViVQA-X-reward-deepseek" # TODO: change this to your own experiment name
-TASK_TYPE="rec"
+TASK_TYPE="vqa"
 cd ${REPO_HOME}/src/open-r1-multimodal
 
 export DEBUG_MODE="true" # Enable Debug if you want to see the rollout of model during RL
@@ -39,19 +39,19 @@ torchrun --nproc_per_node="1" \
     --image_folders $image_folders \
     --is_reward_customized_from_vlm_module $is_reward_customized_from_vlm_module \
     --task_type $TASK_TYPE \
-    --per_device_train_batch_size 4 \
-    --gradient_accumulation_steps 8 \
+    --per_device_train_batch_size 3 \
+    --gradient_accumulation_steps 11 \
     --gradient_checkpointing true \
     --logging_steps 1 \
-    --max_steps 10000 \
-    --num_train_epochs 11 \
+    --max_steps 500 \
+    --num_train_epochs 2 \
     --bf16 \
     --attn_implementation flash_attention_2 \
     --run_name ${EXP_NAME} \
     --data_seed 42 \
     --save_steps 100 \
-    --num_generations 4 \
-    --max_completion_length 256 \
+    --num_generations 3 \
+    --max_completion_length 1024 \
     --reward_funcs accuracy format \
     --beta 0.1 \
     --report_to wandb \
