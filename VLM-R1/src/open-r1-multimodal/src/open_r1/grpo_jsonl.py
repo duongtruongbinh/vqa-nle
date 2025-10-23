@@ -46,7 +46,8 @@ from openai import OpenAI
 import sys
 # Add the parent directory to sys.path to import from src/rewards
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../../src/rewards'))
-from explaination_rewards import ExplanationRewardScorer
+from explaination_rewards import ExplanationRewardScorer 
+from outcome_rewards import accuracy_reward as custom_accuracy_reward
 
 logger = logging.get_logger(__name__)
 
@@ -891,7 +892,8 @@ def accuracy_reward(completions, solution, **kwargs):
         elif accu_reward_method == 'all_match':
             reward = all_match_reward(content, sol)
         else:
-            reward = default_accuracy_reward(content, sol)
+            # reward = default_accuracy_reward(content, sol)
+            reward = custom_accuracy_reward(content, sol)
         rewards.append(reward)
 
         if os.getenv("DEBUG_MODE") == "true":
@@ -938,22 +940,40 @@ def format_reward(completions, **kwargs):
     pat_think = re.compile(r"<think>.*?</think>", re.DOTALL)
     pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
     pat_explain = re.compile(r"<explain>.*?</explain>", re.DOTALL)
-
+    
     scores = []
     for content in completion_contents:
-        n_think = len(pat_think.findall(content))
-        n_answer = len(pat_answer.findall(content))
-        n_explain = len(pat_explain.findall(content))
+        n_pair_think = len(pat_think.findall(content))
+        n_pair_answer = len(pat_answer.findall(content))
+        n_pair_explain = len(pat_explain.findall(content))
 
-        # per-tag score: 0 / 0.5 / 1.0
-        s_think = 1.0 if n_think >= 2 else (0.5 if n_think == 1 else 0.0)
-        s_answer = 1.0 if n_answer >= 2 else (0.5 if n_answer == 1 else 0.0)
-        s_explain = 1.0 if n_explain >= 2 else (0.5 if n_explain == 1 else 0.0)
+        n_think_open   = len(re.findall(r"<think>", content))
+        n_think_close  = len(re.findall(r"</think>", content))
+        n_answer_open  = len(re.findall(r"<answer>", content))
+        n_answer_close = len(re.findall(r"</answer>", content))
+        n_explain_open  = len(re.findall(r"<explain>", content))
+        n_explain_close = len(re.findall(r"</explain>", content))
+        # base score
+        b_think = 1.0 if n_pair_think >= 1 else (0.5 if n_think_open or n_think_close == 1 else 0.0)
+        b_answer = 1.0 if n_pair_answer >= 1 else (0.5 if n_answer_open or n_answer_close == 1 else 0.0)
+        b_explain = 1.0 if n_pair_explain >= 1 else (0.5 if n_explain_open or n_explain_close == 1 else 0.0)
+        b_total = b_think + b_answer + b_explain
+        
+        # penalty score
+        # Đếm số thẻ mở/đóng riêng lẻ
+        # Thẻ đơn dư = (mở + đóng) - 2 (không âm)
+        think_singles   = max(0, n_think_open   + n_think_close   - 2 )
+        answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
+        explain_singles = max(0, n_explain_open + n_explain_close - 2 )
 
-        total = float(s_think + s_answer + s_explain) / 3.0
+        p_think = think_singles * 0.5
+        p_answer = answer_singles * 0.5
+        p_explain = explain_singles * 0.5
+        p_total = p_think + p_answer + p_explain
+
+        total = float(b_total - p_total)
         scores.append(total)
 
-    # Logging giữ nguyên cấu trúc cơ bản của bạn
     if os.getenv("DEBUG_MODE") == "true":
         log_path = os.getenv("LOG_PATH")
         current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
@@ -961,7 +981,7 @@ def format_reward(completions, **kwargs):
             f.write(f"------------- {current_time} Format reward -------------\n")
             for content, score in zip(completion_contents, scores):
                 f.write(f"Content: {content}\n")
-                f.write(f"Has format: {bool(score == 1.0)}\n")
+                f.write(f"Score: {score:.2f}\n")
 
     return scores
 
@@ -1043,7 +1063,7 @@ reward_funcs_registry = {
     "format": format_reward,
     "length": cosine_rewards,
     "repetition": repetition_rewards,
-    "explanation": explanation_reward, 
+    # "explanation": explanation_reward, 
 }
 
 
@@ -1200,7 +1220,7 @@ def main(script_args, training_args, model_args):
 
     # Train and push the model to the Hub
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
-        trainer.train(resume_from_checkpoint=True)
+        trainer.train()
     else:
         trainer.train()
 

@@ -245,6 +245,83 @@ else:
     trainer.train()
 ```
 
+### 7. Data Handling Logic (`grpo_jsonl.py`)
 
-    --max_steps 10000 \  # Training sẽ dừng ở điều kiện nào đến trước
-    --num_train_epochs 11 \
+-   **File**: `VLM-R1/src/open-r1-multimodal/src/open_r1/grpo_jsonl.py`
+-   **Problem**: The original data loading logic was designed to automatically wrap solutions in `<answer>` tags. It first stripped any existing `<answer>` tags from the ground truth and then added them back. This created a logic conflict with pre-formatted data for ViVQA-X, which already contains both `<answer>` and `<explain>` tags, leading to incorrect nested tags (e.g., `<answer>...<explain>...</explain></answer>`).
+-   **Modification**: The data processing pipeline has been adjusted to preserve the original tags from the input data. The code that stripped and re-added `<answer>` tags has been changed. The script now directly uses the `solution` string from the JSONL file, assuming it is already correctly formatted with all necessary tags.
+
+    **Original Logic (Before):**
+    ```python
+    # In the data loading loop
+    item['solution'] = solution_value.replace('<answer>', '').replace('</answer>', '').strip()
+    
+    # In make_conversation_from_jsonl function
+    'solution': f"<answer> {example['solution']} </answer>",
+    ```
+
+    **Modified Logic (After):**
+    ```python
+    # In the data loading loop
+    item['solution'] = solution_value # Directly use the pre-formatted string
+
+    # In make_conversation_from_jsonl function
+    'solution': example['solution'], # Use the solution as-is
+    ```
+
+## Customization and Extensibility
+
+This section provides guidance on how to customize the training pipeline, such as adding new reward functions or understanding how data is handled.
+
+### Adding a New Reward Function
+
+To integrate a new reward function into the GRPO training pipeline, follow these steps:
+
+1.  **Implement the Reward Function**:
+    -   Open `VLM-R1/src/open-r1-multimodal/src/open_r1/grpo_jsonl.py`.
+    -   Define your new Python function. The function must accept `completions`, `solution`, and `**kwargs` as arguments and return a list of floating-point scores. `kwargs` can be used to access additional data like `image_path`.
+    -   **Example Signature**:
+        ```python
+        def my_new_reward(completions, solution, **kwargs):
+            scores = []
+            # ... your logic here ...
+            return scores
+        ```
+
+2.  **Normalize the Reward Score**:
+    -   It is crucial that your reward function returns scores normalized to a consistent range, typically **[0.0, 1.0]**. This ensures that it combines fairly with other reward functions (`accuracy`, `format`, `explanation`).
+
+3.  **Register the Function**:
+    -   In the same file, add your function to the `reward_funcs_registry` dictionary.
+        ```python
+        reward_funcs_registry = {
+            "accuracy": accuracy_reward,
+            "format": format_reward,
+            "explanation": explanation_reward,
+            # Add your new function here
+            "my_new_reward": my_new_reward,
+        }
+        ```
+
+4.  **Activate in Training Script**:
+    -   Open your training script (e.g., `VLM-R1/run_scripts/run_grpo_rec_internvl.sh`).
+    -   Add the key of your new reward function to the `--reward_funcs` argument.
+        ```bash
+        --reward_funcs accuracy format explanation my_new_reward \
+        ```
+
+### Image Path Handling for Rewards
+
+The data pipeline is optimized to handle images efficiently, especially for reward functions that require image data (e.g., CLIP-based scores).
+
+-   **Path-Based Loading**: Instead of loading images into memory during initial data processing, the script stores file paths in the `image_path` field. This is done in `grpo_jsonl.py` by combining the `image_folders` path from the run script with the image filename from the JSONL data.
+-   **Access in Reward Functions**: The list of image paths for the current batch is passed into the `**kwargs` dictionary for all reward functions. A function can access it like this:
+    ```python
+    def my_reward_with_images(completions, solution, **kwargs):
+        if 'image_path' in kwargs:
+            image_paths_list = kwargs['image_path']
+            # Now you can open and process images using these paths
+            for path in image_paths_list:
+                # ...
+    ```
+-   **Singleton Scorer**: For reward models that are computationally expensive to initialize (like CLIP), a global singleton pattern is used (`initialize_explanation_scorer`). This ensures the model is loaded into memory only once per process, preventing repeated initialization on every batch.
