@@ -1,0 +1,36 @@
+{
+  "accuracy": 49.44,
+  "task_score": 49.4410569105691,
+  "unfiltered_scores": {
+    "BLEU-1": 28.51,
+    "BLEU-2": 16.82,
+    "BLEU-3": 9.92,
+    "BLEU-4": 5.82,
+    "METEOR": 25.37,
+    "ROUGE_L": 26.35,
+    "CIDEr": 16.81,
+    "BERTScore_F1": 77.85
+  },
+  "filtered_scores": {
+    "BLEU-1": 29.06,
+    "BLEU-2": 16.88,
+    "BLEU-3": 9.54,
+    "BLEU-4": 5.44,
+    "METEOR": 25.39,
+    "ROUGE_L": 26.52,
+    "CIDEr": 18.66,
+    "BERTScore_F1": 77.77
+  },
+  "scaled_scores": {
+    "BLEU-1": 14.1,
+    "BLEU-2": 8.32,
+    "BLEU-3": 4.9,
+    "BLEU-4": 2.88,
+    "METEOR": 12.54,
+    "ROUGE_L": 13.03,
+    "CIDEr": 8.31,
+    "BERTScore_F1": 38.49
+  },
+  "total_examples": 1968,
+  "correct_count": 973
+}

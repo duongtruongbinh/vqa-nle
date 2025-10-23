@@ -1,0 +1,24 @@
+# Core Deep Learning
+torch==2.8.0
+transformers==4.57.0
+
+# Training & Fine-tuning
+git+https://github.com/huggingface/trl.git
+peft==0.17.1
+accelerate==1.10.1
+einops==0.8.1
+timm==1.0.20
+
+# Data Processing
+datasets
+pillow
+
+# Tokenizers
+sentencepiece==0.2.1
+
+# Reward Functions
+math-verify==0.8.0
+latex2sympy2-extended
+
+# Environment Variables
+python-dotenv==1.1.1
