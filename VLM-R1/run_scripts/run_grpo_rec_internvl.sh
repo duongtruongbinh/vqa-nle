@@ -12,7 +12,7 @@ is_reward_customized_from_vlm_module=False
 echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
-export EXP_NAME="InternVL3-1B-ViVQA-X-101" # TODO: change this to your own experiment name
+export EXP_NAME="InternVL3-1B-ViVQA-X-reward-deepseek" # TODO: change this to your own experiment name
 TASK_TYPE="vqa"
 cd ${REPO_HOME}/src/open-r1-multimodal
 
@@ -24,7 +24,7 @@ export LOG_PATH="${REPO_HOME}/runs/${EXP_NAME}/log/debug_log.$(date +%Y-%m-%d-%H
 
 
 # export WANDB_DISABLED=true
-CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 torchrun --nproc_per_node="1" \
     --nnodes="1" \
     --node_rank="0" \
@@ -40,7 +40,7 @@ torchrun --nproc_per_node="1" \
     --is_reward_customized_from_vlm_module $is_reward_customized_from_vlm_module \
     --task_type $TASK_TYPE \
     --per_device_train_batch_size 3 \
-    --gradient_accumulation_steps 11 \
+    --gradient_accumulation_steps 5 \
     --gradient_checkpointing true \
     --logging_steps 1 \
     --max_steps 500 \
@@ -52,7 +52,7 @@ torchrun --nproc_per_node="1" \
     --save_steps 50 \
     --num_generations 3 \
     --max_completion_length 1024 \
-    --reward_funcs accuracy format explanation\
+    --reward_funcs accuracy format\
     --beta 0.1 \
     --report_to wandb \
     --dataset-name this_is_not_used \
