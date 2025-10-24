@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from babel.numbers import parse_decimal
 from utils.math import compute_score
-from datasets import load_dataset, load_from_disk
+from datasets import load_dataset, load_from_disk, Dataset
 from transformers import Qwen2VLForConditionalGeneration
 
 from math_verify import parse, verify
@@ -36,11 +36,8 @@ import math
 from json_repair import repair_json
 
 from open_r1.vlm_modules import *
-
-from typing import Tuple
 from transformers.utils import logging
 from transformers import AutoProcessor, AutoTokenizer
-
 from openai import OpenAI
 
 import sys
@@ -966,9 +963,9 @@ def format_reward(completions, **kwargs):
         answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
         explain_singles = max(0, n_explain_open + n_explain_close - 2 )
 
-        p_think = think_singles * 0.5
-        p_answer = answer_singles * 0.5
-        p_explain = explain_singles * 0.5
+        p_think = think_singles * (1/3)
+        p_answer = answer_singles * (1/3)
+        p_explain = explain_singles * (1/3)
         p_total = p_think + p_answer + p_explain
 
         total = float(b_total - p_total)
@@ -1100,11 +1097,8 @@ def main(script_args, training_args, model_args):
         reward_funcs = [vlm_module_cls.select_reward_func(func, script_args.task_type) for func in script_args.reward_funcs]
     else:
         reward_funcs = [reward_funcs_registry[func] for func in script_args.reward_funcs]
-    print("reward_funcs:", reward_funcs)
 
-    # Load the JSONL datasets
-    import json
-    from datasets import Dataset
+    
 
     data_files = script_args.data_file_paths.split(":")
     image_folders = script_args.image_folders.split(":")
@@ -1220,7 +1214,7 @@ def main(script_args, training_args, model_args):
 
     # Train and push the model to the Hub
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
-        trainer.train()
+        trainer.train(resume_from_checkpoint=True)
     else:
         trainer.train()
 
