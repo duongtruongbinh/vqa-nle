@@ -1,18 +1,16 @@
 import os
 import json
 
-prompt = """
-<image> You are a Visual Question Answering system. Your task is to answer questions based on the content of the provided image. 
-You must respond in Vietnamese and your response **must** include all the tags <think> </think>, <answer> </answer>, <explain> </explain>.
+prompt = """<image>
+    You are a Visual Question Answering system. Your task is to answer and explain questions based on the content of the provided image. 
+    Follow these steps precisely:    
+    - <think> Your step-by-step reasoning process. Analyze the image carefully. </think>
+    - <answer> Based on your reasoning, provide your Vietnamese answer must be one word or a short phrase. </answer>
+    - <explain> Your brief Vietnamese explanation (one sentence that justifies your answer). </explain>
 
-Follow these steps precisely:
-1. In the <think> tag, provide a step-by-step reasoning process.
-2. In the <answer> tag, give one word or one short phrase.
-3. In the <explain> tag, provide one brief sentence that justifies your answer.
-
-Now, answer this question based on the image:
-Question: {question}
-""".strip()
+    Now, answer this question based on the image:
+    Question: {question} Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>.
+    """.strip()
 
 
 def create_jsonl_for_grpo(split="train", output_file=None):

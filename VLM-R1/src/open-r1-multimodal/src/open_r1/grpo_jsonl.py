@@ -889,8 +889,8 @@ def accuracy_reward(completions, solution, **kwargs):
         elif accu_reward_method == 'all_match':
             reward = all_match_reward(content, sol)
         else:
-            # reward = default_accuracy_reward(content, sol)
-            reward = custom_accuracy_reward(content, sol)
+            reward = default_accuracy_reward(content, sol)
+            # reward = custom_accuracy_reward(content, sol)
         rewards.append(reward)
 
         if os.getenv("DEBUG_MODE") == "true":
