@@ -210,3 +210,4 @@ __marimo__/
 # Ignore model checkpoints
 results/checkpoints/
 data/
+src/inference/results
