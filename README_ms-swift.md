@@ -152,7 +152,7 @@ swift rlhf \
     --output_dir "$STAGE1_OUTPUT"
     # ... other parameters
 ```
-> The checkpoint will be saved at `$STAGE1_OUTPUT/checkpoint-xxx/` (containing only LoRA adapters).
+> The checkpoint will be saved at `$STAGE1_OUTPUT/vx-xxxxxx-xxxx/checkpoint-xxx/` (containing only LoRA adapters).
 
 **Step 2: Merge Stage 1 LoRA into the Base Model**
 
@@ -160,9 +160,10 @@ Use the `swift export` command with the `--merge_lora` flag to combine the LoRA 
 
 ```bash
 # Command to merge LoRA into the base model
+# If you need quantization, you can specify `--quant_bits 4`.
 swift export \
     --model "OpenGVLab/InternVL3_5-4B-Instruct" \
-    --adapters "$STAGE1_OUTPUT/checkpoint-xxx" \
+    --ckpt_dir "$STAGE1_OUTPUT/vx-xxxxxx-xxxx/checkpoint-xxx" \
     --merge_lora true \
     --output_dir "$STAGE1_OUTPUT/checkpoint-xxx-merged"
 ```
@@ -184,3 +185,30 @@ swift rlhf \
     --output_dir "$STAGE2_OUTPUT" \
     # ... other parameters
 ```
+
+### 7. Using Reward Weights (`--reward_weights`)
+
+To balance the influence of different reward sources in GRPO, you can use the `--reward_weights` parameter. This allows you to prioritize certain objectives over others.
+
+**How It Works**
+
+You provide a list of numbers that correspond to each of your reward functions and models. The final reward is a weighted sum, meaning a higher weight gives a reward more importance.
+
+**Key Rules:**
+
+1.  **Order is Critical**: The weights are applied in the same order as your rewards are defined: first all functions from `--reward_funcs`, then all models from `--reward_model`.
+2.  **Count Must Match**: The number of weights must exactly match the total number of reward functions and models.
+3.  **Default is Equal**: If you don't specify `--reward_weights`, all rewards are given an equal weight of `1.0`.
+
+**Practical Example for VQA**
+
+To make the model prioritize `accuracy` twice as much as `format` compliance:
+
+```bash
+swift rlhf \
+    --rlhf_type grpo \
+    --reward_funcs accuracy format \
+    --reward_weights 2.0 1.0
+```
+
+This simple parameter is very powerful for fine-tuning your model's behavior based on what you find most important.

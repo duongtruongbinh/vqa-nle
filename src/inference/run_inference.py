@@ -80,7 +80,8 @@ def main():
     print(f"📝 Processing {len(data)} samples with {clean_model_name}...")
     print(f"💾 Results will be saved to: {output_filename}")
     
-    for i, item in enumerate(tqdm(data, desc=f"Running {clean_model_name}")):
+
+    for i, item in enumerate(tqdm(data[:300], desc=f"Running {clean_model_name}")):
         img_path = os.path.join(args.image_folder, item['image_name'])
         
         if not os.path.exists(img_path):
