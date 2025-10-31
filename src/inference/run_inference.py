@@ -51,8 +51,8 @@ def main():
     parser.add_argument("model", type=str, choices=MODELS.keys(),
                         help=f"Name of the model to run. Choices: {list(MODELS.keys())}")
     parser.add_argument("--image_folder", type=str,
-                        default="/mnt/VLAI_data/COCO_Images/val2014", help="Directory of input images.")
-    parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json",
+                        default="/mnt/VLAI_data/COCO_Images/train2014", help="Directory of input images.")
+    parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_train.json",
                         help="Path to the JSON file of sample questions.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
     parser.add_argument("--output_dir", type=str, default="results", help="Directory to save the results.")
@@ -89,13 +89,20 @@ def main():
             continue
             
         try:
-            answer, explanation = model.infer(item['question'], img_path)
-            item["predict"] = answer
-            item["pred_explanation"] = explanation
+            # think, answer, explanation = model.infer_grpo(item['question'], img_path)
+            # item["thinking"] = think
+            # item["predict"] = answer
+            # item["pred_explanation"] = explanation
 
+            # print(f"Q: {item['question']}")
+            # print(f"Thinking: {think}")
+            # print(f"Predicted: {answer} | GT: {item['answer']}")
+            # print(f"Explanation: {explanation}")
+            
+            respone = model.infer_grpo(item['question'], img_path)
             print(f"Q: {item['question']}")
-            print(f"Predicted: {answer} | GT: {item['answer']}")
-            print(f"Explanation: {explanation}")
+            print(f"Respone: {respone}")
+            print(f"GT:  {item['answer']}")
                 
         except Exception as e:
             print(f"❌ Error processing item {item['image_id']}: {e}")
