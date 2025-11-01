@@ -130,22 +130,36 @@ class QwenVLModel(VQAModel):
             generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
         )[0]
         return parse_output(response)
-    def infer_grpo(self, question: str, image_path: str) -> tuple[str, str, str]:
-        pixel_values = self._load_image(image_path).to(torch.bfloat16).to(DEVICE)
+
+    def infer_grpo(self, question: str, image_path: str) -> tuple[str, str]:
         system_instruction = get_grpo_system_prompt()
 
         user_content = f"""Now, answer this question based on the image: 
 Question: {question}. 
 Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
-        prompt = f"{system_instruction}\n" + user_content
-        # print(prompt)
+        messages = [
+            {"role": "system", "content": [
+                {"type": "text", "text": system_instruction}]},
+            {"role": "user", "content": [
+                {"type": "image", "image": f"file://{image_path}"},
+                {"type": "text", "text": user_content}
+            ]}
+        ]
 
-        with torch.no_grad():
-            response = self.model.chat(
-                self.tokenizer,
-                pixel_values,
-                prompt,
-                generation_config={"max_new_tokens": 256, "pad_token_id": self.tokenizer.eos_token_id}
-            )
-        # return parse_output_grpo(response) 
-        return response
+        text = self.processor.apply_chat_template(
+            messages, tokenize=False, add_generation_prompt=True)
+        image_inputs, video_inputs = process_vision_info(messages)
+        inputs = self.processor(
+            text=[text], images=image_inputs, videos=video_inputs, padding=True, return_tensors="pt"
+        ).to(DEVICE)
+
+        with torch.no_grad(), torch.autocast(device_type="cuda", enabled=torch.cuda.is_available(), dtype=torch.bfloat16):
+            generated_ids = self.model.generate(**inputs, max_new_tokens=100)
+
+        generated_ids_trimmed = [
+            out_ids[len(in_ids):] for in_ids, out_ids in zip(inputs.input_ids, generated_ids)
+        ]
+        response = self.processor.batch_decode(
+            generated_ids_trimmed, skip_special_tokens=True, clean_up_tokenization_spaces=False
+        )[0]
+        return parse_output_grpo(response)

@@ -87,14 +87,12 @@ def get_system_prompt() -> str:
 
 def get_grpo_system_prompt():
     system_instruction = f"""
-Role: Visual Question Answering (VQA) expert.
-Task: Analyze the provided image to answer the question. Answer *strictly* based on visual evidence.
+    You are a Visual Question Answering system. Your task is to answer and explain questions based on the content of the provided image.
 
-Follow this *precise* format:
-<think>[Your step-by-step reasoning connecting the image to the question]</think>
-<answer>[answer: one word or short phrase]</answer>
-<explain>[explanation: one brief sentence]</explain>
-    """
+    Follow these steps precisely:    
+    - <think> Your step-by-step reasoning process. Analyze the image carefully. </think>
+    - <answer> Based on your reasoning, provide your Vietnamese answer must be one word or a short phrase. </answer>
+    - <explain> Your brief Vietnamese explanation (one sentence that justifies your answer). </explain>""".strip()
     
     return system_instruction
 
