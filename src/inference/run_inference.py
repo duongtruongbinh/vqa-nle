@@ -4,7 +4,7 @@ import argparse
 from tqdm import tqdm
 from models.utils import set_seed
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 MODELS = {
     "internvl": "models.internvl.InternVLModel",
     "molmo": "models.molmo.MolmoModel", 
@@ -90,20 +90,20 @@ def main():
             continue
             
         try:
-            # think, answer, explanation = model.infer_grpo(item['question'], img_path)
-            # item["thinking"] = think
-            # item["predict"] = answer
-            # item["pred_explanation"] = explanation
+            think, answer, explanation = model.infer_grpo(item['question'], img_path)
+            item["thinking"] = think
+            item["predict"] = answer
+            item["pred_explanation"] = explanation
 
-            # print(f"Q: {item['question']}")
-            # print(f"Thinking: {think}")
-            # print(f"Predicted: {answer} | GT: {item['answer']}")
-            # print(f"Explanation: {explanation}")
-            
-            respone = model.infer_grpo(item['question'], img_path)
             print(f"Q: {item['question']}")
-            print(f"Respone: {respone}")
-            print(f"GT:  {item['answer']}")
+            print(f"Thinking: {think}")
+            print(f"Predicted: {answer} | GT: {item['answer']}")
+            print(f"Explanation: {explanation}")
+            
+            # respone = model.infer_grpo(item['question'], img_path)
+            # print(f"Q: {item['question']}")
+            # print(f"Respone: {respone}")
+            # print(f"GT:  {item['answer']}")
                 
         except Exception as e:
             print(f"❌ Error processing item {item['image_id']}: {e}")

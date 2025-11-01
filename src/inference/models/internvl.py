@@ -81,7 +81,7 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = '/home/vlai-vqa-nle/phatdat/ms-swift/examples/train/grpo/output/merged_model_final/InternVL3_5-4B-Instruct-Merged'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1/merge-model/checkpoint-500-merged'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -127,8 +127,8 @@ class InternVLModel(VQAModel):
         system_instruction = get_grpo_system_prompt()
 
         user_content = f"""Now, answer this question based on the image: 
-Question: {question}. 
-Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
+        Question: {question}. 
+        Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
         prompt = f"{system_instruction}\n" + user_content
         # print(prompt)
 
@@ -139,5 +139,5 @@ Let's response in three tag pairs in your response: <think></think>, <answer></a
                 prompt,
                 generation_config={"max_new_tokens": 256, "pad_token_id": self.tokenizer.eos_token_id}
             )
-        # return parse_output_grpo(response) 
-        return response
+        return parse_output_grpo(response) 
+        # return response
