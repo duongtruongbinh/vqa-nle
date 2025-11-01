@@ -33,7 +33,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
         print("CIDEr scorer initialized (not used).")
 
         print(f"Initializing BERTScore (PhoBERT) on device: {self.device}")
-        self.bertscore_metric = self.get_bertscore_metric()
+        self.bertscore_metric = self.initialize_bertscore()
         print("BERTScore initialized.")
 
         print(f"Initializing CLIPScore on device: {self.device}")
