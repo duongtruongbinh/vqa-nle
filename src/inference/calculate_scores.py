@@ -2,6 +2,7 @@ import os
 import re
 import json
 import argparse
+import unicodedata
 
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
@@ -9,30 +10,111 @@ from pycocoevalcap.rouge.rouge import Rouge
 from pycocoevalcap.cider.cider import Cider
 from bert_score import score as bert_score
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
-
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 # ----------------------------
-# Helpers
+# Text Cleaning & Normalization
 # ----------------------------
-def normalize_line(s: str) -> str:
-    s = (s or "").replace("\n", " ").replace("\r", " ")
-    return re.sub(r"\s+", " ", s).strip()
 
-def norm_answer(s: str) -> str:
-    s = (s or "").strip().lower()
-    s = s.strip().rstrip(".").replace('"', "").strip()
-    return s
+def clean_text(text: str) -> str:
+    """
+    Làm sạch chuỗi text:
+    - Thay thế mọi biến thể xuống dòng và '|||' bằng khoảng trắng
+    - Loại bỏ ký tự điều khiển (Unicode category == 'Cc')
+    - Gom nhiều khoảng trắng liên tiếp thành 1
+    """
+    if not text:
+        return ""
+    
+    text = (
+        text.replace("|||", " ")
+        .replace("\r\n", " ")
+        .replace("\n", " ")
+        .replace("\r", " ")
+        .replace("\u2028", " ")
+        .replace("\u2029", " ")
+    )
+    text = "".join(ch for ch in text if unicodedata.category(ch) != "Cc")
+    text = re.sub(r"\s+", " ", text).strip()
+    return text
 
-def clean_pred_expl(s: str) -> str:
-    """Removes leading 'because'/'vì' (if any) and trailing period."""
-    t = (s or "").strip().rstrip(".").strip()
-    low = t.lower()
-    if low.startswith("because"):
-        return t[7:].strip()
-    if low.startswith("vì"):
-        return t[2:].strip()
-    return t
+def normalize_answer(text: str) -> str:
+    """
+    Chuẩn hóa câu trả lời:
+    - Bước 1: Làm sạch text qua clean_text()
+    - Bước 2: Chuyển về lowercase và loại bỏ dấu câu thừa
+    - Bước 3: Chuẩn hóa câu trả lời Có/Không
+    - Bước 4: Chuẩn hóa từ/cụm từ đồng nghĩa
+    - Bước 5: Loại bỏ tiền tố phổ biến
+    - Bước 6: Loại bỏ ký tự đặc biệt
+    - Bước 7: Chuẩn hóa thứ tự từ (sắp xếp)
+    """
+    # Bước 1: Làm sạch text
+    text = clean_text(text)
+    
+    # Bước 2: Lowercase và strip, loại bỏ dấu câu
+    text = text.lower().strip().rstrip(".").replace('"', "").strip()
+    
+    # Bước 3: Chuẩn hóa các câu trả lời Có/Không
+    if text in ["có", "đúng", "yes", "true", "correct"]:
+        return "có"
+    if text in ["không", "sai", "no", "false", "incorrect"]:
+        return "không"
+    
+    # Bước 4: Chuẩn hóa từ/cụm từ đồng nghĩa
+    synonym_map = {
+        "bay diều": "thả diều",
+        "diều bay": "thả diều",
+        # Thêm các cặp đồng nghĩa khác tại đây
+    }
+    if text in synonym_map:
+        text = synonym_map[text]
+    
+    # Bước 5: Loại bỏ các tiền tố/hậu tố phổ biến
+    prefixes_to_remove = ["con ", "cái ", "chiếc ", "quả ", "hoa ", "màu ", "bên ", "phía "]
+    for prefix in prefixes_to_remove:
+        if text.startswith(prefix):
+            text = text[len(prefix):]
+            break
+    
+    # Bước 6: Loại bỏ các ký tự đặc biệt và khoảng trắng thừa
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # Bước 7: Chuẩn hóa thứ tự từ
+    words = sorted(text.split())
+    text = " ".join(words)
+    
+    return text
+
+def normalize_explanation(text: str) -> str:
+    """
+    Chuẩn hóa explanation:
+    - Làm sạch qua clean_text()
+    - Loại bỏ 'because'/'vì' ở đầu câu
+    - Loại bỏ dấu chấm cuối
+    """
+    # Làm sạch text
+    text = clean_text(text)
+    
+    # Strip và loại bỏ dấu chấm cuối
+    text = text.strip().rstrip(".").strip()
+    
+    # Loại bỏ 'because'/'vì' ở đầu câu
+    text_lower = text.lower()
+    if text_lower.startswith("because "):
+        text = text[8:].strip()
+    elif text_lower.startswith("vì "):
+        text = text[3:].strip()
+    
+    return text
+
+def normalize_line(text: str) -> str:
+    """Chuẩn hóa line cho NLG metrics - chỉ làm sạch xuống dòng và khoảng trắng."""
+    text = clean_text(text)
+    return text
 
 def ensure_list_explanations(expls) -> list[str]:
+    """Convert explanation(s) to list of strings."""
     if expls is None:
         return []
     if isinstance(expls, str):
@@ -142,20 +224,46 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
 
     all_gt_expls, all_pred_expls = [], []
     filtered_gt_expls, filtered_pred_expls = [], []
+    
+    # Dictionary to store metrics by answer_type
+    by_answer_type = {}
 
     for item in data:
-        gt_ans = norm_answer(item.get("answer", ""))
-        pred_ans = norm_answer(item.get("predict", ""))
-        gt_expls = ensure_list_explanations(item.get("explanation", []))
-        pred_expl = clean_pred_expl(item.get("pred_explanation", ""))
+        gt_ans = normalize_answer(item.get("answer", ""))
+        pred_ans = normalize_answer(item.get("predict", ""))
+        
+        # Chuẩn hóa explanations qua clean_text
+        gt_expls_raw = ensure_list_explanations(item.get("explanation", []))
+        gt_expls = [normalize_explanation(expl) for expl in gt_expls_raw]
+        pred_expl = normalize_explanation(item.get("pred_explanation", ""))
 
         all_gt_expls.append(gt_expls)
         all_pred_expls.append(pred_expl)
+
+        # Track by answer_type
+        answer_type = item.get("answer_type", "unknown")
+        if answer_type not in by_answer_type:
+            by_answer_type[answer_type] = {
+                "total": 0,
+                "correct": 0,
+                "all_gt_expls": [],
+                "all_pred_expls": [],
+                "filtered_gt_expls": [],
+                "filtered_pred_expls": []
+            }
+        
+        by_answer_type[answer_type]["total"] += 1
+        by_answer_type[answer_type]["all_gt_expls"].append(gt_expls)
+        by_answer_type[answer_type]["all_pred_expls"].append(pred_expl)
 
         if pred_ans == gt_ans:
             correct_count += 1
             filtered_gt_expls.append(gt_expls)
             filtered_pred_expls.append(pred_expl)
+            
+            by_answer_type[answer_type]["correct"] += 1
+            by_answer_type[answer_type]["filtered_gt_expls"].append(gt_expls)
+            by_answer_type[answer_type]["filtered_pred_expls"].append(pred_expl)
 
     accuracy_fraction = (correct_count / total_examples) if total_examples > 0 else 0.0
     
@@ -171,6 +279,42 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
 
     scaled_scores = {k: v * accuracy_fraction for k, v in unfiltered_scores.items()}
 
+    # Calculate metrics for each answer_type
+    answer_type_results = {}
+    for ans_type, type_data in by_answer_type.items():
+        print(f"\n--- Evaluating answer_type: {ans_type} ({type_data['total']} examples) ---")
+        
+        type_accuracy = (type_data["correct"] / type_data["total"]) if type_data["total"] > 0 else 0.0
+        
+        # Unfiltered scores for this type
+        type_unfiltered_scores = get_nlg_scores(
+            type_data["all_gt_expls"], 
+            type_data["all_pred_expls"], 
+            device=device
+        )
+        
+        # Filtered scores for this type (correct answers only)
+        if type_data["filtered_pred_expls"]:
+            type_filtered_scores = get_nlg_scores(
+                type_data["filtered_gt_expls"], 
+                type_data["filtered_pred_expls"], 
+                device=device
+            )
+        else:
+            print(f"   ⚠️ No correct answers for {ans_type}. Setting filtered scores to 0.")
+            type_filtered_scores = {k: 0.0 for k in type_unfiltered_scores.keys()}
+        
+        type_scaled_scores = {k: v * type_accuracy for k, v in type_unfiltered_scores.items()}
+        
+        answer_type_results[ans_type] = {
+            "accuracy": type_accuracy * 100,
+            "total_examples": type_data["total"],
+            "correct_count": type_data["correct"],
+            "unfiltered_scores": type_unfiltered_scores,
+            "filtered_scores": type_filtered_scores,
+            "scaled_scores": type_scaled_scores,
+        }
+
     return {
         "accuracy": accuracy_fraction * 100,
         "task_score": accuracy_fraction * 100,
@@ -179,6 +323,7 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
         "scaled_scores": scaled_scores,
         "total_examples": total_examples,
         "correct_count": correct_count,
+        "by_answer_type": answer_type_results,
     }
 
 # ----------------------------
@@ -218,10 +363,19 @@ def main():
         base = os.path.splitext(fname)[0]
         out_path = os.path.join(in_dir, f"{base}{args.suffix}")
         
+        # Round scores for readability
         for score_dict in ["unfiltered_scores", "filtered_scores", "scaled_scores"]:
             if score_dict in result:
                 result[score_dict] = {k: round(v, 2) for k, v in result[score_dict].items()}
         result["accuracy"] = round(result["accuracy"], 2)
+        
+        # Round scores for each answer_type
+        if "by_answer_type" in result:
+            for ans_type, type_result in result["by_answer_type"].items():
+                for score_dict in ["unfiltered_scores", "filtered_scores", "scaled_scores"]:
+                    if score_dict in type_result:
+                        type_result[score_dict] = {k: round(v, 2) for k, v in type_result[score_dict].items()}
+                type_result["accuracy"] = round(type_result["accuracy"], 2)
 
         with open(out_path, "w", encoding="utf-8") as fw:
             json.dump(result, fw, indent=2, ensure_ascii=False)

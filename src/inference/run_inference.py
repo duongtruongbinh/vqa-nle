@@ -94,7 +94,8 @@ def main():
             item["thinking"] = think
             item["predict"] = answer
             item["pred_explanation"] = explanation
-
+            item["answer_type"] = item["answer_type"]
+            
             print(f"Q: {item['question']}")
             print(f"Thinking: {think}")
             print(f"Predicted: {answer} | GT: {item['answer']}")
