@@ -81,7 +81,7 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1/merge-model/checkpoint-500-merged'
+        self.model_path = '/mnt/dataset1/pretrained_fm/OpenGVLab_InternVL3_5-8B'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)

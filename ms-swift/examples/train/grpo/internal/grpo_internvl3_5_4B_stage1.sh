@@ -11,7 +11,7 @@ PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plug
 OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1"
 
 # --- Tham số GRPO & Huấn luyện ---
-MAX_LENGTH=1024
+MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024  
 NUM_GENERATIONS=4
 TEMPERATURE=0.9

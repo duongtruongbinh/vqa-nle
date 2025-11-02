@@ -1,23 +1,23 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-# --- Cấu hình ---
-export CUDA_VISIBLE_DEVICES=2  # Chỉ định GPU muốn sử dụng
+export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1/merge-model/checkpoint-500-merged"
+MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-4B-Instruct"
 MODEL_TYPE="internvl3"
+STAGE1_ADAPTERS="/home/vlai-vqa-nle/phatdat/ms-swift/examples/train/grpo/output/v8-20251031-021532/checkpoint-500" 
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage2"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-internvl35"
 
-# --- Tham số GRPO & Huấn luyện ---
-MAX_LENGTH=1024
-MAX_COMPLETION_LENGTH=1024  
-NUM_GENERATIONS=4
+# Tham số GRPO
+MAX_LENGTH=4096
+MAX_COMPLETION_LENGTH=1024
+NUM_GENERATIONS=3
 TEMPERATURE=0.9
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=1
-GRAD_ACCUM_STEPS=4
+GRAD_ACCUM_STEPS=3
 MAX_STEPS=500
 LEARNING_RATE=1e-5
 
@@ -29,10 +29,11 @@ swift rlhf \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
+    --adapters "$STAGE1_ADAPTERS" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_stage2 custom_accuracy_reward custom_explaination_reward \
-    --reward_weights 0.5 1 1 \
+    --reward_funcs custom_format_reward_stage2 custom_explaination_reward \
+    --reward_weights 0.5 1 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 32 \
@@ -40,7 +41,6 @@ swift rlhf \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
     --per_device_eval_batch_size $NUM_GENERATIONS \
-    --max_length $MAX_LENGTH \
     --max_completion_length $MAX_COMPLETION_LENGTH \
     --num_train_epochs $EPOCHS \
     --per_device_train_batch_size $BATCH_SIZE_PER_DEVICE \

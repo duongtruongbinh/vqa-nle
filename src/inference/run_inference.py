@@ -13,6 +13,7 @@ MODELS = {
     "phi": "models.phi.PhiModel",
     "ovis": "models.ovis.OvisModel",
     "minicpm": "models.minicpm.MiniCPMModel",
+    "vintern1b": "models.vintern1b.Vintern1BModel"
 }
 
 
@@ -51,11 +52,12 @@ def main():
     parser.add_argument("model", type=str, choices=MODELS.keys(),
                         help=f"Name of the model to run. Choices: {list(MODELS.keys())}")
     parser.add_argument("--image_folder", type=str,
-                        default="/mnt/VLAI_data/COCO_Images/train2014", help="Directory of input images.")
-    parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_train.json",
+                        default="/mnt/VLAI_data/COCO_Images/val2014", help="Directory of input images.")
+    parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json",
                         help="Path to the JSON file of sample questions.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
-    parser.add_argument("--output_dir", type=str, default="results", help="Directory to save the results.")
+    parser.add_argument("--output_dir", type=str, default="src/inference/results/grpo/", help="Directory to save the results.")
+    parser.add_argument("--output_name", type=str, default=None, help="Optional: specific name for the output JSON file (e.g., 'my_test_run').")
     args = parser.parse_args()
 
     set_seed(args.seed)
@@ -74,8 +76,14 @@ def main():
     with open(args.data_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
 
-    output_filename = os.path.join(args.output_dir, f"{clean_model_name}.json")
     os.makedirs(args.output_dir, exist_ok=True)
+    if args.output_name:
+        # Nếu người dùng cung cấp tên, sử dụng nó. Thêm .json nếu chưa có.
+        name = args.output_name if args.output_name.endswith('.json') else f"{args.output_name}.json"
+        output_filename = os.path.join(args.output_dir, name)
+    else:
+        # Giữ nguyên hành vi mặc định
+        output_filename = os.path.join(args.output_dir, f"{clean_model_name}.json")
     
     print(f"📝 Processing {len(data)} samples with {clean_model_name}...")
     print(f"💾 Results will be saved to: {output_filename}")
@@ -83,18 +91,17 @@ def main():
 
     for i, item in enumerate(tqdm(data[:300], desc=f"Running {clean_model_name}")):
         img_path = os.path.join(args.image_folder, item['image_name'])
-        
         if not os.path.exists(img_path):
             print(f"⚠️  Image not found: {img_path}")
             item["predict"] = "ERROR: Image file not found"
             continue
-            
+        
         try:
             think, answer, explanation = model.infer_grpo(item['question'], img_path)
             item["thinking"] = think
             item["predict"] = answer
             item["pred_explanation"] = explanation
-            item["answer_type"] = item["answer_type"]
+            # item["answer_type"] = item["answer_type"]
             
             print(f"Q: {item['question']}")
             print(f"Thinking: {think}")

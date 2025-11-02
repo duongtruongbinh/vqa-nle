@@ -22,6 +22,7 @@ from swift.utils import get_logger
 from explaination_rewards import ExplanationRewardScorer 
 from outcome_rewards import AccuracyRewardScorer as custom_accuracy_reward
 from outcome_rewards import CaptionRewardScorer
+from length_rewards import length_penalty_answer, length_penalty_explanation
 
 logger = get_logger()
 """
@@ -98,7 +99,7 @@ orms['external_countdown'] = CountdownORM
 
 class CustomFormatReward_Stage2(ORM):
     def __call__(self, completions: List[str], **kwargs) -> List[float]:
-        
+
         completion_contents = completions
 
         # Regex cho từng cặp thẻ
@@ -108,6 +109,9 @@ class CustomFormatReward_Stage2(ORM):
         
         scores = []
         for content in completion_contents:
+            if len(content) == 0 or not content.strip():
+                    scores.append(-1.0)
+                    continue
             n_pair_think = len(pat_think.findall(content))
             n_pair_answer = len(pat_answer.findall(content))
             n_pair_explain = len(pat_explain.findall(content))
@@ -160,6 +164,9 @@ class CustomFormatReward_Stage1(ORM):
         
         scores = []
         for content in completion_contents:
+            if len(content) == 0 or not content.strip():
+                scores.append(-1.0)
+                continue
             n_pair_think = len(pat_think.findall(content))
             n_pair_caption = len(pat_caption.findall(content))
 
@@ -360,6 +367,70 @@ class CustomCaptionReward(ORM):
         return rewards
 
 orms['custom_caption_reward'] = CustomCaptionReward
+
+class LengthPenaltyAnswerReward(ORM):
+    """
+    Length penalty reward cho answer.
+    Kiểm tra độ dài answer có vượt quá ngưỡng cho phép không.
+    """
+    def __init__(self, ratio=1.3):
+        self.ratio = ratio
+    
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        rewards = []
+        for content, sol in zip(completions, solution):
+            try:
+                # Extract answer từ completion
+                content_match = re.search(r'<answer>(.*?)</answer>', content, re.DOTALL)
+                pred_answer = content_match.group(1).strip() if content_match else content.strip()
+                
+                # Extract answer từ solution
+                sol_match = re.search(r'<answer>(.*?)</answer>', sol, re.DOTALL)
+                truth_answer = sol_match.group(1).strip() if sol_match else sol.strip()
+                
+                # Gọi hàm từ length_rewards.py
+                reward = length_penalty_answer(pred_answer, truth_answer, ratio=self.ratio)
+                rewards.append(reward)
+            except Exception as e:
+                print(f"Error in length_penalty_answer: {e}")
+                rewards.append(0.0)
+        
+        return rewards
+
+
+class LengthPenaltyExplanationReward(ORM):
+    """
+    Length penalty reward cho explanation.
+    Kiểm tra độ dài explanation có nằm trong khoảng cho phép không.
+    """
+    def __init__(self, ratio=1.2):
+        self.ratio = ratio
+    
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        rewards = []
+        for content, sol in zip(completions, solution):
+            try:
+                # Extract explanation từ completion
+                content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
+                pred_explanation = content_match.group(1).strip() if content_match else ""
+                
+                # Extract explanation từ solution
+                sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
+                truth_explanation = sol_match.group(1).strip() if sol_match else ""
+                
+                # Gọi hàm từ length_rewards.py
+                reward = length_penalty_explanation(pred_explanation, truth_explanation, ratio=self.ratio)
+                rewards.append(reward)
+            except Exception as e:
+                print(f"Error in length_penalty_explanation: {e}")
+                rewards.append(0.0)
+        
+        return rewards
+
+
+# Register các reward functions
+orms['length_penalty_answer'] = LengthPenaltyAnswerReward
+orms['length_penalty_explanation'] = LengthPenaltyExplanationReward
 
 class MultiModalAccuracyORM(ORM):
 
