@@ -81,7 +81,7 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = '/mnt/dataset1/pretrained_fm/OpenGVLab_InternVL3_5-8B'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-internvl35/v0-20251102-132249/checkpoint-500-merged'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -137,7 +137,7 @@ class InternVLModel(VQAModel):
                 self.tokenizer,
                 pixel_values,
                 prompt,
-                generation_config={"max_new_tokens": 256, "pad_token_id": self.tokenizer.eos_token_id}
+                generation_config={"max_new_tokens": 512, "pad_token_id": self.tokenizer.eos_token_id}
             )
         return parse_output_grpo(response) 
         # return response

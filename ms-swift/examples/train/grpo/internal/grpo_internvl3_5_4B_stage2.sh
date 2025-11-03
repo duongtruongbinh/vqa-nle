@@ -3,12 +3,11 @@ export HF_ENDPOINT="https://huggingface.co"
 export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-4B-Instruct"
+MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1/merged/checkpoint-500-merged"
 MODEL_TYPE="internvl3"
-STAGE1_ADAPTERS="/home/vlai-vqa-nle/phatdat/ms-swift/examples/train/grpo/output/v8-20251031-021532/checkpoint-500" 
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-internvl35"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage2/trained"
 
 # Tham số GRPO
 MAX_LENGTH=4096
@@ -29,11 +28,10 @@ swift rlhf \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
-    --adapters "$STAGE1_ADAPTERS" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_stage2 custom_explaination_reward \
-    --reward_weights 0.5 1 \
+    --reward_funcs custom_format_reward_stage2 custom_accuracy_reward custom_explaination_reward \
+    --reward_weights 0.5 1.25 1.25 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 32 \
@@ -68,6 +66,6 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_quant_type nf4 \
     --bnb_4bit_compute_dtype bfloat16 \
-    --gradient_checkpointing true
+    --gradient_checkpointing true \
 
 echo "Hoàn thành huấn luyện GRPO Stage 2 - Format + Accuracy + Explanation"

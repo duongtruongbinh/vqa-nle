@@ -1,1 +1,0 @@
-{"profiling/Time taken: GRPOTrainer.CustomAccuracyReward":0.18993355589918792,"_wandb":{"runtime":8},"train/global_step":0,"profiling/Time taken: GRPOTrainer.generate":7.774966260883957,"_timestamp":1.761986124648639e+09,"_runtime":8.946786998,"_step":2,"profiling/Time taken: GRPOTrainer.CustomFormatReward_Stage2":0.0008002580143511295}

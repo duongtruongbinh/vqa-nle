@@ -99,7 +99,7 @@ There are two ways:
    > To fix this, you can clear the WandB cache and restart the training:
    > ```bash
    > # Navigate to the training directory
-   > cd ms-swift/examples/train/grpo
+   > cd ms-swift/examples/train/grpo/internal
    > # Remove all cached runs
    > rm -rf wandb/
    > 
