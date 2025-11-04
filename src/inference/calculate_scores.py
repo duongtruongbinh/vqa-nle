@@ -15,6 +15,21 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 # ============================================================================
+# CONFIGURATION
+# ============================================================================
+
+# List of files to evaluate. 
+# - If empty [], will evaluate ALL .json files in input_dir (or use --files argument)
+# - If specified, will only evaluate these files by default
+# - Can be overridden by --files argument
+FILES_TO_EVALUATE = ['stage1_test_results']
+
+# Example usage:
+# FILES_TO_EVALUATE = ["stage3_test_results.json"]
+# FILES_TO_EVALUATE = ["model1.json", "model2.json", "model3.json"]
+
+
+# ============================================================================
 # TEXT NORMALIZATION
 # ============================================================================
 
@@ -324,21 +339,93 @@ def main():
     parser.add_argument("--input-dir", type=str, default="results", help="Directory with prediction files")
     parser.add_argument("--device", type=str, default="cuda", help="Device for BERTScore")
     parser.add_argument("--suffix", type=str, default="_score.json", help="Output file suffix")
+    parser.add_argument("--files", type=str, nargs="+", default=None, 
+                        help="Specific files to evaluate (e.g., model1.json model2.json). If not provided, evaluates all files.")
     args = parser.parse_args()
     
     if not os.path.isdir(args.input_dir):
         print(f"❌ Directory not found: {args.input_dir}")
         return
     
-    files = sorted([f for f in os.listdir(args.input_dir) 
-                    if f.endswith(".json") and "_score" not in f and "summary" not in f])
+    # Determine which files to process
+    # Priority: 1) --files argument, 2) FILES_TO_EVALUATE config, 3) all files
+    if args.files:
+        # User specified files via argument (highest priority)
+        print(f"📋 Using --files argument")
+        files = []
+        for f in args.files:
+            if not f.endswith(".json"):
+                f = f"{f}.json"
+            if os.path.exists(os.path.join(args.input_dir, f)):
+                files.append(f)
+            else:
+                print(f"⚠️ File not found, skipping: {f}")
+        files = sorted(files)
+    elif FILES_TO_EVALUATE:
+        # User specified files in config (medium priority)
+        print(f"📋 Using FILES_TO_EVALUATE config: {FILES_TO_EVALUATE}")
+        files = []
+        for f in FILES_TO_EVALUATE:
+            if not f.endswith(".json"):
+                f = f"{f}.json"
+            if os.path.exists(os.path.join(args.input_dir, f)):
+                files.append(f)
+            else:
+                print(f"⚠️ File not found, skipping: {f}")
+        files = sorted(files)
+    else:
+        # Default: all JSON files (lowest priority)
+        print(f"📋 No specific files specified, evaluating all files")
+        files = sorted([f for f in os.listdir(args.input_dir) 
+                        if f.endswith(".json") and "_score" not in f and "summary" not in f])
     
     if not files:
-        print(f"⚠️ No .json files found in {args.input_dir}")
+        print(f"⚠️ No .json files to evaluate in {args.input_dir}")
         return
     
-    print(f"📁 Found {len(files)} files in {args.input_dir}")
-    summary = {}
+    print(f"📁 Found {len(files)} file(s) to evaluate")
+    
+    # Load existing summary if it exists
+    summary_path = os.path.join(args.input_dir, "evaluation_summary.txt")
+    existing_summary = {}
+    
+    if os.path.exists(summary_path):
+        print(f"📖 Loading existing summary from {summary_path}")
+        try:
+            with open(summary_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+                # Skip header line
+                for line in lines[1:]:
+                    if line.strip():
+                        parts = line.strip().split("\t")
+                        if len(parts) >= 8:
+                            model_name = parts[0]
+                            existing_summary[model_name] = {
+                                "BLEU-4": float(parts[1]),
+                                "METEOR": float(parts[2]),
+                                "ROUGE_L": float(parts[3]),
+                                "CIDEr": float(parts[4]),
+                                "BERTScore_F1": float(parts[5]),
+                                "answer_bertscore_f1": float(parts[6]),
+                                "accuracy": float(parts[7]),
+                            }
+                            # Try to load answer_type specific scores if they exist
+                            if len(parts) >= 14:
+                                existing_summary[model_name].update({
+                                    "acc_yes/no": float(parts[8]),
+                                    "acc_number": float(parts[9]),
+                                    "acc_other": float(parts[10]),
+                                    "bert_expl_yes/no": float(parts[11]),
+                                    "bert_expl_number": float(parts[12]),
+                                    "bert_expl_other": float(parts[13]),
+                                })
+            print(f"   ✅ Loaded {len(existing_summary)} existing results")
+        except Exception as e:
+            print(f"   ⚠️ Could not parse existing summary: {e}")
+            existing_summary = {}
+    
+    # Start with existing summary
+    summary = existing_summary.copy()
     
     for fname in files:
         fpath = os.path.join(args.input_dir, fname)
@@ -372,6 +459,7 @@ def main():
             json.dump(result, fw, indent=2, ensure_ascii=False)
         print(f"\n   💾 Saved to: {out_path}")
         
+        # Update summary (overwrite if exists, add if new)
         summary[base] = {
             "accuracy": result["accuracy"],
             "answer_bertscore_f1": result["answer_bertscore_f1"],
@@ -381,16 +469,40 @@ def main():
             "CIDEr": result["filtered_scores"].get("CIDEr", 0.0),
             "BERTScore_F1": result["filtered_scores"].get("BERTScore_F1", 0.0),
         }
+        
+        # Add answer_type specific metrics (computed from by_answer_type in evaluate_file)
+        if "by_answer_type" in result:
+            for ans_type, type_result in result["by_answer_type"].items():
+                # Store accuracy and BERTScore for explanations by answer_type
+                summary[base][f"acc_{ans_type}"] = type_result["accuracy"]
+                summary[base][f"bert_expl_{ans_type}"] = type_result["filtered_scores"].get("BERTScore_F1", 0.0)
+        
+        print(f"   🔄 {'Updated' if base in existing_summary else 'Added'} {base} in summary")
     
-    # Write summary
-    summary_path = os.path.join(args.input_dir, "evaluation_summary.txt")
+    # Write summary (with all models: old + new/updated)
     with open(summary_path, "w", encoding="utf-8") as fw:
-        fw.write("Model\tBLEU-4\tMETEOR\tROUGE_L\tCIDEr\tBERTScore_Expl\tBERTScore_Ans\tAccuracy\n")
-        for model, scores in summary.items():
+        # Header with answer_type columns
+        fw.write("Model\tBLEU-4\tMETEOR\tROUGE_L\tCIDEr\tBERTScore_Expl\tBERTScore_Ans\tAccuracy\t"
+                "Acc_YesNo\tAcc_Number\tAcc_Other\tBERT_YesNo\tBERT_Number\tBERT_Other\n")
+        
+        # Sort by model name for consistency
+        for model in sorted(summary.keys()):
+            scores = summary[model]
+            
+            # Get answer_type specific scores (default to 0 if not available)
+            acc_yesno = scores.get("acc_yes/no", 0.0)
+            acc_number = scores.get("acc_number", 0.0)
+            acc_other = scores.get("acc_other", 0.0)
+            bert_yesno = scores.get("bert_expl_yes/no", 0.0)
+            bert_number = scores.get("bert_expl_number", 0.0)
+            bert_other = scores.get("bert_expl_other", 0.0)
+            
             fw.write(f"{model}\t{scores['BLEU-4']:.2f}\t{scores['METEOR']:.2f}\t"
                     f"{scores['ROUGE_L']:.2f}\t{scores['CIDEr']:.2f}\t"
                     f"{scores['BERTScore_F1']:.2f}\t{scores['answer_bertscore_f1']:.2f}\t"
-                    f"{scores['accuracy']:.2f}\n")
+                    f"{scores['accuracy']:.2f}\t"
+                    f"{acc_yesno:.2f}\t{acc_number:.2f}\t{acc_other:.2f}\t"
+                    f"{bert_yesno:.2f}\t{bert_number:.2f}\t{bert_other:.2f}\n")
     
     print(f"\n\n{'='*45}\n✅ All evaluations complete\n{'='*45}")
     with open(summary_path, "r") as f:

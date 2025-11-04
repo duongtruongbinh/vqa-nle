@@ -88,6 +88,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
             sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
             ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
+
             content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
             student_answer = content_match.group(1).strip() if content_match else ""
             
@@ -157,12 +158,12 @@ class CaptionRewardScorer(BaseRewardScorer):
         
         for completion, solution in zip(completions, solutions):
             # Extract image_id từ solution
-            sol_match = re.search(r"<caption>(.*?)</caption>", solution, flags=re.DOTALL | re.IGNORECASE)
+            sol_match = re.search(r"<CAPTION>(.*?)</CAPTION>", solution, flags=re.DOTALL | re.IGNORECASE)
             image_id_str = sol_match.group(1).strip() if sol_match else solution.strip()
             
             
             # Extract student caption từ completion
-            content_match = re.search(r"<caption>(.*?)</caption>", completion, flags=re.DOTALL | re.IGNORECASE)
+            content_match = re.search(r"<CAPTION>(.*?)</CAPTION>", completion, flags=re.DOTALL | re.IGNORECASE)
             student_caption = content_match.group(1).strip() if content_match else ""
             
             if not student_caption:

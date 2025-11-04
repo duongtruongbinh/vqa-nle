@@ -1,10 +1,10 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=2
 
-STAGE2_OUTPUT="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage2/merge-model/v2"
+STAGE2_OUTPUT="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-internvl35/stage3/merge-model"
 
 swift export \
-    --model "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage1/merged/checkpoint-500-merged" \
-    --ckpt_dir "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage2/trained/v9-20251103-110740/checkpoint-500" \
+    --model "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-internvl35/stage2/merge-model/v2/checkpoint-500-merged" \
+    --ckpt_dir "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-internvl35/stage3/trained/v1-20251104-003549/checkpoint-500" \
     --merge_lora true \
     --quant_method bnb \
     --quant_bits 4 \

@@ -3,11 +3,11 @@ export HF_ENDPOINT="https://huggingface.co"
 export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage2/merge-model/v2/checkpoint-500-merged"
+MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/stage3/trained"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
 
 # Tham số GRPO
 MAX_LENGTH=4096
@@ -25,13 +25,14 @@ LOGGING_STEPS=1
 EVAL_STEPS=1
 
 swift rlhf \
+    --use_hf true \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs length_penalty_answer length_penalty_explanation custom_accuracy_reward custom_explaination_reward_stage3 \
-    --reward_weights 0.5 1.5 0.5 1.5 \
+    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward \
+    --reward_weights 0.5 1.25 1.25 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 32 \
@@ -68,4 +69,4 @@ swift rlhf \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
 
-echo "Hoàn thành huấn luyện GRPO Stage 3 - Length Penalty Answer + Length Penalty Explanation + Accuracy + Explanation"
+echo "Hoàn thành huấn luyện GRPO Stage 2 - Format + Accuracy + Explanation"

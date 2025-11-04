@@ -4,7 +4,7 @@ export HF_ENDPOINT="https://huggingface.co"
 export CUDA_VISIBLE_DEVICES=2  # Chỉ định GPU muốn sử dụng
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-4B-Instruct"
+MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage1/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"

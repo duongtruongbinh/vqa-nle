@@ -212,3 +212,5 @@ results/checkpoints/
 data/
 src/inference/results
 data/scripts/client_secret_546753806785-asgenc3h3fvuvqpks3v0mt97slt1lrh8.apps.googleusercontent.com.json
+wandb/
+mycreds.txt
