@@ -2,7 +2,9 @@
 import torch
 from torchmetrics.text import BERTScore
 import os
+
 os.environ["CUDA_VISIBLE_DEVICES"] = "1"
+
 
 class BaseRewardScorer:
     """
@@ -27,72 +29,67 @@ class BaseRewardScorer:
         return cls._shared_bertscore
     
     @classmethod
+    def calculate_bertscore_single(cls, prediction: str, ground_truth: str) -> float:
+        """
+        Tính BERTScore cho một cặp prediction-ground_truth.
+        
+        Args:
+            prediction: Câu dự đoán
+            ground_truth: Câu tham chiếu
+            
+        Returns:
+            BERTScore F1 (float)
+        """
+        pred = str(prediction).strip()
+        gt = str(ground_truth).strip()
+        
+        if not pred or not gt:
+            return 0.0
+        
+        try:
+            metric = cls.get_bertscore_metric()
+            metric.reset()
+            metric.update([pred], [gt])
+            score_dict = metric.compute()
+            return score_dict['f1'].item()
+        except Exception as e:
+            print(f"Error calculating BERTScore: {e}")
+            return 0.0
+    
+    @classmethod
     def calculate_bertscore_batch(cls, ground_truths: dict, predictions: dict) -> dict:
         """
         Tính BERTScore cho batch predictions.
         
         Args:
-            ground_truths: {id: [gt1, gt2, ...]}
+            ground_truths: {id: [gt1, gt2, ...]} hoặc {id: gt_string}
             predictions: {id: prediction_string}
             
         Returns:
             {id: bertscore_f1}
         """
-        ids = list(predictions.keys())
-        bert_scores_dict = {id_: 0.0 for id_ in ids}
-        valid_preds = []
-        valid_gts = []
-        valid_ids = []
+        bert_scores_dict = {}
 
-        for id_ in ids:
-            pred = str(predictions[id_]).strip()
+        for id_, pred in predictions.items():
             gt = ground_truths.get(id_, [])
             
-            # Xử lý khi GT là string hoặc list
+            # Xử lý GT: string hoặc list
             if isinstance(gt, str):
-                gt_list = [gt] if gt.strip() else []
+                gt_list = [gt.strip()] if gt.strip() else []
             else:
                 gt_list = [str(g).strip() for g in gt if str(g).strip()]
-
-            if pred and gt_list:
-                valid_preds.append(pred)
-                # Pass string thay vì list để tránh bug với single reference
-                valid_gts.append(gt_list[0])  # Chỉ lấy reference đầu tiên
-                valid_ids.append(id_)
-
-        if not valid_preds:
-            return bert_scores_dict
-
-        try:
-            # Tạo metric mới với dist_sync_on_step=False để tránh sync issues
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-            bertscore_metric = BERTScore(
-                model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base",
-                num_layers=12,
-                rescale_with_baseline=False,
-                device=device,
-                dist_sync_on_step=False,
-                sync_on_compute=False
-            )
             
-            # Pass string targets thay vì list of lists
-            bertscore_metric.update(valid_preds, valid_gts)
-            score_dict = bertscore_metric.compute()
-
-            # Xử lý cả 0-dim và 1-dim tensor
-            f1_scores = score_dict['f1']
-            if f1_scores.dim() == 0:
-                bert_scores = [f1_scores.item()]
-            else:
-                bert_scores = f1_scores.tolist()
+            if not gt_list:
+                bert_scores_dict[id_] = 0.0
+                continue
             
-            for id_, score in zip(valid_ids, bert_scores):
-                bert_scores_dict[id_] = score
-
-        except Exception as e:
-            print(f"Error during BERTScore batch computation: {e}")
-            import traceback
-            traceback.print_exc()
-            pass
+            # Tính BERTScore với TẤT CẢ references và lấy max
+            scores = []
+            for gt_text in gt_list:
+                score = cls.calculate_bertscore_single(pred, gt_text)
+                scores.append(score)
+            
+            # Lấy score cao nhất trong các references
+            bert_scores_dict[id_] = max(scores)
 
         return bert_scores_dict

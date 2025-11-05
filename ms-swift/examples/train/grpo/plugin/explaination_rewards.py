@@ -111,12 +111,12 @@ class ExplanationRewardScorer(BaseRewardScorer):
 
         return clip_scores_dict
 
-    def explanation_rewards(self, ground_truths: list[list[str]], predictions: list[str], image_paths: list[str]) -> list[float]:
+    def explanation_rewards(self, ground_truths: list[str], predictions: list[str], image_paths: list[str]) -> list[float]:
         """
         Tính combined reward (BERTScore + CLIPScore) cho batch.
         
         Args:
-            ground_truths (list[list[str]]): Dạng [["caption 1a", ...], ["caption 2a", ...]]
+            ground_truths (list[str]): Dạng ["ground_truth 1", "ground_truth 2", ...]
             predictions (list[str]): Dạng ["prediction 1", "prediction 2", ...]
             image_paths (list[str]): Dạng ["path/to/image1.jpg", "path/to/image2.jpg", ...]
 
@@ -129,6 +129,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
         if not predictions:
             return []
 
+        # Mỗi sample chỉ có 1 GT string, không phải list
         gts_dict = {i: gt for i, gt in enumerate(ground_truths)}
         preds_dict = {i: pred for i, pred in enumerate(predictions)}
         paths_dict = {i: path for i, path in enumerate(image_paths)}

@@ -2,18 +2,17 @@ import string
 import re
 import unicodedata
 from base_rewards import BaseRewardScorer
-
+from pycocoevalcap.rouge.rouge import Rouge
 def normalize_answer(text: str) -> str:
     text = text.lower().strip()
     
-    # 1. Chuẩn hóa các câu trả lời Có/Không (giữ nguyên)
+    # 1. Chuẩn hóa các câu trả lời Có/Không
     if text in ["có", "đúng", "yes", "true", "correct"]:
         return "có"
     if text in ["không", "sai", "no", "false", "incorrect"]:
         return "không"
         
     # 2. Chuẩn hóa từ/cụm từ đồng nghĩa
-    # Ví dụ: "bay diều", "diều bay" đều có thể được hiểu là "thả diều".
     synonym_map = {
         "bay diều": "thả diều",
         "diều bay": "thả diều",
@@ -21,20 +20,18 @@ def normalize_answer(text: str) -> str:
     if text in synonym_map:
         text = synonym_map[text]
         
-    # 3. Loại bỏ các tiền tố/hậu tố phổ biến (giữ nguyên)
+    # 3. Loại bỏ các tiền tố/hậu tố phổ biến
     prefixes_to_remove = ["con ", "cái ", "chiếc ", "quả ", "hoa ", "màu ", "bên ", "phía "]
     for prefix in prefixes_to_remove:
         if text.startswith(prefix):
             text = text[len(prefix):]
             
-    # 4. Loại bỏ các ký tự đặc biệt và khoảng trắng thừa (giữ nguyên)
+    # 4. Loại bỏ các ký tự đặc biệt và khoảng trắng thừa
     text = re.sub(r'[^\w\s]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
     
-    # 5. Chuẩn hóa thứ tự từ
-    # Ví dụ: "bò sữa" và "sữa bò" sau khi sắp xếp đều trở thành "bò sữa".
-    words = sorted(text.split())
-    text = " ".join(words)
+    # 5. REMOVED - Không sắp xếp từ vì nó phá hủy nghĩa!
+    # Ví dụ: "xe đỏ" != "đỏ xe"
     
     return text
 
@@ -59,23 +56,114 @@ def clean_text(text: str) -> str:
 
 class AccuracyRewardScorer(BaseRewardScorer):
     """
-    Accuracy reward scorer sử dụng BERTScore cho semantic matching.
-    Trả về điểm BERTScore trực tiếp (0.0 - 1.0).
+    Accuracy reward scorer sử dụng hybrid approach: ROUGE-L + BERTScore (PhoBERT)
+    Trả về điểm kết hợp (0.0 - 1.0).
     """
-    
-    def __init__(self, model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base"):
+    def __init__(self, alpha: float = 0.5):
         """
         Args:
-            model_name_or_path: Đường dẫn đến PhoBERT model cho tiếng Việt
+            alpha: Trọng số cho BERTScore (1-alpha cho ROUGE-L)
+                  alpha=0.5 => 50% BERTScore, 50% ROUGE-L
         """
-        self.model_path = model_name_or_path
-        # Khởi tạo shared BERTScore một lần
-        self.initialize_bertscore(self.model_path)
+        self.initialize_bertscore()
+        self.rouge_scorer = Rouge()
+        self.alpha = alpha
     
+    def calculate_rouge_batch(self, ground_truths: dict, predictions: dict) -> dict:
+        """
+        Tính ROUGE-L cho batch predictions.
+        
+        Args:
+            ground_truths: {id: ground_truth_string}
+            predictions: {id: prediction_string}
+            
+        Returns:
+            {id: rouge_l_score}
+        """
+        if not predictions:
+            return {}
+        
+        gts = {}
+        res = {}
+        valid_ids = []
+        
+        for id_, pred in predictions.items():
+            gt = ground_truths.get(id_, "")
+            if isinstance(gt, str):
+                gt_text = gt.strip()
+            else:
+                # Nếu là list, lấy phần tử đầu tiên
+                gt_text = gt[0].strip() if gt else ""
+            
+            pred_text = pred.strip()
+            
+            # Chỉ tính score cho các cặp không rỗng
+            if gt_text and pred_text:
+                # Text đã được normalized rồi, không cần .lower() lại
+                gts[id_] = [gt_text]
+                res[id_] = [pred_text]
+                valid_ids.append(id_)
+        
+        if not valid_ids:
+            return {id_: 0.0 for id_ in predictions.keys()}
+        
+        try:
+            avg_score, individual_scores = self.rouge_scorer.compute_score(gts, res)
+            # individual_scores là list theo thứ tự của gts/res keys
+            rouge_dict = {id_: score for id_, score in zip(valid_ids, individual_scores)}
+            
+            # Fill 0.0 cho các IDs không valid
+            for id_ in predictions.keys():
+                if id_ not in rouge_dict:
+                    rouge_dict[id_] = 0.0
+                    
+            return rouge_dict
+        except Exception as e:
+            print(f"Error calculating ROUGE-L: {e}")
+            import traceback
+            traceback.print_exc()
+            return {id_: 0.0 for id_ in predictions.keys()}
+
+    def accuracy_reward(self, completion: str, solution: str) -> float:
+        """
+        Single sample version - tính hybrid reward cho một sample.
+        """
+        # Extract answers
+        sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
+        ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
+
+        content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
+        student_answer = content_match.group(1).strip() if content_match else ""
+
+        if not student_answer or not ground_truth:
+            return 0.0
+
+        # Apply cleaning và normalization
+        ground_truth_cleaned = normalize_answer(clean_text(ground_truth))
+        student_answer_cleaned = normalize_answer(clean_text(student_answer))
+        
+        if not student_answer_cleaned or not ground_truth_cleaned:
+            return 0.0
+
+        # Tính cả hai metrics với text đã cleaned
+        gts_dict = {0: ground_truth_cleaned}
+        preds_dict = {0: student_answer_cleaned}
+        
+        print(f"Ground truth cleaned: {ground_truth_cleaned}")
+        print(f"Student answer cleaned: {student_answer_cleaned}")
+        bert_score = self.calculate_bertscore_batch(gts_dict, preds_dict).get(0, 0.0)
+        rouge_score = self.calculate_rouge_batch(gts_dict, preds_dict).get(0, 0.0)
+        
+        print(f"BERTScore: {bert_score}")
+        print(f"ROUGE-L: {rouge_score}")
+        # Combined reward
+        reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
+        
+        return reward
+
     def accuracy_rewards_batch(self, completions: list[str], solutions: list[str]) -> list[float]:
         """
-        Batch version - trả về BERTScore F1 cho từng sample (0-1).
-        Có thể dùng cho 1 sample hoặc nhiều samples.
+        Batch version - trả về hybrid reward (ROUGE-L + BERTScore) cho từng sample (0-1).
         """
         if not completions:
             return []
@@ -88,22 +176,38 @@ class AccuracyRewardScorer(BaseRewardScorer):
             sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
             ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
-
             content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
             student_answer = content_match.group(1).strip() if content_match else ""
             
-            gts_dict[i] = ground_truth
-            preds_dict[i] = normalize_answer(clean_text(student_answer))
+            # Debug: In ra trước khi clean
+            print(f"  [Sample {i}] Raw GT: '{ground_truth}', Raw Pred: '{student_answer}'")
+            
+            # Apply cleaning và normalization trước khi tính metrics
+            ground_truth_cleaned = normalize_answer(clean_text(ground_truth))
+            student_answer_cleaned = normalize_answer(clean_text(student_answer))
+            
+            # Debug: In ra sau khi clean
+            print(f"  [Sample {i}] Cleaned GT: '{ground_truth_cleaned}', Cleaned Pred: '{student_answer_cleaned}'")
+            
+            gts_dict[i] = ground_truth_cleaned
+            preds_dict[i] = student_answer_cleaned
         
-        # Tính BERTScore batch
-        bert_scores = self.calculate_bertscore_batch(
-            gts_dict, 
-            preds_dict,
-            model_name_or_path=self.model_path
-        )
+        # Tính cả ROUGE-L và BERTScore batch với cleaned text
+        rouge_scores = self.calculate_rouge_batch(gts_dict, preds_dict)
+        bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)
         
-        # Trả về scores
-        rewards = [bert_scores.get(i, 0.0) for i in range(len(completions))]
+        # Kết hợp scores với trọng số alpha
+        rewards = []
+        for i in range(len(completions)):
+            rouge_score = rouge_scores.get(i, 0.0)
+            bert_score = bert_scores.get(i, 0.0)
+            
+            # Hybrid reward
+            reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
+            rewards.append(reward)
+            
+            print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f}")
+        
         return rewards
 
 
