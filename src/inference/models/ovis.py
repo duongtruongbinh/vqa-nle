@@ -56,19 +56,24 @@ class OvisModel(VQAModel):
         return parse_output(response) 
 
     def infer_grpo(self, question: str, image_path: str) -> tuple[str, str]:
-        system_instruction = get_grpo_system_prompt()
+        system_instruction = get_grpo_system_prompt(question)
 
         user_content = f"""Now, answer this question based on the image: 
         Question: {question}. 
         Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
         messages = [
-            {"role": "system", "content": system_instruction},
-            {"role": "user",
-            "content": [
-                {"type": "image", "image": Image.open(image_path).convert('RGB')},
-                {"type": "text", "text": user_content},
-            ],
-        }]
+        {"role": "user",
+        "content": [
+            {"type": "image", "image": Image.open(image_path).convert("RGB")},
+            {"type": "text",
+            "text": (
+                "Now answer using exactly three tag pairs: "
+                "<think></think>, <answer></answer>, <explain></explain>.\n"
+                f"Question: {question}"
+            )},
+        ]}
+        ]
+
         
         input_ids, pixel_values, grid_thws = self.model.preprocess_inputs(messages, add_generation_prompt=True,
                                                                           enable_thinking=False)

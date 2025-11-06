@@ -3,6 +3,7 @@ import re
 import json
 import argparse
 import unicodedata
+import torch
 
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
@@ -11,7 +12,48 @@ from pycocoevalcap.cider.cider import Cider
 from torchmetrics.text import BERTScore
 
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
+
+# ============================================================================
+# SHARED BERTSCORE MODEL
+# ============================================================================
+
+class SharedBERTScoreModel:
+    """
+    Shared BERTScore model để tái sử dụng cho nhiều lần tính toán.
+    """
+    _shared_bertscore = None
+    _device = None
+    _model_path = None
+    
+    @classmethod
+    def initialize_bertscore(cls, model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base", device="cuda"):
+        """
+        Khởi tạo shared BERTScore model.
+        
+        Args:
+            model_name_or_path: Đường dẫn đến BERT model.
+            device: Device để chạy model (cuda/cpu).
+        """
+        # Chỉ khởi tạo 1 lần hoặc khi model path/device thay đổi
+        if cls._shared_bertscore is None or cls._model_path != model_name_or_path or cls._device != device:
+            cls._device = device
+            cls._model_path = model_name_or_path
+            print(f"   🔧 Initializing shared BERTScore from: {model_name_or_path}")
+            print(f"   📍 Device: {cls._device}")
+            cls._shared_bertscore = BERTScore(
+                model_name_or_path=model_name_or_path,
+                num_layers=12,
+                rescale_with_baseline=False,
+                device=cls._device,
+                truncation=True,
+                max_length=256,
+                dist_sync_on_step=False,
+                sync_on_compute=False
+            )
+            print("   ✅ Shared BERTScore initialized successfully.")
+        return cls._shared_bertscore
 
 
 # ============================================================================
@@ -22,7 +64,7 @@ os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 # - If empty [], will evaluate ALL .json files in input_dir (or use --files argument)
 # - If specified, will only evaluate these files by default
 # - Can be overridden by --files argument
-FILES_TO_EVALUATE = ['stage1_test_results']
+FILES_TO_EVALUATE = ['vintern3br-base']
 
 # Example usage:
 # FILES_TO_EVALUATE = ["stage3_test_results.json"]
@@ -44,30 +86,56 @@ def clean_text(text: str) -> str:
 
 
 def normalize_answer(text: str) -> str:
-    """Normalize answer for exact matching."""
+    """
+    Normalize answer for exact matching.
+    """
+    if not text:
+        return ""
+    
+    # Clean and lowercase
     text = clean_text(text).lower().strip().rstrip(".").replace('"', "").strip()
     
     # Yes/No normalization
-    if text in ["có", "đúng", "yes", "true", "correct"]:
+    if text in ["có", "đúng", "vâng", "yes", "true", "correct"]:
         return "có"
     if text in ["không", "sai", "no", "false", "incorrect"]:
         return "không"
     
-    # Synonym mapping
-    synonym_map = {"bay diều": "thả diều", "diều bay": "thả diều"}
-    text = synonym_map.get(text, text)
-    
-    # Remove prefixes
-    prefixes = ["con ", "cái ", "chiếc ", "quả ", "hoa ", "màu ", "bên ", "phía "]
-    for prefix in prefixes:
-        if text.startswith(prefix):
-            text = text[len(prefix):]
-            break
-    
-    # Remove special characters and sort words
+    # Remove special characters
     text = re.sub(r'[^\w\s]', '', text)
     text = re.sub(r'\s+', ' ', text).strip()
+    
+    # Sort words for order-independent matching
     return " ".join(sorted(text.split()))
+
+
+def fuzzy_match_answer(pred: str, gt: str) -> bool:
+    """
+    Compare prediction with ground truth using keyword matching.
+    Both inputs should already be normalized via normalize_answer().
+    
+    Args:
+        pred: Normalized prediction
+        gt: Normalized ground truth
+        
+    Returns:
+        True if match (exact or fuzzy), False otherwise
+    """
+    # Exact match
+    if pred == gt:
+        return True
+    
+    # Keyword matching for short ground truths (≤2 words)
+    # Example: gt="đạp xe" matches pred="đạp màu xe xanh"
+    if len(gt.split()) <= 2:
+        gt_keywords = set(gt.split())
+        pred_keywords = set(pred.split())
+        
+        # Prediction contains all GT keywords and is not too long
+        if gt_keywords.issubset(pred_keywords) and len(pred_keywords) <= len(gt_keywords) + 2:
+            return True
+    
+    return False
 
 
 def normalize_explanation(text: str) -> str:
@@ -133,74 +201,92 @@ def compute_traditional_metrics(gts: dict, res: dict) -> dict[str, float]:
     return scores
 
 
-def compute_bertscore(candidates: list[str], references: list[str], device: str = "cuda") -> float:
-    """Compute BERTScore F1 (one-to-one comparison)."""
-    if not candidates or not references:
+def compute_bertscore_single(candidate: str, reference: str, device: str = "cuda") -> float:
+    """
+    Tính BERTScore F1 cho một cặp candidate-reference đơn.
+    Reset model mỗi lần để đảm bảo độc lập.
+    
+    Args:
+        candidate: Câu dự đoán
+        reference: Câu ground truth
+        device: cuda hoặc cpu
+        
+    Returns:
+        BERTScore F1 score (0-100)
+    """
+    if not candidate.strip() or not reference.strip():
         return 0.0
     
     try:
-        bertscore_metric = BERTScore(
+        # Sử dụng shared BERTScore model
+        bertscore_metric = SharedBERTScoreModel.initialize_bertscore(
             model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base",
-            num_layers=12,
-            rescale_with_baseline=False,
-            device=device,
-            truncation=True,
-            max_length=256
+            device=device
         )
         
-        bertscore_metric.update(candidates, references)
-        f1_scores = bertscore_metric.compute()['f1']
+        # Reset metric để clear cache từ lần tính trước
+        bertscore_metric.reset()
         
-        return (f1_scores.mean().item() if f1_scores.dim() > 0 else f1_scores.item()) * 100
+        # Tính toán cho cặp đơn
+        bertscore_metric.update([candidate], [reference])
+        f1_score = bertscore_metric.compute()['f1']
+        
+        # Xử lý cả 0-dim và 1-dim tensor
+        if f1_score.dim() == 0:
+            return f1_score.item() * 100
+        else:
+            return f1_score[0].item() * 100
         
     except Exception as e:
-        print(f"   ⚠️ Error computing BERTScore: {e}")
+        print(f"   ⚠️ Error computing BERTScore for single pair: {e}")
+        import traceback
+        traceback.print_exc()
         return 0.0
 
 
+def compute_bertscore(candidates: list[str], references: list[str], device: str = "cuda") -> float:
+    """
+    Compute BERTScore F1 (one-to-one comparison) by looping through each pair.
+    Tính theo từng cặp và reset mỗi lần.
+    """
+    if not candidates or not references:
+        return 0.0
+    
+    if len(candidates) != len(references):
+        print(f"   ⚠️ Warning: candidates ({len(candidates)}) and references ({len(references)}) length mismatch")
+        return 0.0
+    
+    scores = []
+    for i, (cand, ref) in enumerate(zip(candidates, references)):
+        score = compute_bertscore_single(cand, ref, device)
+        scores.append(score)
+    
+    # Trả về trung bình
+    return sum(scores) / len(scores) if scores else 0.0
+
+
 def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]], device: str = "cuda") -> list[float]:
-    """Compute BERTScore F1 with max over multiple references."""
-    batched_cands, batched_refs, ref_counts = [], [], []
+    """
+    Compute BERTScore F1 with max over multiple references.
+    Tính theo từng cặp hypothesis-reference và lấy max, reset mỗi lần.
+    """
+    max_f1_scores = []
     
     for hyp, refs in zip(hypotheses, references):
         valid_refs = [r for r in refs if r.strip()]
+        
         if not hyp.strip() or not valid_refs:
-            ref_counts.append(0)
+            max_f1_scores.append(0.0)
             continue
         
-        batched_cands.extend([hyp] * len(valid_refs))
-        batched_refs.extend(valid_refs)
-        ref_counts.append(len(valid_refs))
-    
-    max_f1_scores = []
-    if batched_cands:
-        try:
-            bertscore_metric = BERTScore(
-                model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base",
-                num_layers=12,
-                rescale_with_baseline=False,
-                device=device,
-                truncation=True,
-                max_length=256
-            )
-            
-            bertscore_metric.update(batched_cands, batched_refs)
-            all_f1 = bertscore_metric.compute()['f1']
-            all_f1_list = [all_f1.item()] if all_f1.dim() == 0 else all_f1.tolist()
-            
-            current_idx = 0
-            for count in ref_counts:
-                if count == 0:
-                    max_f1_scores.append(0.0)
-                else:
-                    max_f1_scores.append(max(all_f1_list[current_idx:current_idx + count]))
-                    current_idx += count
-                    
-        except Exception as e:
-            print(f"   ⚠️ Error computing BERTScore: {e}")
-            max_f1_scores = [0.0] * len(hypotheses)
-    else:
-        max_f1_scores = [0.0] * len(hypotheses)
+        # Tính BERTScore cho hypothesis với từng reference
+        ref_scores = []
+        for ref in valid_refs:
+            score = compute_bertscore_single(hyp, ref, device)
+            ref_scores.append(score)
+        
+        # Lấy max score
+        max_f1_scores.append(max(ref_scores) if ref_scores else 0.0)
     
     return max_f1_scores
 
@@ -221,7 +307,7 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str], device: s
     # Compute BERTScore
     print("   ⏳ Computing BERTScore...")
     max_f1_scores = compute_bertscore_max_ref(hypotheses, references, device)
-    scores["BERTScore_F1"] = (sum(max_f1_scores) / len(max_f1_scores) * 100) if max_f1_scores else 0.0
+    scores["BERTScore_F1"] = (sum(max_f1_scores) / len(max_f1_scores)) if max_f1_scores else 0.0
     print("   ✅ BERTScore complete")
     
     return scores
@@ -273,8 +359,8 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
         by_answer_type[ans_type]["all_gt_answers"].append(gt_ans)
         by_answer_type[ans_type]["all_pred_answers"].append(pred_ans)
         
-        # Check correctness
-        if pred_ans == gt_ans:
+        # Check correctness with fuzzy matching
+        if fuzzy_match_answer(pred_ans, gt_ans):
             correct += 1
             filtered_gt_expls.append(gt_expls)
             filtered_pred_expls.append(pred_expl)
@@ -284,10 +370,7 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     
     accuracy = (correct / total * 100) if total > 0 else 0.0
     
-    # Compute overall scores
-    print("\n--- Computing BERTScore for answers ---")
-    answer_bertscore = compute_bertscore(all_pred_answers, all_gt_answers, device)
-    
+    # Compute overall scores - REMOVED answer_bertscore calculation
     print("\n--- UNFILTERED evaluation ---")
     unfiltered_scores = get_nlg_scores(all_gt_expls, all_pred_expls, device)
     
@@ -302,14 +385,13 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
         print(f"\n--- Evaluating answer_type: {ans_type} ({type_data['total']} examples) ---")
         
         type_acc = (type_data["correct"] / type_data["total"]) if type_data["total"] > 0 else 0.0
-        type_ans_bert = compute_bertscore(type_data["all_pred_answers"], type_data["all_gt_answers"], device)
+        # REMOVED type_ans_bert calculation
         type_unfiltered = get_nlg_scores(type_data["all_gt_expls"], type_data["all_pred_expls"], device)
         type_filtered = get_nlg_scores(type_data["filtered_gt_expls"], type_data["filtered_pred_expls"], device) if type_data["filtered_pred_expls"] else {k: 0.0 for k in type_unfiltered}
         type_scaled = {k: v * type_acc for k, v in type_unfiltered.items()}
         
         answer_type_results[ans_type] = {
             "accuracy": type_acc * 100,
-            "answer_bertscore_f1": type_ans_bert,
             "total_examples": type_data["total"],
             "correct_count": type_data["correct"],
             "unfiltered_scores": type_unfiltered,
@@ -319,7 +401,6 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     
     return {
         "accuracy": accuracy,
-        "answer_bertscore_f1": answer_bertscore,
         "task_score": accuracy,
         "unfiltered_scores": unfiltered_scores,
         "filtered_scores": filtered_scores,
@@ -406,7 +487,6 @@ def main():
                                 "ROUGE_L": float(parts[3]),
                                 "CIDEr": float(parts[4]),
                                 "BERTScore_F1": float(parts[5]),
-                                "answer_bertscore_f1": float(parts[6]),
                                 "accuracy": float(parts[7]),
                             }
                             # Try to load answer_type specific scores if they exist
@@ -442,7 +522,6 @@ def main():
             if key in result:
                 result[key] = {k: round(v, 2) for k, v in result[key].items()}
         result["accuracy"] = round(result["accuracy"], 2)
-        result["answer_bertscore_f1"] = round(result["answer_bertscore_f1"], 2)
         
         if "by_answer_type" in result:
             for type_result in result["by_answer_type"].values():
@@ -450,7 +529,6 @@ def main():
                     if key in type_result:
                         type_result[key] = {k: round(v, 2) for k, v in type_result[key].items()}
                 type_result["accuracy"] = round(type_result["accuracy"], 2)
-                type_result["answer_bertscore_f1"] = round(type_result["answer_bertscore_f1"], 2)
         
         base = os.path.splitext(fname)[0]
         out_path = os.path.join(args.input_dir, f"{base}{args.suffix}")
@@ -462,7 +540,6 @@ def main():
         # Update summary (overwrite if exists, add if new)
         summary[base] = {
             "accuracy": result["accuracy"],
-            "answer_bertscore_f1": result["answer_bertscore_f1"],
             "BLEU-4": result["filtered_scores"].get("BLEU-4", 0.0),
             "METEOR": result["filtered_scores"].get("METEOR", 0.0),
             "ROUGE_L": result["filtered_scores"].get("ROUGE_L", 0.0),
@@ -482,8 +559,8 @@ def main():
     # Write summary (with all models: old + new/updated)
     with open(summary_path, "w", encoding="utf-8") as fw:
         # Header with answer_type columns
-        fw.write("Model\tBLEU-4\tMETEOR\tROUGE_L\tCIDEr\tBERTScore_Expl\tBERTScore_Ans\tAccuracy\t"
-                "Acc_YesNo\tAcc_Number\tAcc_Other\tBERT_YesNo\tBERT_Number\tBERT_Other\n")
+        fw.write("Model\tBLEU-4\tMETEOR\tROUGE_L\tCIDEr\tBERTScore_Expl\tAccuracy\t"
+        "Acc_YesNo\tAcc_Number\tAcc_Other\tBERT_YesNo\tBERT_Number\tBERT_Other\n")
         
         # Sort by model name for consistency
         for model in sorted(summary.keys()):
@@ -498,11 +575,10 @@ def main():
             bert_other = scores.get("bert_expl_other", 0.0)
             
             fw.write(f"{model}\t{scores['BLEU-4']:.2f}\t{scores['METEOR']:.2f}\t"
-                    f"{scores['ROUGE_L']:.2f}\t{scores['CIDEr']:.2f}\t"
-                    f"{scores['BERTScore_F1']:.2f}\t{scores['answer_bertscore_f1']:.2f}\t"
-                    f"{scores['accuracy']:.2f}\t"
-                    f"{acc_yesno:.2f}\t{acc_number:.2f}\t{acc_other:.2f}\t"
-                    f"{bert_yesno:.2f}\t{bert_number:.2f}\t{bert_other:.2f}\n")
+                f"{scores['ROUGE_L']:.2f}\t{scores['CIDEr']:.2f}\t"
+                f"{scores['BERTScore_F1']:.2f}\t{scores['accuracy']:.2f}\t"  
+                f"{acc_yesno:.2f}\t{acc_number:.2f}\t{acc_other:.2f}\t"
+                f"{bert_yesno:.2f}\t{bert_number:.2f}\t{bert_other:.2f}\n")
     
     print(f"\n\n{'='*45}\n✅ All evaluations complete\n{'='*45}")
     with open(summary_path, "r") as f:

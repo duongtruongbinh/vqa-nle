@@ -79,7 +79,7 @@ def find_closest_aspect_ratio(aspect_ratio: float, target_ratios: list[tuple[int
 class QwenVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = "/home/vlai-vqa-nle/minhtq/vqa-nle/VLM-R1/checkpoints/rl/Qwen2.5-VL-3B-Instruct-rec-lora/checkpoint-500"
+        self.model_path = self.model_path = 'Qwen/Qwen2.5-VL-7B-Instruct'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -132,7 +132,7 @@ class QwenVLModel(VQAModel):
         return parse_output(response)
 
     def infer_grpo(self, question: str, image_path: str) -> tuple[str, str]:
-        system_instruction = get_grpo_system_prompt()
+        system_instruction = get_grpo_system_prompt(question)
 
         user_content = f"""Now, answer this question based on the image: 
 Question: {question}. 

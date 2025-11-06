@@ -81,7 +81,8 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-internvl35/stage1/merged/checkpoint-500-merged'
+        #self.model_path = '5CD-AI/Vintern-3B-R-beta'
+        self.model_path = 'OpenGVLab/InternVL3_5-8B'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -124,20 +125,14 @@ class InternVLModel(VQAModel):
         return parse_output(response) 
     def infer_grpo(self, question: str, image_path: str) -> tuple[str, str, str]:
         pixel_values = self._load_image(image_path).to(torch.bfloat16).to(device)
-        system_instruction = get_grpo_system_prompt()
-
-        user_content = f"""Now, answer this question based on the image: 
-        Question: {question}. 
-        Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
-        prompt = f"{system_instruction}\n" + user_content
-        # print(prompt)
+        prompt = get_grpo_system_prompt(question) 
 
         with torch.no_grad():
             response = self.model.chat(
                 self.tokenizer,
                 pixel_values,
                 prompt,
-                generation_config={"max_new_tokens": 512, "pad_token_id": self.tokenizer.eos_token_id}
+                generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
             )
         return parse_output_grpo(response) 
         # return response

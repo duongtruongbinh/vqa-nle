@@ -85,16 +85,26 @@ def get_system_prompt() -> str:
     return system_instruction
 
 
-def get_grpo_system_prompt():
-    system_instruction = f"""
-    You are a Visual Question Answering system. Your task is to answer and explain questions based on the content of the provided image.
-
+def get_grpo_system_prompt(question: str):
+    system_instruction_internvl = """<image>You are a Visual Question Answering system. Your task is to answer and explain questions based on the content of the provided image.
+    
     Follow these steps precisely:    
     - <think> Your step-by-step reasoning process. Analyze the image carefully. </think>
     - <answer> Based on your reasoning, provide your Vietnamese answer must be one word or a short phrase. </answer>
-    - <explain> Your brief Vietnamese explanation (one sentence that justifies your answer). </explain>""".strip()
+    - <explain> Your brief Vietnamese explanation (one sentence that justifies your answer). </explain>
+    Now, answer this question based on the image: 
+    Question: {question}. 
+    Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>.
+    """.strip()
     
-    return system_instruction
+    system_instruction_vintern3BR = f"""<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời và giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp.
+    Câu hỏi: {question}
+    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
+    <REASONING>Quá trình suy luận chi tiết dẫn đến câu trả lời cuối cùng</REASONING>
+    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
+    <explain>Giải thích một câu ngắn gọn chứng minh câu trả lời</explain>""".strip()
+    
+    return system_instruction_vintern3BR
 
 def parse_output(response: str) -> tuple[str, str]:
     """

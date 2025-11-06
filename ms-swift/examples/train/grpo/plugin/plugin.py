@@ -192,14 +192,6 @@ class CustomFormatReward_Caption(ORM):
             total = float(b_total - p_total)
             scores.append(total)
 
-        # if os.getenv("DEBUG_MODE") == "true":
-        #     log_path = os.getenv("LOG_PATH")
-        #     current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
-        #     with open(log_path.replace(".txt", "_format.txt"), "a", encoding='utf-8') as f:
-        #         f.write(f"------------- {current_time} Format reward -------------\n")
-        #         for content, score in zip(completion_contents, scores):
-        #             f.write(f"Content: {content}\n")
-        #             f.write(f"Score: {score:.2f}\n")
         return scores
 
 orms['custom_format_reward_ViVQA_X'] = CustomFormatReward_ViVQA_X
