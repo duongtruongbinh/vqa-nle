@@ -4,10 +4,12 @@ import torchvision.transforms as T
 from torchvision.transforms.functional import InterpolationMode
 from transformers import AutoModel, AutoTokenizer
 
-from .base_model import VQAModel
-from .utils import get_system_prompt, parse_output
-
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+from .base_model import VQAModel
+from .utils import get_system_prompt, parse_output, get_grpo_system_prompt, parse_output_grpo
+
+
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_STD = (0.229, 0.224, 0.225)
 
@@ -79,7 +81,7 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        self.model_path = '/mnt/dataset1/pretrained_fm/OpenGVLab_InternVL3_5-8B'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-internvl35/stage1/merged/checkpoint-500-merged'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -92,7 +94,9 @@ class InternVLModel(VQAModel):
             low_cpu_mem_usage=True,
             trust_remote_code=True,
             device_map="auto",
-        ).eval()
+        ).to(device)
+
+        self.model.eval()
         self.tokenizer = AutoTokenizer.from_pretrained(
             self.model_path, trust_remote_code=True, use_fast=False)
 
@@ -115,6 +119,25 @@ class InternVLModel(VQAModel):
                 self.tokenizer,
                 pixel_values,
                 prompt,
-                generation_config={"max_new_tokens": 100, "pad_token_id": self.tokenizer.eos_token_id}
+                generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
             )
         return parse_output(response) 
+    def infer_grpo(self, question: str, image_path: str) -> tuple[str, str, str]:
+        pixel_values = self._load_image(image_path).to(torch.bfloat16).to(device)
+        system_instruction = get_grpo_system_prompt()
+
+        user_content = f"""Now, answer this question based on the image: 
+        Question: {question}. 
+        Let's response in three tag pairs in your response: <think></think>, <answer></answer>, <explain></explain>."""
+        prompt = f"{system_instruction}\n" + user_content
+        # print(prompt)
+
+        with torch.no_grad():
+            response = self.model.chat(
+                self.tokenizer,
+                pixel_values,
+                prompt,
+                generation_config={"max_new_tokens": 512, "pad_token_id": self.tokenizer.eos_token_id}
+            )
+        return parse_output_grpo(response) 
+        # return response

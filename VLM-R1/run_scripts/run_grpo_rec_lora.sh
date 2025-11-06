@@ -1,11 +1,14 @@
+export DS_SKIP_CUDA_CHECK=1
+export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
+
 PROJECT_ROOT="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." && pwd )"
 export REPO_HOME="${PROJECT_ROOT}"
 echo "REPO_HOME: $REPO_HOME"
 # on remote
-data_paths="/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcoco_train.jsonl:/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcocop_train.jsonl:/training/shz/dataset/vlm-r1/rec_jsonsl_train/refcocog_train.jsonl" 
-image_folders="/training/shz/dataset/coco:/training/shz/dataset/coco:/training/shz/dataset/coco"
-model_path="/training/models/Qwen2.5-VL-3B-Instruct"
-is_reward_customized_from_vlm_module=True
+data_paths="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ViVQA-X_train_grpo.jsonl"
+image_folders="/mnt/VLAI_data/COCO_Images/train2014"
+model_path="Qwen/Qwen2.5-VL-3B-Instruct"
+is_reward_customized_from_vlm_module=False
 echo "data_paths: $data_paths"
 echo "image_folders: $image_folders"
 
@@ -19,10 +22,12 @@ mkdir -p ${REPO_HOME}/runs/${EXP_NAME}/log
 export LOG_PATH="${REPO_HOME}/runs/${EXP_NAME}/log/debug_log.$(date +%Y-%m-%d-%H-%M-%S).txt"
 # MAX_STEPS=1200 # TODO: change this to your own max steps
 
-
+export CUDA_VISIBLE_DEVICES=2
+export FLASH_ATTENTION_SKIP_CHECKS=1
+export DISABLE_FLASH_ATTN=1
 # export WANDB_DISABLED=true
 # CUDA_VISIBLE_DEVICES=0,1,2,3,4,5,6
-torchrun --nproc_per_node="8" \
+torchrun --nproc_per_node="1" \
     --nnodes="1" \
     --node_rank="0" \
     --master_addr="127.0.0.1" \
@@ -30,23 +35,25 @@ torchrun --nproc_per_node="8" \
   src/open_r1/grpo_jsonl.py \
     --use_vllm False \
     --output_dir ${REPO_HOME}/checkpoints/rl/${EXP_NAME} \
-    --resume_from_checkpoint True \
+    --resume_from_checkpoint False \
     --model_name_or_path $model_path \
     --data_file_paths $data_paths \
     --image_folders $image_folders \
+    --max_pixels 200704 \
     --is_reward_customized_from_vlm_module $is_reward_customized_from_vlm_module \
     --task_type $TASK_TYPE \
-    --per_device_train_batch_size 8 \
+    --per_device_train_batch_size 3 \
     --gradient_accumulation_steps 2 \
     --gradient_checkpointing true \
     --logging_steps 1 \
-    --num_train_epochs 2 \
+    --max_steps 500 \
+    --num_train_epochs 1 \
     --bf16 \
-    --attn_implementation flash_attention_2 \
+    --attn_implementation sdpa \
     --run_name ${EXP_NAME} \
     --data_seed 42 \
     --save_steps 100 \
-    --num_generations 8 \
+    --num_generations 3 \
     --max_completion_length 2048 \
     --reward_funcs accuracy format \
     --beta 0.04 \

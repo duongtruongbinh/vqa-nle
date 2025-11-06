@@ -21,7 +21,7 @@ from dataclasses import dataclass, field
 from typing import Optional
 from babel.numbers import parse_decimal
 from utils.math import compute_score
-from datasets import load_dataset, load_from_disk
+from datasets import load_dataset, load_from_disk, Dataset
 from transformers import Qwen2VLForConditionalGeneration
 
 from math_verify import parse, verify
@@ -36,18 +36,15 @@ import math
 from json_repair import repair_json
 
 from open_r1.vlm_modules import *
-
-from typing import Tuple
 from transformers.utils import logging
 from transformers import AutoProcessor, AutoTokenizer
-
 from openai import OpenAI
 
 import sys
 # Add the parent directory to sys.path to import from src/rewards
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../../../../src/rewards'))
 from explaination_rewards import ExplanationRewardScorer 
-from outcome_rewards import accuracy_reward as custom_accuracy_reward
+from outcome_rewards import AccuracyRewardScorer as custom_accuracy_reward
 
 logger = logging.get_logger(__name__)
 
@@ -68,15 +65,25 @@ def initialize_tokenizer(model_path):
     return tokenizer
 
 explanation_scorer = None  # Global scorer instance
+accuracy_scorer = None     # Global accuracy scorer instance
 
-def initialize_explanation_scorer(alpha=0.5):
+def initialize_explanation_customized_scorer(alpha=0.5):
     """Initialize explanation scorer once and reuse it."""
     global explanation_scorer
     if explanation_scorer is None:
-        print("Initializing ExplanationRewardScorer (CLIP + CIDEr)...")
+        print("Initializing ExplanationRewardScorer (CLIP + BERTScore)...")
         explanation_scorer = ExplanationRewardScorer(alpha=alpha)
         print("ExplanationRewardScorer initialized successfully!")
     return explanation_scorer
+
+def initialize_accuracy_customized_scorer():
+    """Initialize accuracy scorer once and reuse it."""
+    global accuracy_scorer
+    if accuracy_scorer is None:
+        print("Initializing AccuracyRewardScorer (BERTScore)...")
+        accuracy_scorer = custom_accuracy_reward()
+        print("AccuracyRewardScorer initialized successfully!")
+    return accuracy_scorer
 
 @dataclass
 class GRPOScriptArguments(ScriptArguments):
@@ -856,7 +863,6 @@ def default_accuracy_reward(content, sol, **kwargs):
 
     return reward
 
-
 def accuracy_reward(completions, solution, **kwargs):
     """Reward function that checks if the completion is correct using symbolic verification, exact string matching, or fuzzy matching."""
     contents = [completion[0]["content"] for completion in completions]
@@ -912,7 +918,35 @@ def accuracy_reward(completions, solution, **kwargs):
 
     return rewards
 
-
+def customized_accuracy_reward(completions, solution, **kwargs):
+    """
+    Custom accuracy reward using BERTScore for semantic matching.
+    Returns BERTScore F1 directly (0-1 range).
+    """
+    contents = [completion[0]["content"] for completion in completions]
+    
+    try:
+        rewards = initialize_accuracy_customized_scorer().accuracy_rewards_batch(contents, solution)
+    except Exception as e:
+        print(f"Error in customized_accuracy_reward: {e}")
+        rewards = [0.0] * len(contents)
+    
+    # Debug logging
+    if os.getenv("DEBUG_MODE") == "true":
+        log_path = os.getenv("LOG_PATH")
+        if log_path:
+            current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
+            try:
+                with open(log_path.replace(".txt", "_accuracy_bertscore.txt"), "a", encoding='utf-8') as f:
+                    f.write(f"------------- {current_time} Customized Accuracy reward (BERTScore) -------------\n")
+                    for i, (content, sol, reward) in enumerate(zip(contents, solution, rewards)):
+                        f.write(f"Sample {i}: Reward={reward:.4f}\n")
+                        f.write(f"Content: {content}\n")
+                        f.write(f"Solution: {sol}\n")
+            except Exception as e:
+                print(f"Failed to write debug log: {e}")
+    
+    return rewards
 # def format_reward(completions, **kwargs):
 #     """Reward function that checks if the completion has a specific format."""
 #     pattern = r"<think>.*?</think>\s*<answer>.*?</answer>\s*<explain>.*?</explain>"
@@ -954,9 +988,9 @@ def format_reward(completions, **kwargs):
         n_explain_open  = len(re.findall(r"<explain>", content))
         n_explain_close = len(re.findall(r"</explain>", content))
         # base score
-        b_think = 1.0 if n_pair_think >= 1 else (0.5 if n_think_open or n_think_close == 1 else 0.0)
-        b_answer = 1.0 if n_pair_answer >= 1 else (0.5 if n_answer_open or n_answer_close == 1 else 0.0)
-        b_explain = 1.0 if n_pair_explain >= 1 else (0.5 if n_explain_open or n_explain_close == 1 else 0.0)
+        b_think = 0.2 if n_pair_think >= 1 else (0.1 if n_think_open or n_think_close == 1 else 0.0)
+        b_answer = 0.4 if n_pair_answer >= 1 else (0.2 if n_answer_open or n_answer_close == 1 else 0.0)
+        b_explain = 0.4 if n_pair_explain >= 1 else (0.2 if n_explain_open or n_explain_close == 1 else 0.0)
         b_total = b_think + b_answer + b_explain
         
         # penalty score
@@ -966,9 +1000,9 @@ def format_reward(completions, **kwargs):
         answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
         explain_singles = max(0, n_explain_open + n_explain_close - 2 )
 
-        p_think = think_singles * 0.5
-        p_answer = answer_singles * 0.5
-        p_explain = explain_singles * 0.5
+        p_think = think_singles * (1/6)
+        p_answer = answer_singles * (1/6)
+        p_explain = explain_singles * (1/6)
         p_total = p_think + p_answer + p_explain
 
         total = float(b_total - p_total)
@@ -987,83 +1021,82 @@ def format_reward(completions, **kwargs):
 
 def explanation_reward(completions, solution, **kwargs):
     """
-    Calculate explanation reward using CIDEr + CLIP score.
+    Reward function wrapper cho GRPO training.
+    Extract <explain> tags và tính rewards.
     
     Args:
-        completions: List of completion objects
+        completions: List of model completions
         solution: List of ground truth solutions
-        **kwargs: Must contain 'image_path' key with list of image paths
-    
+        **kwargs: Must contain 'image_path' and optionally 'scorer'
+        
     Returns:
-        list[float]: Reward scores for each completion
+        List of reward scores
     """
     contents = [completion[0]["content"] for completion in completions]
-    rewards = []
-    
-    # Initialize scorer (alpha=0.5 means equal weight for CIDEr and CLIP)
-    scorer = initialize_explanation_scorer(alpha=0.5)
-    
-    # Extract explanations from content and solution
+    scorer = initialize_explanation_customized_scorer(alpha=0.5)
+
     ground_truths_list = []
     predictions_list = []
-    image_paths_list = []
-    
+
     for content, sol in zip(contents, solution):
-        # Extract explanation from solution
         sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
         if sol_match:
-            # Ground truth can have multiple reference explanations
             gt_explanation = sol_match.group(1).strip()
             ground_truths_list.append([gt_explanation])
         else:
             ground_truths_list.append([""])
-        
-        # Extract explanation from content
+
         content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
         if content_match:
             pred_explanation = content_match.group(1).strip()
         else:
             pred_explanation = ""
         predictions_list.append(pred_explanation)
-    
-    # Get image paths from kwargs
+
     if 'image_path' in kwargs:
-        image_paths_list = [img_path[0] if isinstance(img_path, list) else img_path 
-                           for img_path in kwargs['image_path']]
+        image_paths_list = [img_path[0] if isinstance(img_path, list) else img_path
+                            for img_path in kwargs['image_path']]
     else:
-        # If no image paths provided, return 0 rewards
+        print("Error in explanation_reward: 'image_path' not found in kwargs.")
         return [0.0] * len(contents)
-    
+
+    if not predictions_list:
+        return [0.0] * len(contents)
+
     try:
-        # Calculate rewards using the scorer
         rewards = scorer.explanation_rewards(
             ground_truths=ground_truths_list,
             predictions=predictions_list,
             image_paths=image_paths_list
         )
     except Exception as e:
-        print(f"Error in explanation_reward: {e}")
+        print(f"Error in explanation_reward during calculation: {e}")
         rewards = [0.0] * len(contents)
-    
-    # Debug logging
+
     if os.getenv("DEBUG_MODE") == "true":
         log_path = os.getenv("LOG_PATH")
-        current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
-        with open(log_path.replace(".txt", "_explanation.txt"), "a", encoding='utf-8') as f:
-            f.write(f"------------- {current_time} Explanation reward -------------\n")
-            for i, (content, sol, reward) in enumerate(zip(contents, solution, rewards)):
-                f.write(f"Sample {i}: Reward={reward:.4f}\n")
-                f.write(f"Content: {content}\n")
-                f.write(f"Solution: {sol}\n")
-    
+        if log_path:
+            current_time = datetime.now().strftime("%d-%H-%M-%S-%f")
+            try:
+                with open(log_path.replace(".txt", "_explanation_bertscore.txt"), "a", encoding='utf-8') as f:
+                    f.write(f"------------- {current_time} Explanation reward (BERTScore) -------------\n")
+                    for i, (content, sol, reward) in enumerate(zip(contents, solution, rewards)):
+                        f.write(f"Sample {i}: Reward={reward:.4f}\n")
+                        f.write(f"Content: {content}\n")
+                        f.write(f"Solution: {sol}\n")
+            except Exception as e:
+                print(f"Failed to write debug log: {e}")
+        else:
+            print("DEBUG_MODE is true but LOG_PATH is not set.")
+
     return rewards
 
 reward_funcs_registry = {
-    "accuracy": accuracy_reward,
+    "accuracy": customized_accuracy_reward,
     "format": format_reward,
     "length": cosine_rewards,
     "repetition": repetition_rewards,
-    # "explanation": explanation_reward, 
+    "explanation": explanation_reward, 
 }
 
 
@@ -1100,11 +1133,8 @@ def main(script_args, training_args, model_args):
         reward_funcs = [vlm_module_cls.select_reward_func(func, script_args.task_type) for func in script_args.reward_funcs]
     else:
         reward_funcs = [reward_funcs_registry[func] for func in script_args.reward_funcs]
-    print("reward_funcs:", reward_funcs)
 
-    # Load the JSONL datasets
-    import json
-    from datasets import Dataset
+    
 
     data_files = script_args.data_file_paths.split(":")
     image_folders = script_args.image_folders.split(":")
@@ -1220,7 +1250,7 @@ def main(script_args, training_args, model_args):
 
     # Train and push the model to the Hub
     if list(pathlib.Path(training_args.output_dir).glob("checkpoint-*")):
-        trainer.train()
+        trainer.train(resume_from_checkpoint=True)
     else:
         trainer.train()
 
