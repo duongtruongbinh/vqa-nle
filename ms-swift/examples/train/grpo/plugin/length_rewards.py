@@ -25,10 +25,10 @@ def length_penalty_explanation(pred, truth, ratio=1.2, sentence_penalty_weight=0
     Returns:
         float: 1.0 (ok), -0.5 (quá ngắn), hoặc giá trị âm (quá dài/nhiều câu)
     """
-    # Tách câu dựa trên dấu '.' hoặc ',' (loại bỏ câu rỗng)
+    # Tách câu dựa trên dấu '.' (loại bỏ câu rỗng)
     import re
-    pred_sentences = [s.strip() for s in re.split(r'[.,]', pred) if s.strip()]
-    truth_sentences = [s.strip() for s in re.split(r'[.,]', truth) if s.strip()]
+    pred_sentences = [s.strip() for s in re.split(r'[.]', pred) if s.strip()]
+    truth_sentences = [s.strip() for s in re.split(r'[.]', truth) if s.strip()]
     
     num_pred_sentences = len(pred_sentences)
     num_truth_sentences = len(truth_sentences)

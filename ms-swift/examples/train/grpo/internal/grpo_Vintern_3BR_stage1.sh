@@ -1,6 +1,6 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=1,2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
@@ -12,12 +12,12 @@ OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/outpu
 # Tham số GRPO
 MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024
-NUM_GENERATIONS=3
+NUM_GENERATIONS=4
 TEMPERATURE=0.9
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=1
-GRAD_ACCUM_STEPS=3
-MAX_STEPS=500
+GRAD_ACCUM_STEPS=4
+MAX_STEPS=2500
 LEARNING_RATE=1e-5
 
 SAVE_STEPS=50
@@ -60,13 +60,12 @@ swift rlhf \
     --save_only_model false \
     --save_total_limit 2 \
     --warmup_ratio 0.05 \
-    --dataloader_num_workers 1 \
+    --dataloader_num_workers 4 \
     --dataset_num_proc 1 \
     --report_to wandb \
     --quant_method bnb \
-    --quant_bits 4 \
-    --bnb_4bit_quant_type nf4 \
-    --bnb_4bit_compute_dtype bfloat16 \
+    --quant_bits 8 \
     --gradient_checkpointing true \
-
-echo "Hoàn thành huấn luyện GRPO Stage 2 - Format + Accuracy + Explanation"
+# dự kiến có thể sử dụng 8 bit sau này
+#    --bnb_4bit_compute_dtype bfloat16 \
+echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation"

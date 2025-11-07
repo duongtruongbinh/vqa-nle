@@ -98,19 +98,19 @@ def main():
             continue
         
         try:
-            # think, answer, explanation = model.infer_grpo(item['question'], img_path)
-            # item["thinking"] = think
-            # item["predict"] = answer
-            # item["pred_explanation"] = explanation
+            think, answer, explanation = model.infer_grpo(item['question'], img_path)
+            item["thinking"] = think
+            item["predict"] = answer
+            item["pred_explanation"] = explanation
             
             # print(f"Q: {item['question']}")
             # print(f"Thinking: {think}")
             # print(f"Predicted: {answer} | GT: {item['answer']}")
             # print(f"Explanation: {explanation}")
             
-            answer, explanation = model.infer(item['question'], img_path)
-            item["predict"] = answer
-            item["pred_explanation"] = explanation
+            # answer, explanation = model.infer(item['question'], img_path)
+            # item["predict"] = answer
+            # item["pred_explanation"] = explanation
                 
         except Exception as e:
             print(f"❌ Error processing item {item['image_id']}: {e}")

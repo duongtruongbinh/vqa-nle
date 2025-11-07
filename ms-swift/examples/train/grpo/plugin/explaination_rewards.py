@@ -16,6 +16,50 @@ import atexit
 from base_rewards import BaseRewardScorer
 warnings.filterwarnings("ignore", category=UserWarning, module='transformers.modeling_utils')
 
+import py_vncorenlp
+
+# rdrsegmenter = py_vncorenlp.VnCoreNLP(annotators=["wseg"], save_dir='/absolute/path/to/vncorenlp')
+
+# os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
+def set_up_visegmenter():
+    vncorenlp_dir = '/home/vlai-vqa-nle/minhtq/vqa-nle/vncorenlp_models'
+    if not os.path.exists(vncorenlp_dir):
+        os.makedirs(vncorenlp_dir)
+
+    # # Tự động tải model VnCoreNLP nếu chưa có trong thư mục
+    # if not os.path.exists(os.path.join(vncorenlp_dir, 'models')):
+    #     print("Downloading VnCoreNLP models...")
+    #     py_vncorenlp.download_model(save_dir=vncorenlp_dir)
+    #     print("Download complete!")
+
+    # Load RDRSegmenter 
+    print("Loading VnCoreNLP RDRSegmenter...")
+    rdrsegmenter = py_vncorenlp.VnCoreNLP(annotators=["wseg"], save_dir='/home/vlai-vqa-nle/minhtq/vqa-nle/src/inference/vncorenlp_models')
+    return rdrsegmenter
+
+rdrsegmenter = set_up_visegmenter()
+
+def segment_text(text: str) -> str:
+    """
+    Tách từ sử dụng VnCoreNLP (chuẩn cho PhoBERT).
+    Đầu vào: "Tôi là sinh viên đại học."
+    Đầu ra: "Tôi là sinh_viên đại_học ."
+    """
+    if not text:
+        return ""
+    try:
+        # rdrsegmenter trả về list các câu, mỗi câu là list các từ
+        # Ví dụ: [['Tôi', 'là', 'sinh_viên', 'đại_học', '.']]
+        sentences = rdrsegmenter.word_segment(text)
+        # Nối lại thành chuỗi chuẩn
+        segmented_text = " ".join([" ".join(sentence) for sentence in sentences])
+        return segmented_text
+    except Exception as e:
+        print(f"Error segmenting text: {e}")
+        return text
+
 class ExplanationRewardScorer(BaseRewardScorer):
     """
     Reward scorer kết hợp BERTScore (semantic similarity) và CLIPScore (image-text alignment).
@@ -130,8 +174,8 @@ class ExplanationRewardScorer(BaseRewardScorer):
             return []
 
         # Mỗi sample chỉ có 1 GT string, không phải list
-        gts_dict = {i: gt for i, gt in enumerate(ground_truths)}
-        preds_dict = {i: pred for i, pred in enumerate(predictions)}
+        gts_dict = {i: segment_text(gt[0].strip()) for i, gt in enumerate(ground_truths)}
+        preds_dict = {i: segment_text(pred[0].strip()) for i, pred in enumerate(predictions)}
         paths_dict = {i: path for i, path in enumerate(image_paths)}
 
         bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)

@@ -82,7 +82,7 @@ class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #self.model_path = '5CD-AI/Vintern-3B-R-beta'
-        self.model_path = 'OpenGVLab/InternVL3_5-8B'
+        self.model_path = '5CD-AI/Vintern-3B-R-beta'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -94,7 +94,6 @@ class InternVLModel(VQAModel):
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
-            device_map="auto",
         ).to(device)
 
         self.model.eval()

@@ -11,20 +11,7 @@ def normalize_answer(text: str) -> str:
         return "có"
     if text in ["không", "sai", "no", "false", "incorrect"]:
         return "không"
-        
-    # 2. Chuẩn hóa từ/cụm từ đồng nghĩa
-    synonym_map = {
-        "bay diều": "thả diều",
-        "diều bay": "thả diều",
-    }
-    if text in synonym_map:
-        text = synonym_map[text]
-        
-    # 3. Loại bỏ các tiền tố/hậu tố phổ biến
-    prefixes_to_remove = ["con ", "cái ", "chiếc ", "quả ", "hoa ", "màu ", "bên ", "phía "]
-    for prefix in prefixes_to_remove:
-        if text.startswith(prefix):
-            text = text[len(prefix):]
+
             
     # 4. Loại bỏ các ký tự đặc biệt và khoảng trắng thừa
     text = re.sub(r'[^\w\s]', '', text)
