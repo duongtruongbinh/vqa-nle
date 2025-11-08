@@ -3,7 +3,7 @@ export HF_ENDPOINT="https://huggingface.co"
 export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1/merged/checkpoint-500-merged"
+MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1/merged/checkpoint-1000-merged"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
@@ -12,13 +12,13 @@ OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/outpu
 # Tham số GRPO
 MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024
+BATCH_SIZE_PER_DEVICE=2
 NUM_GENERATIONS=3
+GRAD_ACCUM_STEPS=3
 TEMPERATURE=0.9
 EPOCHS=1
-BATCH_SIZE_PER_DEVICE=1
-GRAD_ACCUM_STEPS=3
-MAX_STEPS=500
-LEARNING_RATE=1e-5
+MAX_STEPS=1000
+LEARNING_RATE=1e-3
 
 SAVE_STEPS=50
 LOGGING_STEPS=1
@@ -33,8 +33,8 @@ swift rlhf \
     --reward_funcs length_penalty_explanation custom_accuracy_reward custom_explaination_reward \
     --reward_weights 1 1 1 \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 32 \
+    --lora_rank 64 \
+    --lora_alpha 128 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -52,7 +52,6 @@ swift rlhf \
     --num_generations $NUM_GENERATIONS \
     --temperature $TEMPERATURE \
     --top_p 0.9 \
-    --top_k 50 \
     --beta 0.04 \
     --log_completions true \
     --torch_dtype bfloat16 \
@@ -63,9 +62,8 @@ swift rlhf \
     --dataset_num_proc 1 \
     --report_to wandb \
     --quant_method bnb \
-    --quant_bits 4 \
-    --bnb_4bit_quant_type nf4 \
-    --bnb_4bit_compute_dtype bfloat16 \
+    --quant_bits 8 \
     --gradient_checkpointing true \
 
+# --top_k 20 \ # This is not used in the script
 echo "Hoàn thành huấn luyện GRPO Stage 2 - Format + Accuracy + Explanation"

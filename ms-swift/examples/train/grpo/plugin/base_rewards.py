@@ -70,7 +70,7 @@ class BaseRewardScorer:
             if pred and gt_list:
                 valid_preds.append(pred)
                 # Pass string thay vì list để tránh bug với single reference
-                valid_gts.append(gt_list[0])  # Chỉ lấy reference đầu tiên
+                valid_gts.append(gt_list) 
                 valid_ids.append(id_)
 
         if not valid_preds:

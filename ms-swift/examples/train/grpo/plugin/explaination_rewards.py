@@ -175,7 +175,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
 
         # Mỗi sample chỉ có 1 GT string, không phải list
         gts_dict = {i: segment_text(gt[0].strip()) for i, gt in enumerate(ground_truths)}
-        preds_dict = {i: segment_text(pred[0].strip()) for i, pred in enumerate(predictions)}
+        preds_dict = {i: segment_text(pred.strip()) for i, pred in enumerate(predictions)}
         paths_dict = {i: path for i, path in enumerate(image_paths)}
 
         bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)

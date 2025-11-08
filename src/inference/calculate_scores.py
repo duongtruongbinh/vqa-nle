@@ -429,14 +429,16 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
         "by_answer_type": {}
     }
     
-    total = len(data)
+    total = 0  
     correct = 0
     all_gt_expls, all_pred_expls = [], []
     by_type = {}
     
     # Process each example
     for item in data:
-        print(item)
+        
+        total += 1 
+        
         gt_ans = normalize_answer(item["answer"])
         pred_ans = normalize_answer(item["predict"])
         gt_expls = [normalize_explanation(e) for e in ensure_list(item["explanation"])]
@@ -475,7 +477,7 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     
     return results
 
-FILES_TO_EVALUATE = ['vintern3br-base']
+FILES_TO_EVALUATE = ['vintern3b-stage1-1000steps']
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate VQA predictions")
