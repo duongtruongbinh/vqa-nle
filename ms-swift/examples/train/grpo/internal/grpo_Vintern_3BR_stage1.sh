@@ -1,13 +1,14 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
+# OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B"
 
 # Tham số GRPO
 MAX_LENGTH=4096
@@ -17,7 +18,7 @@ TEMPERATURE=0.9
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=1
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=2500
+MAX_STEPS=1000
 LEARNING_RATE=1e-5
 
 SAVE_STEPS=50
@@ -34,8 +35,8 @@ swift rlhf \
     --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward \
     --reward_weights 0.5 1.25 1.25 \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 32 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -53,7 +54,6 @@ swift rlhf \
     --num_generations $NUM_GENERATIONS \
     --temperature $TEMPERATURE \
     --top_p 0.9 \
-    --top_k 50 \
     --beta 0.04 \
     --log_completions true \
     --torch_dtype bfloat16 \
@@ -64,8 +64,9 @@ swift rlhf \
     --dataset_num_proc 1 \
     --report_to wandb \
     --quant_method bnb \
-    --quant_bits 8 \
+    --quant_bits 4 \
+    --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
 # dự kiến có thể sử dụng 8 bit sau này
-#    --bnb_4bit_compute_dtype bfloat16 \
+#    
 echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation"

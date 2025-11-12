@@ -35,30 +35,21 @@ def set_up_visegmenter():
     #     print("Download complete!")
 
     # Load RDRSegmenter 
-    print("Loading VnCoreNLP RDRSegmenter...")
     rdrsegmenter = py_vncorenlp.VnCoreNLP(annotators=["wseg"], save_dir='/home/vlai-vqa-nle/minhtq/vqa-nle/src/inference/vncorenlp_models')
     return rdrsegmenter
 
 rdrsegmenter = set_up_visegmenter()
 
 def segment_text(text: str) -> str:
-    """
-    Tách từ sử dụng VnCoreNLP (chuẩn cho PhoBERT).
-    Đầu vào: "Tôi là sinh viên đại học."
-    Đầu ra: "Tôi là sinh_viên đại_học ."
-    """
     if not text:
         return ""
     try:
-        # rdrsegmenter trả về list các câu, mỗi câu là list các từ
-        # Ví dụ: [['Tôi', 'là', 'sinh_viên', 'đại_học', '.']]
         sentences = rdrsegmenter.word_segment(text)
-        # Nối lại thành chuỗi chuẩn
         segmented_text = " ".join([" ".join(sentence) for sentence in sentences])
         return segmented_text
     except Exception as e:
-        print(f"Error segmenting text: {e}")
-        return text
+        print(f"Error segmenting text: {e}. Text: '{text}'. Returning empty string.")
+        return "" 
 
 class ExplanationRewardScorer(BaseRewardScorer):
     """
@@ -72,17 +63,9 @@ class ExplanationRewardScorer(BaseRewardScorer):
         self.alpha = alpha
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        # CIDEr scorer - định nghĩa nhưng không xài
         self.cider_scorer = Cider()
-        print("CIDEr scorer initialized (not used).")
-
-        print(f"Initializing BERTScore (PhoBERT) on device: {self.device}")
         self.bertscore_metric = self.initialize_bertscore()
-        print("BERTScore initialized.")
-
-        print(f"Initializing CLIPScore on device: {self.device}")
         self.clip_metric = CLIPScore(model_name_or_path=clip_model_name).to(self.device)
-        print("CLIPScore model loaded and ready.")
 
     def calculate_cider_batch(self, ground_truths: dict, predictions: dict) -> dict:
         res = {img_id: [caption] for img_id, caption in predictions.items()}
@@ -155,42 +138,117 @@ class ExplanationRewardScorer(BaseRewardScorer):
 
         return clip_scores_dict
 
-    def explanation_rewards(self, ground_truths: list[str], predictions: list[str], image_paths: list[str]) -> list[float]:
+    def explanation_rewards(self, ground_truths: list[str], predictions: list[str], 
+                        image_paths: list[str], prompt_ids: list[int]) -> list[float]:
         """
-        Tính combined reward (BERTScore + CLIPScore) cho batch.
+        Tính combined reward (BERTScore + CLIPScore) cho batch với normalization per group.
         
         Args:
             ground_truths (list[str]): Dạng ["ground_truth 1", "ground_truth 2", ...]
             predictions (list[str]): Dạng ["prediction 1", "prediction 2", ...]
             image_paths (list[str]): Dạng ["path/to/image1.jpg", "path/to/image2.jpg", ...]
-
+            prompt_ids (list[int]): ID của prompt tương ứng với mỗi completion
+                                VD: [0, 0, 0, 1, 1, 1] nghĩa là 3 completions đầu từ prompt 0,
+                                    3 completions sau từ prompt 1
+        
         Returns:
-            list[float]
+            list[float]: Rewards cho từng completion
         """
-        assert len(ground_truths) == len(predictions) == len(image_paths), \
+        from collections import defaultdict
+        
+        assert len(ground_truths) == len(predictions) == len(image_paths) == len(prompt_ids), \
             "Input lists must have the same length."
-
+        
         if not predictions:
             return []
-
-        # Mỗi sample chỉ có 1 GT string, không phải list
-        gts_dict = {i: segment_text(gt[0].strip()) for i, gt in enumerate(ground_truths)}
-        preds_dict = {i: segment_text(pred.strip()) for i, pred in enumerate(predictions)}
+        
+        # Chuẩn bị dữ liệu
+        gts_dict = {}
+        for i, gt in enumerate(ground_truths):
+            if isinstance(gt, list):
+                # Nếu gt là list, lấy phần tử đầu tiên
+                gt_text = gt[0] if gt else ""
+            else:
+                # Nếu gt là string
+                gt_text = gt
+            gts_dict[i] = [segment_text(gt_text.strip())]
+        preds_dict = {}
+        empty_indices = set()
+        
+        # Check từng prediction sau segment_text
+        for i, pred in enumerate(predictions):
+            pred_segmented = segment_text(pred.strip())
+            if not pred_segmented or not pred_segmented.strip():
+                empty_indices.add(i)
+            else:
+                preds_dict[i] = pred_segmented
+        
         paths_dict = {i: path for i, path in enumerate(image_paths)}
-
-        bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)
-        clip_scores = self.calculate_clip_batch(paths_dict, preds_dict)
-
+        
+        # Tính scores cho non-empty predictions
+        bert_scores_dict = self.calculate_bertscore_batch(gts_dict, preds_dict)
+        clip_scores_raw_dict = self.calculate_clip_batch(paths_dict, preds_dict)
+        
+        # --- NORMALIZE CLIP SCORES PER GROUP (GRPO) ---
+        clip_normalized_dict = {}
+        
+        # Group samples by prompt_id
+        groups = defaultdict(list)
+        for i in range(len(predictions)):
+            if i not in empty_indices: 
+                pid = prompt_ids[i]
+                groups[pid].append(i)
+        
+        # Normalize within each group separately
+        for pid, indices in groups.items():
+            # Lấy raw CLIP scores của group này
+            group_clip_scores = [clip_scores_raw_dict.get(idx, 0.0) for idx in indices]
+            group_tensor = torch.tensor(group_clip_scores, device=self.device, dtype=torch.float32)
+            
+            # Normalize trong group
+            if len(group_tensor) > 1:
+                g_min = group_tensor.min()
+                g_max = group_tensor.max()
+                g_range = g_max - g_min
+                
+                if g_range > 1e-8:
+                    # Min-max normalization to [0, 1]
+                    normalized = (group_tensor - g_min) / g_range
+                else:
+                    # Nếu tất cả giá trị giống nhau, assign 0.5
+                    normalized = torch.full_like(group_tensor, 0.5)
+                
+                print(f"   [Group {pid}] Size={len(indices)}, CLIP Min={g_min:.4f}, Max={g_max:.4f}, Range={g_range:.4f}")
+            else:
+                # Nếu group chỉ có 1 sample, assign 0.5
+                normalized = torch.full_like(group_tensor, 0.5)
+                print(f"   [Group {pid}] Size=1, assigned CLIPNorm=0.5")
+            
+            # Map normalized scores back to dict
+            for idx, i in enumerate(indices):
+                clip_normalized_dict[i] = normalized[idx].item()
+        
+        # --- BUILD FINAL REWARDS ---
         final_rewards = []
         for i in range(len(predictions)):
-            bert_score = bert_scores.get(i, 0.0)
-            clip_score_raw = clip_scores.get(i, 0.0)
-
-            clip_score_normalized = max(0, (clip_score_raw - 15) / (35 - 15))
-            reward = self.alpha * bert_score + (1.0 - self.alpha) * clip_score_normalized
+            if i in empty_indices:
+                # Phạt -1 cho prediction rỗng
+                reward = -1.0
+                print(f"   [Sample {i}, Group {prompt_ids[i]}] Empty prediction -> Penalty={reward}")
+            else:
+                # Tính reward bình thường
+                bert_score = bert_scores_dict.get(i, 0.0)
+                clip_raw = clip_scores_raw_dict.get(i, 0.0)
+                clip_norm = clip_normalized_dict.get(i, 0.0)
+                
+                # Combined reward: alpha * BERT + (1-alpha) * CLIP_normalized
+                reward = (self.alpha * bert_score) + ((1.0 - self.alpha) * clip_norm)
+                
+                print(f"   [Sample {i}, Group {prompt_ids[i]}] BERT={bert_score:.4f}, "
+                    f"CLIPRaw={clip_raw:.2f} (CLIPNorm={clip_norm:.4f}) -> Reward={reward:.4f}")
+            
             final_rewards.append(reward)
-            print(f"  [Sample {i}] BERTScore={bert_score:.4f}, CLIPRaw={clip_score_raw:.2f} (Norm={clip_score_normalized:.4f}) -> Reward={reward:.4f}")
-
+        
         return final_rewards
 
 

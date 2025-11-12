@@ -225,15 +225,16 @@ def initialize_accuracy_customized_scorer():
         print("AccuracyRewardScorer initialized successfully!")
     return accuracy_scorer
 
+NUM_GENERATIONS = 4
 class CustomExplainationReward(ORM):
     def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
         contents = completions
-        scorer = initialize_explanation_customized_scorer(alpha=0.8)
-
+        scorer = initialize_explanation_customized_scorer(alpha=0.5)
+        
         ground_truths_list = []
         predictions_list = []
         image_paths_list = [] # Initialize list for image paths
-
+        prompt_ids = [i // NUM_GENERATIONS for i in range(len(completions))]
         # --- MODIFIED: Extract image paths from list[dict] structure ---
         if 'images' in kwargs:
             batch_image_data = kwargs['images'] # This is likely List[List[Dict[str, str]]]
@@ -276,7 +277,8 @@ class CustomExplainationReward(ORM):
             rewards = scorer.explanation_rewards(
                 ground_truths=ground_truths_list,
                 predictions=predictions_list,
-                image_paths=image_paths_list
+                image_paths=image_paths_list,
+                prompt_ids=prompt_ids
             )
             if len(rewards) != len(contents):
                 print(f"Error: Scorer returned {len(rewards)} rewards, expected {len(contents)}.")

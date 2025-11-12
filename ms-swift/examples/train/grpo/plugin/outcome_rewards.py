@@ -122,27 +122,21 @@ class AccuracyRewardScorer(BaseRewardScorer):
         content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
         student_answer = content_match.group(1).strip() if content_match else ""
 
-        if not student_answer or not ground_truth:
-            return 0.0
-
         # Apply cleaning và normalization
         ground_truth_cleaned = normalize_answer(clean_text(ground_truth))
         student_answer_cleaned = normalize_answer(clean_text(student_answer))
-        
-        if not student_answer_cleaned or not ground_truth_cleaned:
-            return 0.0
 
+        # Nếu sau normalize mà rỗng -> phạt -1
+        if not student_answer_cleaned:
+            return -1.0
+            
         # Tính cả hai metrics với text đã cleaned
         gts_dict = {0: ground_truth_cleaned}
         preds_dict = {0: student_answer_cleaned}
         
-        print(f"Ground truth cleaned: {ground_truth_cleaned}")
-        print(f"Student answer cleaned: {student_answer_cleaned}")
         bert_score = self.calculate_bertscore_batch(gts_dict, preds_dict).get(0, 0.0)
         rouge_score = self.calculate_rouge_batch(gts_dict, preds_dict).get(0, 0.0)
-        
-        print(f"BERTScore: {bert_score}")
-        print(f"ROUGE-L: {rouge_score}")
+    
         # Combined reward
         reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
         
@@ -158,6 +152,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
         # Extract tất cả answers
         gts_dict = {}
         preds_dict = {}
+        empty_indices = set()  # Track các index có answer rỗng
         
         for i, (completion, solution) in enumerate(zip(completions, solutions)):
             sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
@@ -166,34 +161,37 @@ class AccuracyRewardScorer(BaseRewardScorer):
             content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
             student_answer = content_match.group(1).strip() if content_match else ""
             
-            # Debug: In ra trước khi clean
-            print(f"  [Sample {i}] Raw GT: '{ground_truth}', Raw Pred: '{student_answer}'")
-            
             # Apply cleaning và normalization trước khi tính metrics
             ground_truth_cleaned = normalize_answer(clean_text(ground_truth))
             student_answer_cleaned = normalize_answer(clean_text(student_answer))
             
-            # Debug: In ra sau khi clean
-            print(f"  [Sample {i}] Cleaned GT: '{ground_truth_cleaned}', Cleaned Pred: '{student_answer_cleaned}'")
-            
-            gts_dict[i] = ground_truth_cleaned
-            preds_dict[i] = student_answer_cleaned
+            # Nếu sau normalize mà rỗng -> đánh dấu để phạt
+            if not student_answer_cleaned:
+                empty_indices.add(i)
+            else:
+                gts_dict[i] = ground_truth_cleaned
+                preds_dict[i] = student_answer_cleaned
         
-        # Tính cả ROUGE-L và BERTScore batch với cleaned text
+        # Tính cả ROUGE-L và BERTScore batch với cleaned text (chỉ cho non-empty)
         rouge_scores = self.calculate_rouge_batch(gts_dict, preds_dict)
         bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)
         
         # Kết hợp scores với trọng số alpha
         rewards = []
         for i in range(len(completions)):
-            rouge_score = rouge_scores.get(i, 0.0)
-            bert_score = bert_scores.get(i, 0.0)
+            if i in empty_indices:
+                # Phạt -1 cho answer rỗng
+                reward = -1.0
+                print(f"  [Sample {i}] Empty answer -> Penalty={reward}")
+            else:
+                rouge_score = rouge_scores.get(i, 0.0)
+                bert_score = bert_scores.get(i, 0.0)
+                
+                # Hybrid reward
+                reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
+                print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f}")
             
-            # Hybrid reward
-            reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
             rewards.append(reward)
-            
-            print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f}")
         
         return rewards
 

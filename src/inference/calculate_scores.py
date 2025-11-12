@@ -477,7 +477,7 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     
     return results
 
-FILES_TO_EVALUATE = ['vintern3b-stage1-1000steps']
+FILES_TO_EVALUATE = ['vintern-stage1-ver2']
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate VQA predictions")

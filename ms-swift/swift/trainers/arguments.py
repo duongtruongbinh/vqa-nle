@@ -330,7 +330,39 @@ class GRPOArgumentsMixin(RolloutTrainerArgumentsMixin):
 
     # dataset
     dataset_shuffle: Optional[bool] = True
-
+    
+    # -- GFPO --
+    enable_gfpo: bool = field(
+        default=False,
+        metadata={'help': 'Enable Group Filtered Policy Optimization (GFPO) filtering'}
+    )
+    
+    gfpo_metric: Literal['length', 'token_efficiency', 'combined'] = field(
+        default='token_efficiency',
+        metadata={
+            'help': 'GFPO filtering metric:\n'
+                    '  - length: Select shortest k responses (Shortest k/G)\n'
+                    '  - token_efficiency: Select highest reward/length ratio (Token Efficiency)\n'
+                    '  - combined: Combine RPT and length penalty'
+        }
+    )
+    
+    gfpo_filter_ratio: float = field(
+        default=0.5,
+        metadata={
+            'help': 'Ratio of samples to retain per prompt group (k/G). '
+                    'E.g., 0.5 means keep top 50% responses. Range: (0, 1]'
+        }
+    )
+    
+    gfpo_length_penalty: float = field(
+        default=0.01,
+        metadata={
+            'help': 'Length penalty coefficient for "combined" metric. '
+                    'Score = RPT - length_penalty * num_tokens. '
+                    'Higher values penalize longer responses more.'
+        }
+    )
 
 @dataclass
 class TrainingArguments(SwiftArgumentsMixin, HfTrainingArguments):
