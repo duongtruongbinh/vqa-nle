@@ -1,6 +1,6 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1/merged/checkpoint-1000-merged-ver2"
@@ -13,9 +13,9 @@ OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/outpu
 MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024
 BATCH_SIZE_PER_DEVICE=1
-NUM_GENERATIONS=8
-GRAD_ACCUM_STEPS=8
-TEMPERATURE=1
+NUM_GENERATIONS=4
+GRAD_ACCUM_STEPS=4
+TEMPERATURE=0.9
 EPOCHS=1
 MAX_STEPS=1000
 LEARNING_RATE=1e-3
@@ -33,11 +33,11 @@ swift rlhf \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_accuracy_reward custom_explaination_reward \
-    --reward_weights 1 1 \
+    --reward_funcs custom_format_reward_ViVQA_X_Stage2 custom_accuracy_reward custom_explaination_reward \
+    --reward_weights 1 1 1 \
     --train_type lora \
-    --lora_rank 64 \
-    --lora_alpha 128 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -68,7 +68,7 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
-    --enable_gfpo $ENABLE_GFPO \
+    # --enable_gfpo $ENABLE_GFPO \
 
 # --top_k 20 \ # This is not used in the script
 echo "Hoàn thành huấn luyện GRPO Stage 2 - Format + Accuracy + Explanation"

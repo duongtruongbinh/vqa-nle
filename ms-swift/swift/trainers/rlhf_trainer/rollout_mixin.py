@@ -108,7 +108,10 @@ class RolloutTrainerMixin(RLHFTrainerMixin):
             top_k=args.top_k,
             repetition_penalty=args.repetition_penalty,
             stop=args.stop_words,
-            return_details=True)
+            return_details=True,
+            logprobs=True,        # Bật log probabilities
+            top_logprobs=5 
+        )
 
     def _prepare_vllm(self):
         """Initialize vLLM engine (server or colocate mode)"""
@@ -841,6 +844,18 @@ class RolloutTrainerMixin(RLHFTrainerMixin):
 
             input_data['finish_reason'] = choice.finish_reason
             input_data['is_truncated'] = choice.finish_reason == 'length'
+
+            # === ADD THIS: Save logprobs ===
+            if choice.logprobs is not None and 'content' in choice.logprobs:
+                tokens = []
+                logprobs = []
+                
+                for token_data in choice.logprobs['content']:
+                    tokens.append(token_data['token'])
+                    logprobs.append(token_data['logprob'])
+                
+                input_data['response_tokens'] = tokens
+                input_data['response_logprobs'] = logprobs
 
             if output.rollout_infos:
                 multi_modal_keys = ['images', 'videos', 'audios']

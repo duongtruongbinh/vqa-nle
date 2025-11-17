@@ -43,7 +43,7 @@ except ImportError:
 del HFGRPOTrainer.__init__
 del HFGRPOTrainer.log
 grpo_trainer.seed_worker = seed_worker  # fix transformers 4.51.3
-import re
+
 logger = get_logger()
 if is_wandb_available():
     import wandb
@@ -216,56 +216,13 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
             inputs = self.resample_encode_failed_inputs(inputs)
 
         inputs = self._generate_completions(inputs)
-
-        # if inputs and 'response_logprobs' in inputs[0]:
-        #     tokens = inputs[0]['response_tokens']
-        #     logprobs = inputs[0]['response_logprobs']
-        #     print(f"\n[LOGPROBS] {len(tokens)} tokens")
-        #     print(f"[LOGPROBS] First 10: {list(zip(tokens[:10], logprobs[:10]))}")
-
         total_rewards_per_func = self._score_completions(inputs)
         mode = 'train' if self.model.training else 'eval'
-            # === DEBUG: Rewards Before GFPO ===
-        print(f"\n Rewards: {total_rewards_per_func}")
-        if total_rewards_per_func.dim() == 2:
-            final_rewards = (total_rewards_per_func * self.reward_weights.unsqueeze(0)).nansum(dim=1)
-            print(f"[BEFORE GFPO] Aggregated: {final_rewards.tolist()}")
-
-
-        # GFPO filtering
-        enable_gfpo = getattr(self.args, 'enable_gfpo', False)
-        metric = getattr(self.args, 'gfpo_metric', 'token_efficiency')
-        length_penalty = getattr(self.args, 'gfpo_length_penalty', 0.01)
-        filter_ratio = getattr(self.args, 'gfpo_filter_ratio', 0.5)
-        if enable_gfpo:
-            inputs, total_rewards_per_func, mask = self.filter_by_rpt(
-                inputs, 
-                total_rewards_per_func,
-                metric=metric,
-                length_penalty=length_penalty,
-                filter_ratio=filter_ratio
-            )
-
-            # === DEBUG: After GFPO ===
-            print(f"\n[AFTER GFPO] Mask: {mask.tolist()}")
-            print(f"[AFTER GFPO] Retained: {int(mask.sum())}/{len(mask)}")
-
-        else:
-            mask = None
-
 
         if self.dynamic_sample and mode == 'train':
             # dynamic sampling for std=0 groups
             inputs, total_rewards_per_func = self._dynamic_sampling(inputs, total_rewards_per_func)  # noqa
-            
-        total_advantages = self._compute_advantages(inputs, total_rewards_per_func, mask=mask)
-
-        if enable_gfpo:
-            retained_adv = total_advantages[mask.bool()]
-            rejected_adv = total_advantages[~mask.bool()]
-            print(f"[ADVANTAGES] Retained: mean={retained_adv.mean():.3f}, std={retained_adv.std():.3f}")
-            print(f"[ADVANTAGES] Rejected: {rejected_adv.tolist()} (should be all 0)")
-
+        total_advantages = self._compute_advantages(inputs, total_rewards_per_func)
 
         local_advantages = get_even_process_data(self, total_advantages)
         assert len(local_advantages) == len(inputs)
@@ -379,153 +336,7 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
 
         return rewards_per_func
 
-    def filter_by_rpt(
-        self,
-        inputs: List[Dict],
-        rewards_per_func: torch.Tensor,
-        metric: str = "token_efficiency",
-        length_penalty: float = 0.01,
-        filter_ratio: float = 0.5
-    ) -> Tuple[List[Dict], torch.Tensor, torch.Tensor]:
-        """
-        GFPO filtering according to paper Section 3.
-        
-        Paper: "Sample More to Think Less: Group Filtered Policy Optimization for Concise Reasoning"
-        
-        Args:
-            inputs: List of dicts with 'messages' key containing conversation history
-            rewards_per_func: Tensor of shape (N, num_reward_funcs) with reward values
-            metric: Filtering strategy - "length" | "token_efficiency" | "combined"
-            length_penalty: Penalty coefficient for "combined" metric (default: 0.01)
-        
-        Returns:
-            inputs: Original input list (unmodified)
-            rewards_per_func: Original reward tensor (unmodified)
-            mask: Binary mask tensor (1.0 = retained, 0.0 = rejected)
-        """
-        
-        device = rewards_per_func.device
-        num_samples = len(inputs)
-        
-        # Get filtering parameters from trainer config
-        num_generations = getattr(self, 'num_generations', 8)
-        
-        # Step 1: Aggregate rewards using reward weights
-        if rewards_per_func.dim() == 2:
-            # Shape: [N, num_reward_funcs] -> [N]
-            final_rewards = (rewards_per_func * self.reward_weights.unsqueeze(0)).nansum(dim=1)
-        else:
-            # Already aggregated
-            final_rewards = rewards_per_func.squeeze()
-        
-        # Step 2: Extract and tokenize reasoning content
-        num_tokens = []
-        for inp in inputs:
-            # Get assistant's completion
-            completion = inp['messages'][-1]['content']
-                
-            # Extract <REASONING> content
-            reasoning_match = re.search(
-                    r"<REASONING>(.*?)</REASONING>",
-                    completion,
-                    flags=re.DOTALL | re.IGNORECASE
-            )
-
-            if reasoning_match:
-                    reasoning_text = reasoning_match.group(1).strip()
-            else:
-                reasoning_text = completion
-            
-            # Tokenize using model's tokenizer
-            tokens = self.processing_class.encode(
-                reasoning_text,
-                add_special_tokens=False
-            )
-            num_tokens.append(len(tokens))
-            
-        
-        num_tokens = torch.tensor(num_tokens, dtype=torch.float32, device=device)
-        num_prompts = num_samples // num_generations
-        mask = torch.zeros(num_samples, dtype=torch.float32, device=device)
-        zero_var_groups = 0
-
-        for i in range(num_prompts):
-            start_idx = i * num_generations
-            end_idx = start_idx + num_generations
-            # Get scores for this prompt group
-            group_rewards = final_rewards[start_idx:end_idx]
-            group_lengths = num_tokens[start_idx:end_idx].clamp(min=1.0)
-            
-            # Step 3: Compute metric scores based on selected strategy
-            if metric == "length":
-                # Shortest k/G: prefer shorter responses
-                group_scores = -group_lengths
-                
-            elif metric == "token_efficiency":
-                # Token Efficiency: reward/length (higher is better)
-                group_scores = group_rewards / group_lengths.clamp(min=1.0)
-
-            elif metric == "combined":
-                # Combined: RPT with length penalty
-                rpt_scores = group_rewards / group_lengths.clamp(min=1.0)
-                group_scores = rpt_scores - length_penalty * group_lengths
-            else:
-                raise ValueError(f"Unknown GFPO metric: '{metric}'. "
-                                f"Expected one of: ['length', 'token_efficiency', 'combined']")
-
-            
-            # reward_std = float(group_rewards.std().item())
-            # score_std = float(group_scores.std().item())
-            # if reward_std < 1e-6 or score_std < 1e-8:
-            #     zero_var_groups += 1
-            #     eps = torch.linspace(0, 1e-6, steps=group_lengths.numel(), device=device)
-            #     group_scores = -group_lengths + eps
-            #     print(f"[WARNING-ZEROVAR] Group {i}: reward_std={reward_std:.2e}, "f"score_std={score_std:.2e}")
-
-            # Step 4: Select top-k responses
-            # Count negative reward samples
-            num_negative = (group_rewards < 0).sum().item()
-            neg_ratio = num_negative / num_generations
-            k = num_generations
-
-            if neg_ratio > 0.0:  # >0% samples âm
-                k = num_generations  # Không lọc, train tất cả
-                print(f"Group {i}: {num_negative}/{num_generations} negative → keep all")
-            else:  # Tất cả samples dương 
-                k = int(0.5 * num_generations)  
-
-            _, top_k_indices = torch.topk(group_scores, k=k)
-
-
-            # Set mask to 1.0 for retained samples
-            global_indices = start_idx + top_k_indices
-            mask[global_indices] = 1.0
-        
-        # Step 5: Compute and log statistics
-        retained_mask = mask.bool()
-        num_retained = int(mask.sum().item())
-        retention_rate = num_retained / num_samples * 100
-        
-        # Statistics on retained set
-        retained_rewards = final_rewards[retained_mask]
-        retained_lengths = num_tokens[retained_mask]
-        
-        mu_S = retained_rewards.mean().item()
-
-        
-        # Statistics on all samples
-        all_mean_reward = final_rewards.mean().item()
-        all_mean_length = num_tokens.mean().item()       
-        
-        
-        print(f"[GFPO FILTER] {metric} | Retained {num_retained}/{num_samples} ({retention_rate:.1f}%) | "
-        f"ZeroVar groups: {zero_var_groups}/{num_prompts} | "
-        f"Reward: {all_mean_reward:.4f}±{final_rewards.std().item():.4f} → {mu_S:.4f}±{retained_rewards.std().item():.4f} | "
-        f"Length: {all_mean_length:.1f}±{num_tokens.std().item():.1f} → {retained_lengths.mean().item():.1f}±{retained_lengths.std().item():.1f}")
-
-        return inputs, rewards_per_func, mask
-
-    def _compute_advantages(self, inputs: DataType, rewards_per_func: torch.Tensor, mask: torch.Tensor = None) -> torch.Tensor:
+    def _compute_advantages(self, inputs: DataType, rewards_per_func: torch.Tensor) -> torch.Tensor:
         """
         Compute advantages for RL training.
 
@@ -555,42 +366,21 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
                 return advantages / (rewards_std + 1e-4)
             return advantages
 
-        def log_rewards_metrics(
-            rewards: torch.Tensor, 
-            rewards_per_func_for_metrics: torch.Tensor,
-            frac_reward_zero_std: Optional[float] = None  # Bởi vì GFPO thì mình không cần compute frac_reward_zero_std từ các sample bị loại
-        ):
-            """Log reward statistics for monitoring."""
+        def log_rewards_metrics(rewards: torch.Tensor, rewards_per_func_for_metrics: torch.Tensor):
+            """Log reward statistics for monitoring. Only log once per unique request_id."""
+            # rewards: [prompt_batch_size, self.num_generations]
+            # rewards_per_func_for_metrics: [prompt_batch_size*self.num_generations, self.num_reward_funcs]
             mode = 'train' if self.model.training else 'eval'
-            
-            # Compute basic stats
-            if rewards.dim() == 1:
-                # For GFPO: rewards is already flattened [N]
-                rewards_mean = rewards.mean().item()
-                rewards_std = rewards.std().item()
-            else:
-                # For default GRPO: rewards is [prompt_batch_size, num_generations]
-                group_rewards = rewards.view(-1, self.num_generations)
-                rewards_mean = group_rewards.mean(-1).mean().item()
-                rewards_std = group_rewards.std(-1).mean().item()
-            
+            group_rewards = rewards.view(-1, self.num_generations)
+            rewards_mean = group_rewards.mean(-1).mean().item()
+            rewards_std = group_rewards.std(-1).mean().item()
+            is_std_zero = torch.isclose(group_rewards.std(dim=1), torch.zeros_like(group_rewards.std(dim=1)))
+
             self._metrics[mode]['reward'].append(rewards_mean)
             self._metrics[mode]['reward_std'].append(rewards_std)
-            
+            self._metrics[mode]['frac_reward_zero_std'].append(is_std_zero.float().mean().item())
 
-            if frac_reward_zero_std is not None:
-                self._metrics[mode]['frac_reward_zero_std'].append(frac_reward_zero_std)
-            else:
-                # Default GRPO: compute from grouped rewards
-                if rewards.dim() > 1:
-                    group_rewards = rewards.view(-1, self.num_generations)
-                    is_std_zero = torch.isclose(
-                        group_rewards.std(dim=1), 
-                        torch.zeros_like(group_rewards.std(dim=1))
-                    )
-                    self._metrics[mode]['frac_reward_zero_std'].append(is_std_zero.float().mean().item())
-            
-            # Log per-reward-function statistics
+            # Log per-reward-function statistics using deduplicated rewards_per_func
             for i, name in enumerate(self.reward_func_names):
                 col = rewards_per_func_for_metrics[:, i]
                 self._metrics[mode][f'rewards/{name}/mean'].append(torch.nanmean(col).item())
@@ -604,82 +394,6 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
         # Step 0. Aggregate final reward using reward weights
         device = self.accelerator.device
         rewards = (rewards_per_func * self.reward_weights.unsqueeze(0)).nansum(dim=1)
-
-
-        # --------------------------------------------------
-        # GFPO Mode: Use mask to compute advantages
-        # --------------------------------------------------
-        per_group_stats = []
-        if mask is not None:
-            num_samples = len(rewards)
-            num_generations = getattr(self, 'num_generations', 4)
-            num_prompts = num_samples // num_generations
-            
-            advantages = torch.zeros_like(rewards)
-            for i in range(num_prompts):
-                
-                start_idx = i * num_generations
-                end_idx = start_idx + num_generations
-                
-                group_rewards = rewards[start_idx:end_idx]
-                group_mask = mask[start_idx:end_idx]    
-                
-                retained_mask = group_mask.bool()
-                retained_rewards = group_rewards[retained_mask]
-                
-                mu_S = retained_rewards.mean()
-                sigma_S = retained_rewards.std(unbiased=False) if len(retained_rewards) > 1 else torch.tensor(1.0, device=device)
-                sigma_S = torch.clamp(sigma_S, min=1e-8)    
-                group_advantages = (group_rewards - mu_S) / sigma_S 
-                group_advantages = group_advantages * group_mask
-                advantages[start_idx:end_idx] = group_advantages
-                
-                per_group_stats.append({
-                    'group_id': i,
-                    'num_retained': int(retained_mask.sum().item()),
-                    'mu_S': mu_S.item(),
-                    'sigma_S': sigma_S.item(),
-                    'group_rewards': group_rewards.tolist(),
-                    'retained_rewards': retained_rewards.tolist(),
-                    'group_advantages': group_advantages.tolist(),
-                })
-
-            # Compute frac_reward_zero_std for GFPO
-            # Group retained rewards and check for zero std
-            retention_rate = mask.sum() / len(mask)
-            num_retained_per_prompt = int(retention_rate * self.num_generations + 0.5)
-            
-            frac_reward_zero_std = 0.0
-            if num_retained_per_prompt > 0:
-                try:
-                    num_prompts = len(retained_rewards) // num_retained_per_prompt
-                    if num_prompts > 0:
-                        grouped_retained = retained_rewards[:num_prompts * num_retained_per_prompt].view(
-                            num_prompts, num_retained_per_prompt
-                        )
-                        is_std_zero = torch.isclose(
-                            grouped_retained.std(dim=1),
-                            torch.zeros_like(grouped_retained.std(dim=1))
-                        )
-                        frac_reward_zero_std = is_std_zero.float().mean().item()
-                except Exception as e:
-                    logger.warning(f"Failed to compute frac_reward_zero_std in GFPO mode: {e}")
-            
-            retained_indices = mask.bool()
-            print(f"\n[GFPO ADVANTAGES] {len(per_group_stats)} groups | Retention {retention_rate:.1%}")
-            for s in per_group_stats:
-                print(f"  G{s['group_id']}: {s['num_retained']}/{num_generations} kept | "
-                    f"μ={s['mu_S']:.3f} σ={s['sigma_S']:.3f} | "
-                    f"R={s['retained_rewards']} | A={[f'{a:.2f}' for a in s['group_advantages']]}")
-
-            log_rewards_metrics(
-                rewards=retained_rewards,  # Log stats on retained set
-                rewards_per_func_for_metrics=rewards_per_func[retained_indices],
-                frac_reward_zero_std=frac_reward_zero_std
-            )
-            log_rewards_all(rewards_per_func)
-            
-            return advantages
 
         # --------------------------------------------------
         # Case 1: Default grouped mode

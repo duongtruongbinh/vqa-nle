@@ -54,3 +54,61 @@ def length_penalty_explanation(pred, truth, ratio=1.2, sentence_penalty_weight=0
     else:
         excess_ratio = (pred_len - max_ok) / truth_len
         return -min(excess_ratio, 1.0)
+
+
+
+# def standard_len(pred, truth):
+#     pred_len = len(pred.split(``))
+#     mean = pred_len / len(pred)
+#     std = 
+
+
+# def length_reasoning(pred, truth, alpha = 0):
+#     pred_len = len(pred.split())
+#     truth_len = len(truth.split())
+
+# import numpy as np
+# import math
+
+# def calculate_standardized_length(current_length: int, all_correct_lengths: list[int], epsilon: float = 1e-6) -> float:
+    
+#     if not all_correct_lengths:
+#         return 0.0
+
+#     mu = np.mean(all_correct_lengths)
+#     sigma = np.std(all_correct_lengths)
+    
+#     # z = (|o| - μ) / (σ + ε)
+#     z = (current_length - mu) / (sigma + epsilon)
+    
+#     return z
+
+# def length_reasoning(z_score: float, is_correct: bool, alpha: float = 0.05) -> float:
+#     """
+#     Args:
+#         z_score: From calculate_standardized_length).
+#         is_correct: Boolean, True if o_i true, otherwise False 
+#         alpha
+
+#     Returns:
+#         float: reward
+#     """
+    
+#     if is_correct:
+#         # R = exp(-α * z) 
+#         return math.exp(-alpha * z_score)
+#     else:
+#         #R = -1 
+#         return -1.0
+
+# class LengthPenaltyExplanationReward(ORM):
+#     """
+#     Length penalty reward cho explanation.
+#     Kiểm tra độ dài explanation có nằm trong khoảng cho phép không.
+#     """
+#     def __init__(self, alpha=1):
+#         self.alpha = alpha
+    
+#     def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        
+#         return rewards

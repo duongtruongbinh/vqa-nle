@@ -153,6 +153,54 @@ class CustomFormatReward_ViVQA_X(ORM):
         #             f.write(f"Score: {score:.2f}\n")
         return scores
 
+class CustomFormatReward_ViVQA_X_Stage2(ORM):
+    def __call__(self, completions: List[str], **kwargs) -> List[float]:
+
+        completion_contents = completions
+
+        # Regex cho từng cặp thẻ
+        pat_think = re.compile(r"<REASONING>.*?</REASONING>", re.DOTALL)
+        pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+        pat_explain = re.compile(r"<explain>.*?</explain>", re.DOTALL)
+        
+        scores = []
+        for content in completion_contents:
+            if len(content) == 0 or not content.strip():
+                scores.append(-1.0)
+                continue
+                
+            n_pair_think = len(pat_think.findall(content))
+            n_pair_answer = len(pat_answer.findall(content))
+            n_pair_explain = len(pat_explain.findall(content))
+
+            n_think_open   = len(re.findall(r"<REASONING>", content))
+            n_think_close  = len(re.findall(r"</REASONING>", content))
+            n_answer_open  = len(re.findall(r"<answer>", content))
+            n_answer_close = len(re.findall(r"</answer>", content))
+            n_explain_open  = len(re.findall(r"<explain>", content))
+            n_explain_close = len(re.findall(r"</explain>", content))
+            
+            # Base score - chỉ cộng điểm khi có cặp hoàn chỉnh
+            b_think = 0.2 if n_pair_think >= 1 else 0.0
+            b_answer = 0.4 if n_pair_answer >= 1 else 0.0
+            b_explain = 0.4 if n_pair_explain >= 1 else 0.0
+            b_total = b_think + b_answer + b_explain
+            
+            # Penalty score - trừ điểm cho TOÀN BỘ thẻ đơn lẻ (kể cả thẻ đầu tiên)
+            think_singles   = n_think_open + n_think_close - 2 * n_pair_think
+            answer_singles  = n_answer_open + n_answer_close - 2 * n_pair_answer
+            explain_singles = n_explain_open + n_explain_close - 2 * n_pair_explain
+
+            p_think = think_singles * 0.1
+            p_answer = answer_singles * 0.2
+            p_explain = explain_singles * 0.2
+            p_total = p_think + p_answer + p_explain
+
+            total = float(b_total - p_total)
+            scores.append(total)
+
+        return scores
+
 class CustomFormatReward_Caption(ORM):
     def __call__(self, completions: List[str], **kwargs) -> List[float]:
         
@@ -195,6 +243,7 @@ class CustomFormatReward_Caption(ORM):
         return scores
 
 orms['custom_format_reward_ViVQA_X'] = CustomFormatReward_ViVQA_X
+orms['custom_format_reward_ViVQA_X_Stage2'] = CustomFormatReward_ViVQA_X_Stage2
 orms['custom_format_reward_Caption'] = CustomFormatReward_Caption
 
 tokenizer = None
@@ -225,7 +274,7 @@ def initialize_accuracy_customized_scorer():
         print("AccuracyRewardScorer initialized successfully!")
     return accuracy_scorer
 
-NUM_GENERATIONS = 4
+NUM_GENERATIONS = 8
 class CustomExplainationReward(ORM):
     def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
         contents = completions
@@ -234,6 +283,7 @@ class CustomExplainationReward(ORM):
         ground_truths_list = []
         predictions_list = []
         image_paths_list = [] # Initialize list for image paths
+        print(f"num_generations in explaination reward: {NUM_GENERATIONS}")
         prompt_ids = [i // NUM_GENERATIONS for i in range(len(completions))]
         # --- MODIFIED: Extract image paths from list[dict] structure ---
         if 'images' in kwargs:

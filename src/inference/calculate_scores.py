@@ -160,34 +160,6 @@ def fuzzy_match_answer(pred: str, gt: str) -> bool:
     return False
 
 
-def fuzzy_match_answer(pred: str, gt: str) -> bool:
-    """
-    Compare prediction with ground truth using keyword matching.
-    Both inputs should already be normalized via normalize_answer().
-    
-    Args:
-        pred: Normalized prediction
-        gt: Normalized ground truth
-        
-    Returns:
-        True if match (exact or fuzzy), False otherwise
-    """
-    # Exact match
-    if pred == gt:
-        return True
-    
-    # Keyword matching for short ground truths (≤2 words)
-    # Example: gt="đạp xe" matches pred="đạp màu xe xanh"
-    if len(gt.split()) <= 2:
-        gt_keywords = set(gt.split())
-        pred_keywords = set(pred.split())
-        
-        # Prediction contains all GT keywords and is not too long
-        if gt_keywords.issubset(pred_keywords) and len(pred_keywords) <= len(gt_keywords) + 2:
-            return True
-    
-    return False
-
 
 def normalize_explanation(text: str) -> str:
     """Normalize explanation text."""
@@ -455,6 +427,7 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
         by_type[ans_type]["pred_expls"].append(pred_expl)
         by_type[ans_type]["total"] += 1
         
+        # if fuzzy_match_answer(pred_ans, gt_ans):
         if pred_ans == gt_ans:
             correct += 1
             by_type[ans_type]["correct"] += 1
@@ -477,7 +450,8 @@ def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     
     return results
 
-FILES_TO_EVALUATE = ['vintern-stage1-ver2']
+# vintern3b-stage1-BS1-1000steps, vintern3b-stage1-BS2-1000steps-gfpo, vintern-stage1-BS2-1000step.json
+FILES_TO_EVALUATE = ['gfpo_bs2.json']
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate VQA predictions")

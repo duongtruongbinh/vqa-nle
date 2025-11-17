@@ -8,7 +8,6 @@ from PIL import Image
 from torchmetrics.multimodal import CLIPScore
 from torchmetrics.text import BERTScore
 
-# Imports này được định nghĩa nhưng không xài - giữ nguyên theo yêu cầu
 from pycocoevalcap.cider.cider import Cider
 from pycocoevalcap.tokenizer.ptbtokenizer import PTBTokenizer
 from transformers import AutoModel, AutoTokenizer
@@ -56,7 +55,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
     Reward scorer kết hợp BERTScore (semantic similarity) và CLIPScore (image-text alignment).
     Sử dụng PhoBERT cho Vietnamese text evaluation.
     """
-    def __init__(self, alpha: float = 0.5, clip_model_name: str = "openai/clip-vit-base-patch16"):
+    def __init__(self, alpha: float = 0.5, clip_model_name: str = "/home/vlai-vqa-nle/.cache/huggingface/hub/models--openai--clip-vit-base-patch16/snapshots/57c216476eefef5ab752ec549e440a49ae4ae5f3"):
         if not 0.0 <= alpha <= 1.0:
             raise ValueError("Alpha must be in [0, 1]")
 
