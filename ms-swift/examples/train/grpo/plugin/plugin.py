@@ -23,6 +23,7 @@ from explaination_rewards import ExplanationRewardScorer
 from outcome_rewards import AccuracyRewardScorer as custom_accuracy_reward
 from outcome_rewards import CaptionRewardScorer
 from length_rewards import length_penalty_answer, length_penalty_explanation
+from reasoning_rewards import ReasoningRewardScorer
 
 logger = get_logger()
 """
@@ -273,6 +274,50 @@ def initialize_accuracy_customized_scorer():
         accuracy_scorer = custom_accuracy_reward()
         print("AccuracyRewardScorer initialized successfully!")
     return accuracy_scorer
+
+# Khởi tạo global scorer
+reasoning_scorer = None
+
+def initialize_reasoning_scorer(threshold=0.3, use_preprocessing=True):
+    """Initialize reasoning scorer once and reuse it."""
+    global reasoning_scorer
+    if reasoning_scorer is None:
+        print("Initializing ReasoningRewardScorer...")
+        reasoning_scorer = ReasoningRewardScorer(
+            threshold=threshold, 
+            use_preprocessing=use_preprocessing
+        )
+        print("ReasoningRewardScorer initialized successfully!")
+    return reasoning_scorer
+
+class CustomReasoningReward(ORM):
+    """
+    Reasoning reward cho matching giữa <REASONING> và <explain>
+    sử dụng POS tagging và weighted Jaccard overlap.
+    """
+    def __init__(self, threshold=0.3, use_preprocessing=True):
+        self.threshold = threshold
+        self.use_preprocessing = use_preprocessing
+    
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        contents = completions
+        
+        try:
+            scorer = initialize_reasoning_scorer(
+                threshold=self.threshold,
+                use_preprocessing=self.use_preprocessing
+            )
+            rewards = scorer.reasoning_rewards_batch(contents, solution)
+        except Exception as e:
+            print(f"Error in custom_reasoning_reward: {e}")
+            import traceback
+            traceback.print_exc()
+            rewards = [0.0] * len(contents)
+        
+        return rewards
+
+# Register reward function
+orms['custom_reasoning_reward'] = CustomReasoningReward
 
 NUM_GENERATIONS = 8
 class CustomExplainationReward(ORM):

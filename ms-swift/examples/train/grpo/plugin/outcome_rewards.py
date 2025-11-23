@@ -46,15 +46,17 @@ class AccuracyRewardScorer(BaseRewardScorer):
     Accuracy reward scorer sử dụng hybrid approach: ROUGE-L + BERTScore (PhoBERT)
     Trả về điểm kết hợp (0.0 - 1.0).
     """
-    def __init__(self, alpha: float = 0.5):
+    def __init__(self, alpha: float = 0.5, threshold: float = 0.3):
         """
         Args:
             alpha: Trọng số cho BERTScore (1-alpha cho ROUGE-L)
                   alpha=0.5 => 50% BERTScore, 50% ROUGE-L
+            threshold: Ngưỡng tối thiểu, nếu reward < threshold thì gán -1.0
         """
         self.initialize_bertscore()
         self.rouge_scorer = Rouge()
         self.alpha = alpha
+        self.threshold = threshold
     
     def calculate_rouge_batch(self, ground_truths: dict, predictions: dict) -> dict:
         """
@@ -140,6 +142,10 @@ class AccuracyRewardScorer(BaseRewardScorer):
         # Combined reward
         reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
         
+        # Nếu reward nhỏ hơn threshold, gán -1
+        if reward < self.threshold:
+            return -1.0
+        
         return reward
 
     def accuracy_rewards_batch(self, completions: list[str], solutions: list[str]) -> list[float]:
@@ -189,7 +195,13 @@ class AccuracyRewardScorer(BaseRewardScorer):
                 
                 # Hybrid reward
                 reward = self.alpha * bert_score + (1.0 - self.alpha) * rouge_score
-                print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f}")
+                
+                # Nếu reward nhỏ hơn threshold, gán -1
+                if reward < self.threshold:
+                    print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f} < {self.threshold} -> Penalty=-1.0")
+                    reward = -1.0
+                else:
+                    print(f"  [Sample {i}] ROUGE-L={rouge_score:.4f}, BERTScore={bert_score:.4f} -> Reward={reward:.4f}")
             
             rewards.append(reward)
         

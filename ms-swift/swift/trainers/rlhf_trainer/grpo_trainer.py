@@ -413,11 +413,15 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
         # Step 1: Aggregate rewards using reward weights
         if rewards_per_func.dim() == 2:
             # Shape: [N, num_reward_funcs] -> [N]
-            final_rewards = (rewards_per_func * self.reward_weights.unsqueeze(0)).nansum(dim=1)
+            # Lấy accuracy (index 1) và explanation (index 2)
+            accuracy_explain_rewards = rewards_per_func[:, 1:3]  # [N, 2]
+            accuracy_explain_weights = self.reward_weights[1:3]   # [2]
+            
+            final_rewards = (accuracy_explain_rewards * accuracy_explain_weights.unsqueeze(0)).nansum(dim=1)
         else:
             # Already aggregated
             final_rewards = rewards_per_func.squeeze()
-        
+   
         # Step 2: Extract and tokenize reasoning content
         num_tokens = []
         for inp in inputs:

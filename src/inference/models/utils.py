@@ -150,7 +150,7 @@ def parse_output_grpo(response: str) -> tuple[str, str, str]:
     think, answer, explanation = "", "", ""
 
     # 1. Trích xuất nội dung thẻ <think>
-    m_think = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
+    m_think = re.search(r"<REASONING>(.*?)</REASONING>", text, re.DOTALL)
     if m_think:
         think = m_think.group(1).strip()
 

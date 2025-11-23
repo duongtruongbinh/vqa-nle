@@ -5,7 +5,7 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
 MODEL_TYPE="internvl3"
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/ms-swift/stage2/ViVQA-X_train_msswift.jsonl"
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum/stage1/ViVQA-X_train_stage1.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
 # OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
 OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B"
@@ -18,7 +18,7 @@ TEMPERATURE=1.0
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=1000
+MAX_STEPS=250
 LEARNING_RATE=1e-7
 
 SAVE_STEPS=50
@@ -31,13 +31,12 @@ swift rlhf \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
-    --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B/v11-20251116-185104/checkpoint-550 \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward \
-    --reward_weights 1 1 1 \
+    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward custom_reasoning_reward \
+    --reward_weights 1 1 1 1 \
     --train_type lora \
-    --lora_rank 32 \
-    --lora_alpha 64 \
+    --lora_rank 8 \
+    --lora_alpha 16 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -68,7 +67,7 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
-    --enable_gfpo true \
+    # --enable_gfpo true \
 # dự kiến có thể sử dụng 8 bit sau này
-#    
-echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation"
+#        --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B/v11-20251116-185104/checkpoint-550 \
+echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation + Reasoning"

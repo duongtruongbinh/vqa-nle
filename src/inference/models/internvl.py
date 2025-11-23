@@ -82,7 +82,7 @@ class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #self.model_path = '5CD-AI/Vintern-3B-R-beta'
-        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1/merged/gfpo'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage3_250_curr_anstype_ver_3'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)

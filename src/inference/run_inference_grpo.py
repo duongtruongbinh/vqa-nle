@@ -4,7 +4,7 @@ import argparse
 from tqdm import tqdm
 from models.utils import set_seed
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 MODELS = {
     "internvl": "models.internvl.InternVLModel",
     "molmo": "models.molmo.MolmoModel", 
