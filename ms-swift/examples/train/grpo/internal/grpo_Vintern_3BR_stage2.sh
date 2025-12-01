@@ -3,7 +3,7 @@ export HF_ENDPOINT="https://huggingface.co"
 export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage_1_250_curr_anstype_ver2"
+MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage1_250_curr_anstype_ver_3"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum/stage2/ViVQA-X_train_stage2.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
@@ -30,6 +30,7 @@ swift rlhf \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
+    --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/stage2/v6-20251126-001343/checkpoint-150 \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
     --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward custom_reasoning_reward \

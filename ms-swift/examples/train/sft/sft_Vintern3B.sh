@@ -11,7 +11,7 @@ GRAD_ACCUM_STEPS=4
 LEARNING_RATE=1e-7
 MAX_STEPS=2000
 
-SAVE_STEPS=50
+SAVE_STEPS=150
 LOGGING_STEPS=1
 EVAL_STEPS=1
 
@@ -19,7 +19,7 @@ TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/sft/ViVQA-X
 OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/sft/output/dat-vinternvl3B"
 
 
-CUDA_VISIBLE_DEVICES=0 \
+CUDA_VISIBLE_DEVICES=2 \
 swift sft \
     --use_hf=1 \
     --model "$MODEL_ID_OR_PATH" \
@@ -49,3 +49,4 @@ swift sft \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
     --report_to wandb \
+    --resume_from_checkpoint "$OUTPUT_DIR/v1-20251124-140140/checkpoint-1450" \

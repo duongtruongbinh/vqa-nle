@@ -56,7 +56,7 @@ def main():
     parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json",
                         help="Path to the JSON file of sample questions.")
     parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
-    parser.add_argument("--output_dir", type=str, default="src/inference/results/grpo/", help="Directory to save the results.")
+    parser.add_argument("--output_dir", type=str, default="src/inference/results/OTA_grpo/", help="Directory to save the results.")
     parser.add_argument("--output_name", type=str, default=None, help="Optional: specific name for the output JSON file (e.g., 'my_test_run').")
     args = parser.parse_args()
 
@@ -98,15 +98,13 @@ def main():
             continue
         
         try:
-            think, answer, explanation = model.infer_grpo(item['question'], img_path)
+            think, answer = model.infer_grpo_OTA(item['question'], img_path)
             item["thinking"] = think
             item["predict"] = answer
-            item["pred_explanation"] = explanation
             
             print(f"Q: {item['question']}")
             print(f"Thinking: {think}")
             print(f"Predicted: {answer} | GT: {item['answer']}")
-            print(f"Explanation: {explanation}")
             
             # answer, explanation = model.infer(item['question'], img_path)
             # item["predict"] = answer

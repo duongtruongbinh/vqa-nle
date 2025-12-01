@@ -7,7 +7,7 @@ from transformers import AutoModel, AutoTokenizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 from .base_model import VQAModel
-from .utils import get_system_prompt, parse_output, get_grpo_system_prompt, parse_output_grpo
+from .utils import get_system_prompt, parse_output, get_grpo_system_prompt, parse_output_grpo, get_grpo_OTA_system_prompt, parse_output_grpo_OTA, get_grpo_OEA_system_prompt, parse_output_grpo_OEA
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -82,7 +82,7 @@ class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #self.model_path = '5CD-AI/Vintern-3B-R-beta'
-        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage3_250_curr_anstype_ver_3'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage3_500_curr_anstype_ver_3'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -141,4 +141,29 @@ class InternVLModel(VQAModel):
                 generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
             )
         return parse_output_grpo(response) 
-        # return response
+
+    def infer_grpo_OTA(self, question: str, image_path: str) -> tuple[str, str, str]:
+        pixel_values = self._load_image(image_path).to(torch.bfloat16).to(device)
+        prompt = get_grpo_OTA_system_prompt(question) 
+
+        with torch.no_grad():
+            response = self.model.chat(
+                self.tokenizer,
+                pixel_values,
+                prompt,
+                generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
+            )
+        return parse_output_grpo_OTA(response) 
+
+    def infer_grpo_OEA(self, question: str, image_path: str) -> tuple[str, str, str]:
+        pixel_values = self._load_image(image_path).to(torch.bfloat16).to(device)
+        prompt = get_grpo_OEA_system_prompt(question) 
+
+        with torch.no_grad():
+            response = self.model.chat(
+                self.tokenizer,
+                pixel_values,
+                prompt,
+                generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
+            )
+        return parse_output_grpo_OEA(response) 

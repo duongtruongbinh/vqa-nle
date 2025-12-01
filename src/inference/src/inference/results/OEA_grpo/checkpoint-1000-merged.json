@@ -1,0 +1,4802 @@
+[
+  {
+    "question": "Đây là cái gì?",
+    "image_id": "262284",
+    "image_name": "COCO_val2014_000000262284.jpg",
+    "explanation": [
+      "nó có một đầu vòi sen treo bên trong",
+      "có một vòi sen",
+      "có một vòi nước và một bồn tắm"
+    ],
+    "answer": "vòi sen",
+    "question_id": "262284001",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một phần của sàn nhà, có thể là một phần của bồn tắm hoặc bồn cầu.",
+    "predict": "Sàn nhà"
+  },
+  {
+    "question": "Người phụ nữ có nhìn vào máy ảnh không?",
+    "image_id": "393372",
+    "image_name": "COCO_val2014_000000393372.jpg",
+    "explanation": [
+      "mắt cô ấy mở to và hướng về phía trước.",
+      "cô ấy đang đối mặt với máy ảnh và tạo dáng cho nó.",
+      "người phụ nữ đang giao tiếp bằng mắt với bất cứ ai nhìn vào bức ảnh"
+    ],
+    "answer": "có",
+    "question_id": "393372017",
+    "question_type": "is the woman",
+    "answer_type": "yes/no",
+    "explain": "Nhìn vào mắt của người phụ nữ trong ảnh, cô ấy đang nhìn thẳng vào máy ảnh.",
+    "predict": "Có"
+  },
+  {
+    "question": "Nhà vệ sinh có sạch không?",
+    "image_id": "262386",
+    "image_name": "COCO_val2014_000000262386.jpg",
+    "explanation": [
+      "không có bụi bẩn hoặc dấu vết ở bên trong hoặc bên ngoài",
+      "nó sáng bóng và trắng, không hề bị ố vàng",
+      "bồn vệ sinh sáng bóng và màu trắng"
+    ],
+    "answer": "có",
+    "question_id": "262386025",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy nhà vệ sinh sạch sẽ, không có rác thải hoặc vết bẩn đáng kể.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là một khu thương mại hay khu dân cư?",
+    "image_id": "262471",
+    "image_name": "COCO_val2014_000000262471.jpg",
+    "explanation": [
+      "có các doanh nghiệp trong nền",
+      "có những tòa nhà thương mại lớn ở phía sau",
+      "có một loạt các tòa nhà kho ở phía xa"
+    ],
+    "answer": "khu thương mại",
+    "question_id": "262471003",
+    "question_type": "is this a",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một khu vực có nhà ở, cây cối và không có dấu hiệu của một khu thương mại lớn.  Đường phố cũng không có vẻ là một con đường thương mại sầm uất.",
+    "predict": "Khu dân cư"
+  },
+  {
+    "question": "Con ngựa có nhảy không?",
+    "image_id": "21900",
+    "image_name": "COCO_val2014_000000021900.jpg",
+    "explanation": [
+      "cả bốn chân của nó đều chạm đất",
+      "tất cả chân nó đều nằm trên mặt đất.",
+      "nó có chân chạm đất"
+    ],
+    "answer": "không",
+    "question_id": "21900002",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Con ngựa đang chạy trên mặt đất, không có dấu hiệu nhảy lên cao.",
+    "predict": "Có"
+  },
+  {
+    "question": "Mọi người đang tổ chức tiệc à?",
+    "image_id": "262476",
+    "image_name": "COCO_val2014_000000262476.jpg",
+    "explanation": [
+      "họ đang đứng trong bếp với đồ uống trong tay và cười.",
+      "họ đang tụ tập trong bếp uống",
+      "họ có cốc tiệc trong tay"
+    ],
+    "answer": "có",
+    "question_id": "262476000",
+    "question_type": "are the",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "524621",
+    "image_name": "COCO_val2014_000000524621.jpg",
+    "explanation": [
+      "nó có cái cổ dài và màu be với những đốm nâu",
+      "nó đang đứng xung quanh một số cây với bốn chân dài và một cái cổ dài",
+      "hươu cao cổ có cổ dài và các đốm nâu"
+    ],
+    "answer": "hươu cao cổ",
+    "question_id": "524621009",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị hai con ngựa hươu cao cổ, có thể nhận biết qua bộ lông đặc trưng và chiều cao khổng lồ của chúng.",
+    "predict": "Giraffe"
+  },
+  {
+    "question": "Nước có yên tĩnh không?",
+    "image_id": "546191",
+    "image_name": "COCO_val2014_000000546191.jpg",
+    "explanation": [
+      "trời có gió và có sóng lớn trên biển không",
+      "có những con sóng đập xung quanh người đàn ông",
+      "một người đàn ông đang thả diều trên mặt nước gợn sóng"
+    ],
+    "answer": "không",
+    "question_id": "546191004",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Nước có sóng lớn, cho thấy không yên tĩnh.",
+    "predict": "No"
+  },
+  {
+    "question": "u ám hay nắng?",
+    "image_id": "359",
+    "image_name": "COCO_val2014_000000000359.jpg",
+    "explanation": [
+      "có rất nhiều mây trên bầu trời.",
+      "bầu trời đầy mây và có màu xám",
+      "hầu hết bầu trời có màu trắng với các sắc thái xám"
+    ],
+    "answer": "u ám",
+    "question_id": "359000",
+    "question_type": "none of the above",
+    "answer_type": "other",
+    "explain": "Hình ảnh có tông màu tối, bầu trời nhiều mây, không có ánh nắng mặt trời rõ rệt, tạo cảm giác u ám và thiếu sáng.",
+    "predict": "U ám"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "524665",
+    "image_name": "COCO_val2014_000000524665.jpg",
+    "explanation": [
+      "bạn có thể biết qua đặc điểm khuôn mặt của nó",
+      "một con chó đen trắng đứng trước một người phụ nữ đang leo núi",
+      "nó có lưỡi dài và mõm"
+    ],
+    "answer": "chó",
+    "question_id": "524665002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Dog"
+  },
+  {
+    "question": "Loại phương tiện nào được hiển thị?",
+    "image_id": "393647",
+    "image_name": "COCO_val2014_000000393647.jpg",
+    "explanation": [
+      "đó là một chiếc xe buýt thành phố bình thường với hành khách đang lên xe để đến một trạm",
+      "tuyến đường xe buýt được hiển thị trong bảng điện tử ở trên đỉnh xe buýt",
+      "nó có hai cửa và chỗ ngồi cho khoảng 60 người"
+    ],
+    "answer": "xe buýt",
+    "question_id": "393647004",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Ô tô buýt"
+  },
+  {
+    "question": "Có phải là mùa hè?",
+    "image_id": "131539",
+    "image_name": "COCO_val2014_000000131539.jpg",
+    "explanation": [
+      "có tuyết trên mặt đất và mọi người đang mặc đồ mùa đông",
+      "các vận động viên trượt tuyết đang mặc trang phục mùa đông và có tuyết trên mặt đất",
+      "có tuyết trên mặt đất"
+    ],
+    "answer": "không",
+    "question_id": "131539008",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Ảnh cho thấy một khu vực phủ đầy tuyết, với những người đang đi bộ trên tuyết, cho thấy đây là mùa đông.",
+    "predict": "No"
+  },
+  {
+    "question": "Mọi người đang làm gì?",
+    "image_id": "131539",
+    "image_name": "COCO_val2014_000000131539.jpg",
+    "explanation": [
+      "họ cầm gậy và đang băng qua một ngọn núi tuyết",
+      "có người đang trượt tuyết",
+      "họ đang mang ván trượt và sử dụng gậy trượt tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "131539010",
+    "question_type": "what are the",
+    "answer_type": "other",
+    "explain": "Mọi người đều đang đi trượt tuyết trên sương mù.",
+    "predict": "Chơi trượt tuyết"
+  },
+  {
+    "question": "Con vật này có vẻ đang nhìn vào máy ảnh không?",
+    "image_id": "502",
+    "image_name": "COCO_val2014_000000000502.jpg",
+    "explanation": [
+      "con vật đang nhìn sang một bên",
+      "con vật đang quay mặt về hướng ngược lại",
+      "mặt chú gấu hướng về bên phải camera"
+    ],
+    "answer": "không",
+    "question_id": "502001",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Con vật đang nhìn về phía máy ảnh, hướng đầu của nó hướng về phía ống kính.",
+    "predict": "Có"
+  },
+  {
+    "question": "Phòng này có gọn gàng không?",
+    "image_id": "327771",
+    "image_name": "COCO_val2014_000000327771.jpg",
+    "explanation": [
+      "mọi thứ đều ở đúng chỗ của nó",
+      "không có sự lộn xộn và giường được dọn gọn gàng",
+      "giường được dọn dẹp và sàn nhà sạch sẽ"
+    ],
+    "answer": "có",
+    "question_id": "327771001",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Phòng ngủ trông gọn gàng và ngăn nắp, với đồ đạc được sắp xếp một cách có trật tự trên giường và bàn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Loại phương tiện nào có thể được nhìn thấy trong hình?",
+    "image_id": "131627",
+    "image_name": "COCO_val2014_000000131627.jpg",
+    "explanation": [
+      "nó ở trên đường nhưng dài hơn một chiếc ô tô",
+      "nó có số ở góc trên cùng",
+      "bạn có thể thấy mặt trước của xe buýt ở phía sau"
+    ],
+    "answer": "xe buýt",
+    "question_id": "131627000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Xe buýt"
+  },
+  {
+    "question": "Giới tính của những người chơi là gì?",
+    "image_id": "393809",
+    "image_name": "COCO_val2014_000000393809.jpg",
+    "explanation": [
+      "họ có thân hình nam tính và đang mặc quần áo nam giới theo khuôn mẫu",
+      "họ có tóc ngắn và không có ngực",
+      "cả ba người đều có tóc ngắn và cơ thể cơ bắp"
+    ],
+    "answer": "nam",
+    "question_id": "393809011",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Các người chơi trong ảnh đều là nam giới.",
+    "predict": "Nam"
+  },
+  {
+    "question": "Giường có được dọn không?",
+    "image_id": "393836",
+    "image_name": "COCO_val2014_000000393836.jpg",
+    "explanation": [
+      "cái chăn ở trên chưa được kéo thẳng hoàn toàn để che phủ toàn bộ bề mặt giường.",
+      "chăn không phủ hết giường",
+      "chăn bị lộn xộn trên giường"
+    ],
+    "answer": "không",
+    "question_id": "393836001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Giường được trải đầy bạt và có hai chiếc gối, cho thấy nó đã được dọn sẵn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Có phải là ban ngày?",
+    "image_id": "525024",
+    "image_name": "COCO_val2014_000000525024.jpg",
+    "explanation": [
+      "đám đông lớn đang tạo ra bóng từ ánh nắng mặt trời",
+      "mặt trời đang chiếu sáng bầu trời",
+      "không có mây trên bầu trời và bên ngoài trời rất sáng"
+    ],
+    "answer": "đúng",
+    "question_id": "525024000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Có mưa không?",
+    "image_id": "525024",
+    "image_name": "COCO_val2014_000000525024.jpg",
+    "explanation": [
+      "bầu trời trong xanh và không nhìn thấy một đám mây nào",
+      "bầu trời xanh và nhiều người đang đội mũ và đeo kính râm để che nắng",
+      "bầu trời xanh ở quảng trường đỏ, trung quốc"
+    ],
+    "answer": "không",
+    "question_id": "525024010",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Không"
+  },
+  {
+    "question": "Điều này có tốt cho sức khỏe không?",
+    "image_id": "262896",
+    "image_name": "COCO_val2014_000000262896.jpg",
+    "explanation": [
+      "nó bao gồm các loại thực phẩm đặc biệt béo và nhiều dầu mỡ",
+      "có rất nhiều nước xốt và phô mai trên đĩa",
+      "có rất nhiều nước sốt trên đĩa"
+    ],
+    "answer": "không",
+    "question_id": "262896005",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh chỉ cho thấy món ăn, không cung cấp thông tin về thành phần dinh dưỡng hoặc tác động sức khỏe.",
+    "predict": "Không rõ"
+  },
+  {
+    "question": "Có ai mặc áo xanh không?",
+    "image_id": "761",
+    "image_name": "COCO_val2014_000000000761.jpg",
+    "explanation": [
+      "cái áo họ đang mặc màu xanh",
+      "người ở giữa mặc màu đó",
+      "một người phụ nữ trong ảnh mặc áo sơ mi màu xanh"
+    ],
+    "answer": "có",
+    "question_id": "761004",
+    "question_type": "is",
+    "answer_type": "yes/no",
+    "explain": "Có ít nhất một người trong ảnh mặc áo xanh.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đứa trẻ này có vẻ hào hứng không?",
+    "image_id": "525119",
+    "image_name": "COCO_val2014_000000525119.jpg",
+    "explanation": [
+      "cậu bé giơ tay lên trời và nở nụ cười trên môi",
+      "cậu ấy sắp ăn một cái bánh mì kẹp xúc xích.",
+      "hai tay cậu ấy giơ lên và cậu ấy có một nụ cười trên khuôn mặt trong khi nhìn chằm chằm vào thức ăn của mình"
+    ],
+    "answer": "đúng",
+    "question_id": "525119003",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Đứa trẻ đang giơ tay lên, biểu hiện rõ ràng sự hào hứng và háo hức khi nhìn vào món ăn trước mặt.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người phụ nữ đang làm gì?",
+    "image_id": "525170",
+    "image_name": "COCO_val2014_000000525170.jpg",
+    "explanation": [
+      "cô ấy có một cái nĩa chạm vào một đĩa thức ăn",
+      "cô ấy đang muốn ăn trái cây",
+      "cô ấy có một cái nĩa trong tay"
+    ],
+    "answer": "ăn",
+    "question_id": "525170000",
+    "question_type": "what is the woman",
+    "answer_type": "other",
+    "explain": "Nhìn vào hình ảnh, người phụ nữ đang ngồi tại bàn ăn và có vẻ như đang thưởng thức một bữa ăn nhẹ hoặc một bữa ăn sáng.  Cô ấy đang cầm một ly nước và có một đĩa trái cây và bánh mì trước mặt.  Tư thế và biểu cảm của cô ấy cho thấy sự thư giãn và thoải mái.",
+    "predict": "Nghĩa là"
+  },
+  {
+    "question": "Món ăn này có tốt cho sức khỏe không?",
+    "image_id": "196759",
+    "image_name": "COCO_val2014_000000196759.jpg",
+    "explanation": [
+      "bánh khoai tây được chiên trong dầu",
+      "khoai tây chiên chứa nhiều chất béo bão hòa.",
+      "chúng là bánh khoai tây nhiều chất béo"
+    ],
+    "answer": "không",
+    "question_id": "196759001",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Lay's là một thương hiệu bánh quy, thường được coi là một loại thực phẩm nhẹ, phù hợp cho những người muốn ăn nhẹ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Chuột có phải không dây không?",
+    "image_id": "132001",
+    "image_name": "COCO_val2014_000000132001.jpg",
+    "explanation": [
+      "không có dây gắn vào nó",
+      "nó không có dây",
+      "không có dây nào nối ra khỏi nó"
+    ],
+    "answer": "có",
+    "question_id": "132001001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Chuột trong ảnh có dây nối, cho thấy nó không phải là chuột không dây.",
+    "predict": "Có"
+  },
+  {
+    "question": "Chuối có nên ăn sớm không?",
+    "image_id": "482719",
+    "image_name": "COCO_val2014_000000482719.jpg",
+    "explanation": [
+      "những đốm trên chúng cho thấy chúng đang già đi",
+      "chúng bị bao phủ bởi các đốm và bắt đầu có dây",
+      "chúng có đốm và chín"
+    ],
+    "answer": "đúng",
+    "question_id": "482719002",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Chuối đã chín, có thể ăn ngay.",
+    "predict": "Có"
+  },
+  {
+    "question": "Chiếc máy bay này có biểu tượng American Airlines không?",
+    "image_id": "525344",
+    "image_name": "COCO_val2014_000000525344.jpg",
+    "explanation": [
+      "nó có chữ delta ở bên hông.",
+      "đó là một chiếc máy bay của delta.",
+      "máy bay có logo delta trên đó"
+    ],
+    "answer": "không",
+    "question_id": "525344001",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Máy bay phía sau rõ ràng là của American Airlines, với logo đặc trưng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là tàu chở khách không?",
+    "image_id": "525361",
+    "image_name": "COCO_val2014_000000525361.jpg",
+    "explanation": [
+      "có những chiếc xe chở khách và đó là tại một nhà ga xe lửa nơi mọi người có thể lên xe",
+      "tất cả đều là một khối có cửa mở và cho người vào ở nhiều nơi khác nhau, không có ô tô để chở hàng",
+      "có rất nhiều xe cho mọi người ngồi"
+    ],
+    "answer": "đúng",
+    "question_id": "525361003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Tàu có vẻ là loại tàu chở khách, dựa trên kích thước và thiết kế bên ngoài.",
+    "predict": "Có"
+  },
+  {
+    "question": "Những quả chuối này đã chín chưa?",
+    "image_id": "1153",
+    "image_name": "COCO_val2014_000000001153.jpg",
+    "explanation": [
+      "chúng có màu vàng và phát triển một số đốm nâu",
+      "chuối gần như hoàn toàn màu vàng",
+      "chuối chín khi có màu vàng."
+    ],
+    "answer": "có",
+    "question_id": "1153014",
+    "question_type": "are these",
+    "answer_type": "yes/no",
+    "explain": "Chuối đã chuyển sang màu vàng, cho thấy chúng đã chín.",
+    "predict": "Có"
+  },
+  {
+    "question": "Cậu bé đang làm gì?",
+    "image_id": "132288",
+    "image_name": "COCO_val2014_000000132288.jpg",
+    "explanation": [
+      "cậu ta đang cưỡi ván trượt",
+      "cậu ta đang thực hiện một pha nhào lộn trên ván trượt",
+      "anh ấy đang chơi ván trượt trong một cái bát"
+    ],
+    "answer": "trượt ván",
+    "question_id": "132288000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Cậu bé đang điều khiển một chiếc ván trượt trên mặt đất.",
+    "predict": "Skateboarding"
+  },
+  {
+    "question": "Người ăn món này có thích cà rốt không?",
+    "image_id": "263393",
+    "image_name": "COCO_val2014_000000263393.jpg",
+    "explanation": [
+      "có rất nhiều cà rốt còn lại trên đĩa",
+      "họ để cà rốt trên đĩa của họ",
+      "chúng vẫn còn trên đĩa"
+    ],
+    "answer": "không",
+    "question_id": "263393001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Món ăn có cà rốt được nhìn thấy rõ ràng trên đĩa.",
+    "predict": "Có"
+  },
+  {
+    "question": "Họ đang chơi trò gì?",
+    "image_id": "1270",
+    "image_name": "COCO_val2014_000000001270.jpg",
+    "explanation": [
+      "cậu bé có găng tay bắt bóng và cậu bé kia có một cây gậy",
+      "các cầu thủ đang đeo mặt và thiết bị đầu đặc biệt được thực hiện để bảo vệ các cầu thủ bóng chày",
+      "có khán giả trên khán đài đang xem một cậu bé đang cầm gậy bóng chày."
+    ],
+    "answer": "bóng chày",
+    "question_id": "1270002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Những người này đang làm gì?",
+    "image_id": "132510",
+    "image_name": "COCO_val2014_000000132510.jpg",
+    "explanation": [
+      "cô ấy đang ở trên ván trượt tuyết",
+      "anh ấy đang đi xuống một ngọn đồi tuyết trên ván trượt tuyết",
+      "có một ván trượt tuyết gắn vào chân họ"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "132510005",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Người trong ảnh đang đứng trên tuyết và sử dụng giày trượt tuyết để di chuyển, cho thấy họ đang tham gia vào môn thể thao trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Đó có phải là xe buýt thương mại không?",
+    "image_id": "1584",
+    "image_name": "COCO_val2014_000000001584.jpg",
+    "explanation": [
+      "nó là một chiếc xe buýt hai tầng để mọi người đi công cộng",
+      "có hành khách đang đi trên đó",
+      "nó có thể chở nhiều hành khách và có quảng cáo ở bên hông"
+    ],
+    "answer": "đúng",
+    "question_id": "1584016",
+    "question_type": "is that a",
+    "answer_type": "yes/no",
+    "explain": "Xe buýt trong ảnh là loại xe buýt thương mại, được sử dụng phổ biến ở London.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "526044",
+    "image_name": "COCO_val2014_000000526044.jpg",
+    "explanation": [
+      "có một con bò đang uống nước ở bờ biển",
+      "nó có màu nâu trắng và có cái bụng béo",
+      "bò lớn, có đuôi và bốn chân."
+    ],
+    "answer": "con bò",
+    "question_id": "526044021",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một con bò đứng trên bờ biển.",
+    "predict": "Cow"
+  },
+  {
+    "question": "Đây có phải là hình ảnh gần đây không?",
+    "image_id": "526091",
+    "image_name": "COCO_val2014_000000526091.jpg",
+    "explanation": [
+      "đó là một bức tranh màu nâu đỏ và người đàn ông đang mặc quần áo theo phong cách cũ",
+      "nó là màu đen trắng và vợt là bằng gỗ",
+      "người đàn ông đang mặc quần áo thời trang những năm 1920"
+    ],
+    "answer": "không",
+    "question_id": "526091001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Cây cối có trụi lá không?",
+    "image_id": "263966",
+    "image_name": "COCO_val2014_000000263966.jpg",
+    "explanation": [
+      "có rất nhiều lá xanh bám vào cây",
+      "lá xanh phẳng phủ kín cây",
+      "cây đằng sau con ngựa đầy lá."
+    ],
+    "answer": "không",
+    "question_id": "263966003",
+    "question_type": "are the",
+    "answer_type": "yes/no",
+    "explain": "Cây cối trong hình ảnh có nhiều lá, không có dấu hiệu trụi lá.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đó là loại hoa gì?",
+    "image_id": "1852",
+    "image_name": "COCO_val2014_000000001852.jpg",
+    "explanation": [
+      "nó có màu đỏ và trông giống như thiết kế chung của một bông hồng",
+      "nó có màu đỏ và lãng mạn",
+      "nó có màu đỏ và có hình xoắn ốc"
+    ],
+    "answer": "hoa hồng",
+    "question_id": "1852001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Rôbinson"
+  },
+  {
+    "question": "Đây là loại phòng gì?",
+    "image_id": "526359",
+    "image_name": "COCO_val2014_000000526359.jpg",
+    "explanation": [
+      "có ghế sofa và ghế",
+      "có ghế sofa và lò sưởi",
+      "có một bàn cà phê giữa một lò sưởi và một chiếc ghế sofa"
+    ],
+    "answer": "phòng khách",
+    "question_id": "526359003",
+    "question_type": "what type of",
+    "answer_type": "other",
+    "explain": "Phòng có bàn ghế, bàn trà, và lò sưởi, đặc trưng của một phòng khách trong nhà ở.",
+    "predict": "Phòng khách"
+  },
+  {
+    "question": "Đây có phải là nhà hàng không?",
+    "image_id": "526360",
+    "image_name": "COCO_val2014_000000526360.jpg",
+    "explanation": [
+      "có máy tính trên bàn và không có thức ăn",
+      "nó trông giống như một quán cà phê internet cho mọi người làm việc",
+      "không có thức ăn và có máy tính trên bàn"
+    ],
+    "answer": "không",
+    "question_id": "526360001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Chó đang làm gì?",
+    "image_id": "133251",
+    "image_name": "COCO_val2014_000000133251.jpg",
+    "explanation": [
+      "nó đang nằm với mắt nhắm.",
+      "nó đang nằm trên giường.",
+      "nó đang nằm trên giường của mình."
+    ],
+    "answer": "ngủ",
+    "question_id": "133251014",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Chó đang nằm trên giường, cho thấy trạng thái nghỉ ngơi hoặc ngủ.",
+    "predict": "Nghỉ ngơi"
+  },
+  {
+    "question": "Loại phòng nào được hiển thị?",
+    "image_id": "264554",
+    "image_name": "COCO_val2014_000000264554.jpg",
+    "explanation": [
+      "có một cái bồn cầu trong phòng",
+      "nó có một cái toilet và một vài khăn treo xung quanh",
+      "có một nhà vệ sinh trong đó"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "264554002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một bồn cầu và một phần của giường, cho thấy đây là một phòng tắm.",
+    "predict": "Bathroom"
+  },
+  {
+    "question": "Con mèo đang làm gì?",
+    "image_id": "526721",
+    "image_name": "COCO_val2014_000000526721.jpg",
+    "explanation": [
+      "đầu anh ấy ở trong một cái bát",
+      "khuôn mặt của con mèo ở trong bát thức ăn",
+      "miệng của nó ở trong cái bát"
+    ],
+    "answer": "ăn",
+    "question_id": "526721000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Con mèo đang cúi xuống và có vẻ như đang ăn thức ăn từ bát.",
+    "predict": "Nấu ăn"
+  },
+  {
+    "question": "Đây có phải là ở Mỹ không?",
+    "image_id": "264599",
+    "image_name": "COCO_val2014_000000264599.jpg",
+    "explanation": [
+      "các dấu hiệu bằng ký tự nước ngoài",
+      "các biển hiệu bằng một ngôn ngữ châu Á",
+      "tất cả các biển báo đều không phải bằng tiếng Anh"
+    ],
+    "answer": "không",
+    "question_id": "264599001",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "No"
+  },
+  {
+    "question": "Trời nhiều mây phải không?",
+    "image_id": "133693",
+    "image_name": "COCO_val2014_000000133693.jpg",
+    "explanation": [
+      "mặt trời không hiện ra và có vẻ như trời sắp mưa",
+      "không có bầu trời xanh hay mặt trời nào có thể nhìn thấy được",
+      "thay vì màu xanh và trong, bầu trời được bao phủ bởi những đám mây xám"
+    ],
+    "answer": "có",
+    "question_id": "133693007",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Người phụ nữ có mái tóc dài không?",
+    "image_id": "526940",
+    "image_name": "COCO_val2014_000000526940.jpg",
+    "explanation": [
+      "nó chỉ dài một chút dưới tai của cô ấy.",
+      "bạn có thể nhìn thấy toàn bộ cổ của cô ấy",
+      "nó chỉ dài đến cằm của cô ấy."
+    ],
+    "answer": "không",
+    "question_id": "526940001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Nữ người trong ảnh có mái tóc ngắn, không dài.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông chơi môn thể thao nào?",
+    "image_id": "264853",
+    "image_name": "COCO_val2014_000000264853.jpg",
+    "explanation": [
+      "anh ấy đang đeo tấm che quần vợt trong khi cầm vợt trên sân tennis",
+      "người đàn ông đang ở trên sân quần vợt cầm vợt",
+      "anh ấy đứng cầm vợt sẵn sàng trả giao bóng"
+    ],
+    "answer": "quần vợt",
+    "question_id": "264853003",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang cầm vợt tennis và đứng trên sân tennis.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "265066",
+    "image_name": "COCO_val2014_000000265066.jpg",
+    "explanation": [
+      "cô ấy đang trượt xuống một con dốc phủ tuyết với ván trượt gắn vào chân và gậy trượt tuyết trên tay",
+      "người phụ nữ đang trượt tuyết xuống núi để thi đấu",
+      "người phụ nữ đang mang ván trượt và di chuyển trên tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "265066000",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Người mặc áo trắng đang làm gì?",
+    "image_id": "527215",
+    "image_name": "COCO_val2014_000000527215.jpg",
+    "explanation": [
+      "ông đang cầm một sợi dây nối với một con diều.",
+      "ông đang cầm một cái gì đó trong khi nhìn lên con diều trong không khí",
+      "có vài cái diều trong bầu trời"
+    ],
+    "answer": "diều bay",
+    "question_id": "527215000",
+    "question_type": "what is the person",
+    "answer_type": "other",
+    "explain": "Người mặc áo trắng đang đi bộ trên bãi cát, không có hành động nào khác được thể hiện rõ ràng trong hình ảnh.",
+    "predict": "Đi bộ"
+  },
+  {
+    "question": "Sự kiện này diễn ra trong nhà hay ngoài trời?",
+    "image_id": "527248",
+    "image_name": "COCO_val2014_000000527248.jpg",
+    "explanation": [
+      "mọi người đang tập trung trên đường phố",
+      "có nhiều lều được dựng bên cạnh các tòa nhà",
+      "bầu trời đã ló dạng và đang ngự trị trên đám đông"
+    ],
+    "answer": "ngoài trời",
+    "question_id": "527248005",
+    "question_type": "is this",
+    "answer_type": "other",
+    "explain": "Ảnh chụp một khu vực ngoài trời, nhưng các gian hàng và người tham dự đều được bao quanh bởi các tòa nhà, cho thấy sự kiện diễn ra trong một không gian mở nhưng được bao bọc bởi các công trình kiến trúc.",
+    "predict": "Trong nhà"
+  },
+  {
+    "question": "Cái kéo này sẽ được sử dụng để làm gì?",
+    "image_id": "265200",
+    "image_name": "COCO_val2014_000000265200.jpg",
+    "explanation": [
+      "chúng sẽ cắt xúc xích ra",
+      "chúng sắc bén và có thể dễ dàng cắt xuyên qua mọi thứ.",
+      "người này trông như đang cố cắt xúc xích"
+    ],
+    "answer": "cắt",
+    "question_id": "265200001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Chỉ thấy kéo được đặt trên thịt, cho thấy nó được sử dụng để cắt thịt.",
+    "predict": "Chặt thịt"
+  },
+  {
+    "question": "Trời có nhiều mây không?",
+    "image_id": "134255",
+    "image_name": "COCO_val2014_000000134255.jpg",
+    "explanation": [
+      "hầu hết bầu trời có mây trắng và xám hơn là trong xanh.",
+      "có những đám mây phía sau ô tô và xe buýt",
+      "có những đám mây trên bầu trời và bạn có thể nhìn thấy một phần bầu trời"
+    ],
+    "answer": "đúng",
+    "question_id": "134255001",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy bầu trời có nhiều đám mây trắng lớn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hình ảnh loại ghế nào?",
+    "image_id": "396404",
+    "image_name": "COCO_val2014_000000396404.jpg",
+    "explanation": [
+      "nó nằm ở giữa một công viên",
+      "đó là nơi cho mọi người ngồi",
+      "các thanh gỗ được đặt trên một khung kim loại dọc theo một con đường dưới những cái cây"
+    ],
+    "answer": "băng ghế dự bị",
+    "question_id": "396404001",
+    "question_type": "what type of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một chiếc ghế bệt đơn giản, không có tựa lưng, được đặt trên mặt đất phủ đầy lá vàng.",
+    "predict": "Ghế bệt"
+  },
+  {
+    "question": "Đây có phải là một bữa ăn lành mạnh không?",
+    "image_id": "527535",
+    "image_name": "COCO_val2014_000000527535.jpg",
+    "explanation": [
+      "kem tươi và sốt caramel không được coi là lành mạnh",
+      "kem ở giữa phủ kem tươi",
+      "kem tươi chứa nhiều chất béo"
+    ],
+    "answer": "không",
+    "question_id": "527535004",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Không"
+  },
+  {
+    "question": "Cái gì đang bay trên trời?",
+    "image_id": "134322",
+    "image_name": "COCO_val2014_000000134322.jpg",
+    "explanation": [
+      "nó là một lá cờ lớn bay được gắn vào những sợi dây",
+      "diều nhẹ và được nối với dây",
+      "con diều được buộc vào dây và ai đó đang điều khiển nó"
+    ],
+    "answer": "diều",
+    "question_id": "134322001",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Trong hình ảnh, một chiếc dù bay trên trời, có thể nhận biết được qua hình dạng và chiều dài dây kéo.",
+    "predict": "Kite"
+  },
+  {
+    "question": "Tất cả những chàng trai đó đang làm gì?",
+    "image_id": "265462",
+    "image_name": "COCO_val2014_000000265462.jpg",
+    "explanation": [
+      "họ đang đứng trên những tấm ván gỗ",
+      "tất cả họ đều đang đi trên ván trượt",
+      "họ đang làm trò trên ván trượt"
+    ],
+    "answer": "trượt ván",
+    "question_id": "265462001",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Họ đang thực hiện các động tác lướt ván trên một khu vực trượt ván, cho thấy họ đang tham gia một cuộc đua hoặc thử thách tốc độ.",
+    "predict": "Đua xe lướt ván"
+  },
+  {
+    "question": "Bây giờ là ban đêm à?",
+    "image_id": "396541",
+    "image_name": "COCO_val2014_000000396541.jpg",
+    "explanation": [
+      "không có ánh sáng chiếu từ cửa sổ và căn phòng tối",
+      "căn phòng rất tối và rèm cửa đóng",
+      "không có ánh sáng tự nhiên lọt qua rèm"
+    ],
+    "answer": "đúng",
+    "question_id": "396541006",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy không gian xung quanh tối, chỉ có ánh sáng từ màn hình máy tính và một số đèn nhỏ, cho thấy đây là ban đêm.",
+    "predict": "Có"
+  },
+  {
+    "question": "Anh ấy có giỏi lướt sóng không?",
+    "image_id": "396693",
+    "image_name": "COCO_val2014_000000396693.jpg",
+    "explanation": [
+      "anh ấy đang trên một con sóng vỡ",
+      "anh ấy đang lướt sóng rất tốt",
+      "anh ấy đang giữ thăng bằng trên sóng"
+    ],
+    "answer": "đúng",
+    "question_id": "396693001",
+    "question_type": "is he",
+    "answer_type": "yes/no",
+    "explain": "Anh ấy đang lướt sóng một cách thành thạo, thể hiện kỹ năng điều khiển và kiểm soát của mình trên sóng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là trò chơi gì?",
+    "image_id": "134551",
+    "image_name": "COCO_val2014_000000134551.jpg",
+    "explanation": [
+      "có một vợt và quả bóng quần vợt và vạch kẻ trên sân",
+      "có một sân tennis và một cây vợt trong tay người đàn ông.",
+      "có một cây vợt tennis và một quả bóng"
+    ],
+    "answer": "quần vợt",
+    "question_id": "134551003",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Tiểu cầu"
+  },
+  {
+    "question": "Mặt đất có vẻ trơn trượt phải không?",
+    "image_id": "3590",
+    "image_name": "COCO_val2014_000000003590.jpg",
+    "explanation": [
+      "trời đang mưa và mặt đất ướt.",
+      "có nước trên mặt đất.",
+      "nó có rất nhiều độ ẩm"
+    ],
+    "answer": "đúng",
+    "question_id": "3590002",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Mặt đất ướt và phản chiếu ánh sáng, cho thấy bề mặt trơn trượt.",
+    "predict": "Có"
+  },
+  {
+    "question": "Xe lửa có được chăm sóc không?",
+    "image_id": "134722",
+    "image_name": "COCO_val2014_000000134722.jpg",
+    "explanation": [
+      "nó đẹp và sạch sẽ và hoàn toàn không có graffiti trên đó",
+      "nó trông sáng bóng và mới khi di chuyển trên đường ray",
+      "bên ngoài của tàu là sạch sẽ"
+    ],
+    "answer": "đúng",
+    "question_id": "134722005",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Xe lửa trông sạch sẽ và được bảo dưỡng tốt, không có vết bẩn hoặc hư hỏng đáng kể.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "3694",
+    "image_name": "COCO_val2014_000000003694.jpg",
+    "explanation": [
+      "anh ấy đang cưỡi ván trượt",
+      "họ đang làm một trick trên một skateboard",
+      "một người đang cưỡi ván trượt trên một lan can"
+    ],
+    "answer": "trượt ván",
+    "question_id": "3694001",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang thực hiện một động tác trên ván trượt, đây là đặc trưng của môn thể thao skateboarding.",
+    "predict": "Skateboarding"
+  },
+  {
+    "question": "Con vật này có đuôi không?",
+    "image_id": "528011",
+    "image_name": "COCO_val2014_000000528011.jpg",
+    "explanation": [
+      "có một phần cơ thể nhô ra từ phía sau",
+      "nó là một con ngựa vằn và đang thể hiện một cái đuôi",
+      "nó nhô ra từ phần sau của anh ấy và có lông trên đó"
+    ],
+    "answer": "có",
+    "question_id": "528011002",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Con vật trong ảnh có một đuôi dài và đen, rõ ràng là một phần của cơ thể.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông này có ăn mặc trang trọng không?",
+    "image_id": "528030",
+    "image_name": "COCO_val2014_000000528030.jpg",
+    "explanation": [
+      "anh ấy mặc áo sơ mi trắng phẳng phiu và cà vạt",
+      "anh ấy đang mặc một chiếc áo sơ mi đẹp và một chiếc cà vạt",
+      "anh ấy đang chuẩn bị cho một sự kiện trang trọng."
+    ],
+    "answer": "có",
+    "question_id": "528030001",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Người đàn ông mặc áo sơ mi trắng và cà vạt, đây là trang phục thường được coi là trang trọng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Máy bay đang hạ cánh hay cất cánh?",
+    "image_id": "134886",
+    "image_name": "COCO_val2014_000000134886.jpg",
+    "explanation": [
+      "nó đang ở thấp trên bầu trời và hướng xuống",
+      "các bánh xe bên dưới máy bay đang hạ xuống khi nó hạ xuống",
+      "bộ phận hạ cánh nằm ở dưới cùng của máy bay"
+    ],
+    "answer": "hạ cánh",
+    "question_id": "134886009",
+    "question_type": "is the",
+    "answer_type": "other",
+    "explain": "Máy bay đang bay gần mặt đất, với bánh sau hạ xuống, cho thấy nó đang cất cánh.",
+    "predict": "Cất cánh"
+  },
+  {
+    "question": "Đây có phải là một sự kiện chuyên nghiệp?",
+    "image_id": "134888",
+    "image_name": "COCO_val2014_000000134888.jpg",
+    "explanation": [
+      "có khán giả và các cầu thủ đang mặc trang phục của đội chuyên nghiệp",
+      "các cầu thủ mặc đồng phục và có khán đài.",
+      "có khán giả ngồi sau các cầu thủ"
+    ],
+    "answer": "đúng",
+    "question_id": "134888002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một trận đấu có khán giả, trang phục chuyên nghiệp của các cầu thủ và một sân vận động có vẻ chuyên nghiệp.",
+    "predict": "Có"
+  },
+  {
+    "question": "Họ đang chơi môn thể thao gì?",
+    "image_id": "265971",
+    "image_name": "COCO_val2014_000000265971.jpg",
+    "explanation": [
+      "họ đang ở trên sân tennis",
+      "có một vận động viên cầm vợt",
+      "họ đang ở sân quần vợt cầm vợt quần vợt"
+    ],
+    "answer": "quần vợt",
+    "question_id": "265971001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một người đang chơi tennis trên sân cỏ, với vợt và quả bóng tennis rõ ràng.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Loại phương tiện nào được hiển thị?",
+    "image_id": "528136",
+    "image_name": "COCO_val2014_000000528136.jpg",
+    "explanation": [
+      "nó là một chiếc xe lớn, rộng và có một đĩa vệ tinh trên đó",
+      "phần sau của chiếc xe này không có cửa sổ và nó có những cánh cửa lớn trượt để cho phép tiếp cận",
+      "xe tải có các tấm cửa trượt mở ra"
+    ],
+    "answer": "xe van",
+    "question_id": "528136020",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một chiếc van màu trắng, có vẻ là loại van chuyên dụng, có thể được sử dụng cho mục đích truyền thông hoặc vận chuyển hàng hóa.",
+    "predict": "Van"
+  },
+  {
+    "question": "Cái bàn có bừa bộn không?",
+    "image_id": "528200",
+    "image_name": "COCO_val2014_000000528200.jpg",
+    "explanation": [
+      "chỉ có một bình hoa với hoa trên đó",
+      "chỉ có một bình hoa và không có gì khác trên đó",
+      "trên bàn chỉ có một chiếc bình màu đen"
+    ],
+    "answer": "không",
+    "question_id": "528200000",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Bàn có một bình hoa, không có vật dụng khác nào khác nhau trên đó.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "528225",
+    "image_name": "COCO_val2014_000000528225.jpg",
+    "explanation": [
+      "nó đang đứng trên cánh đồng bò với những con bò khác",
+      "nó có móng guốc và được chăn thả trong một khu vực khép kín.",
+      "bạn có thể nhìn thấy vú của nó bên dưới nó"
+    ],
+    "answer": "con bò",
+    "question_id": "528225009",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một con vật có bộ lông trắng, đặc trưng của tiên cừu, đang ăn cỏ trong một khu vực rộng lớn.",
+    "predict": "Tiên cừu"
+  },
+  {
+    "question": "Con vật đang nhìn gì?",
+    "image_id": "528225",
+    "image_name": "COCO_val2014_000000528225.jpg",
+    "explanation": [
+      "nó đang đi trong một cánh đồng cây xanh",
+      "con bò đang gặm cỏ trên cánh đồng cách một vài ngôi nhà",
+      "con bò đang gặm cỏ trên cánh đồng xanh"
+    ],
+    "answer": "cỏ",
+    "question_id": "528225019",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Con bò đang nhìn xuống thảm cỏ xung quanh nó.",
+    "predict": "Thảm"
+  },
+  {
+    "question": "Trong cốc có đồ uống gì?",
+    "image_id": "135029",
+    "image_name": "COCO_val2014_000000135029.jpg",
+    "explanation": [
+      "nước trái cây có màu cam và được phục vụ trong bữa sáng.",
+      "màu của đồ uống là màu cam.",
+      "nước cam thường được uống trong bữa sáng."
+    ],
+    "answer": "nước cam",
+    "question_id": "135029007",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Cốc có vẻ chứa cà phê, dựa trên màu sắc và hình dạng của nó.",
+    "predict": "Cà phê"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "266124",
+    "image_name": "COCO_val2014_000000266124.jpg",
+    "explanation": [
+      "nó lớn và có bờm",
+      "nó có một bờm trắng và được bao bọc trong một khu vực có rào chắn.",
+      "nó đang đeo dây cương và có bờm và đuôi"
+    ],
+    "answer": "ngựa",
+    "question_id": "266124002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Tiên cừu"
+  },
+  {
+    "question": "Họ đang làm gì vậy?",
+    "image_id": "4021",
+    "image_name": "COCO_val2014_000000004021.jpg",
+    "explanation": [
+      "có một quả bóng chày và trọng tài",
+      "một cầu thủ đang trượt về phía sân nhà",
+      "một người bắt bóng đang cố gắng ném bóng trong khi một cầu thủ trượt vào sân nhà"
+    ],
+    "answer": "chơi bóng chày",
+    "question_id": "4021001",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Người chơi đang cố gắng đánh nhau với người chơi đối phương, thể hiện qua tư thế và động tác của họ.",
+    "predict": "Đánh nhau"
+  },
+  {
+    "question": "Môn thể thao nào đang được chơi?",
+    "image_id": "4175",
+    "image_name": "COCO_val2014_000000004175.jpg",
+    "explanation": [
+      "người phụ nữ bên trái đang giao bóng với cây vợt tennis trên tay",
+      "các vận động viên đang phát bóng trên một sân quần vợt",
+      "các cầu thủ đang đánh bóng bằng vợt của họ"
+    ],
+    "answer": "quần vợt",
+    "question_id": "4175001",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một trận đấu tennis đang diễn ra trên sân cỏ. Có hai người chơi đang thi đấu và một số người đang theo dõi từ khán đài.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Đây là phòng nào?",
+    "image_id": "397404",
+    "image_name": "COCO_val2014_000000397404.jpg",
+    "explanation": [
+      "bạn có thể thấy lò nướng và tủ lạnh",
+      "có một lò vi sóng được tích hợp vào tủ trên tường",
+      "có một lò vi sóng ở giữa các tủ"
+    ],
+    "answer": "bếp",
+    "question_id": "397404000",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Khu vực bếp"
+  },
+  {
+    "question": "Đây có phải là khu dân cư không?",
+    "image_id": "135319",
+    "image_name": "COCO_val2014_000000135319.jpg",
+    "explanation": [
+      "có rất nhiều tòa nhà chung cư dọc đường",
+      "các tòa nhà trong hình này là các tòa nhà chung cư, không phải văn phòng",
+      "có nhiều tòa nhà cho người ở"
+    ],
+    "answer": "có",
+    "question_id": "135319000",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Cậu bé đang làm gì?",
+    "image_id": "528575",
+    "image_name": "COCO_val2014_000000528575.jpg",
+    "explanation": [
+      "cậu bé nhỏ đang nằm trên giường và được che bởi một cái chăn với đôi mắt nhắm lại",
+      "đôi mắt của cậu ấy nhắm lại trên giường",
+      "cậu ấy đang nằm trên giường với đôi mắt nhắm lại"
+    ],
+    "answer": "ngủ",
+    "question_id": "528575001",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Nghỉ ngơi"
+  },
+  {
+    "question": "Đây là con vật gì?",
+    "image_id": "219174",
+    "image_name": "COCO_val2014_000000219174.jpg",
+    "explanation": [
+      "nó to và có bốn chân, tai tròn và mõm dài",
+      "nó lớn và đen và trong tự nhiên",
+      "nó là một con vật khổng lồ đi bằng bốn chân được phủ lông"
+    ],
+    "answer": "gấu",
+    "question_id": "219174002",
+    "question_type": "what animal is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Bò"
+  },
+  {
+    "question": "Đây có phải là một chiếc bánh mì kẹp cà chua không?",
+    "image_id": "135436",
+    "image_name": "COCO_val2014_000000135436.jpg",
+    "explanation": [
+      "có những thứ khác trên bánh mì không chỉ là cà chua",
+      "có rất nhiều thứ trên chiếc bánh sandwich chỉ với một lát cà chua",
+      "không có miếng bánh mì trên cùng"
+    ],
+    "answer": "không",
+    "question_id": "135436002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại phòng nào?",
+    "image_id": "135561",
+    "image_name": "COCO_val2014_000000135561.jpg",
+    "explanation": [
+      "có tủ lạnh trong đó với một cái máy nướng bánh mì trên quầy",
+      "căn phòng này có tủ, quầy, tủ lạnh và một số thiết bị nhỏ như máy xay sinh tố và máy nướng bánh mì",
+      "một máy nướng bánh mì và máy xay sinh tố ở trên quầy"
+    ],
+    "answer": "phòng bếp",
+    "question_id": "135561014",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị các thiết bị và đồ dùng thường thấy trong một căn bếp, bao gồm tủ lạnh, tủ bếp, quạt, và các dụng cụ nấu ăn.",
+    "predict": "Khu vực bếp"
+  },
+  {
+    "question": "Đây có phải là ở Mỹ không?",
+    "image_id": "4497",
+    "image_name": "COCO_val2014_000000004497.jpg",
+    "explanation": [
+      "viết trên thân xe tải không phải tiếng anh",
+      "dòng chữ bên hông xe tải không phải bằng tiếng anh",
+      "biển số xe ở Mỹ có in tên bang của chúng"
+    ],
+    "answer": "không",
+    "question_id": "4497000",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh hiển thị biển số xe có ký hiệu \"SP\", thường được sử dụng ở Đức.  Tên công ty trên xe cũng là tiếng Đức.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là khách sạn không?",
+    "image_id": "135613",
+    "image_name": "COCO_val2014_000000135613.jpg",
+    "explanation": [
+      "có bồn tắm với cửa kính trượt và có chậu rửa với gương phía sau",
+      "có hình mờ của một công ty cho thuê trong hình",
+      "khách sạn có nội thất đồng nhất và khăn trắng"
+    ],
+    "answer": "có",
+    "question_id": "135613003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Người ăn chay có ăn món này không?",
+    "image_id": "528866",
+    "image_name": "COCO_val2014_000000528866.jpg",
+    "explanation": [
+      "nó chỉ bao gồm các thành phần dựa trên thực vật",
+      "không có thịt trong món thịt hầm",
+      "chỉ có rau cho bữa ăn"
+    ],
+    "answer": "đúng",
+    "question_id": "528866001",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Món ăn trong hình là các loại rau củ quả, phù hợp với chế độ ăn chay.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đó có cánh không?",
+    "image_id": "135690",
+    "image_name": "COCO_val2014_000000135690.jpg",
+    "explanation": [
+      "anh ấy chỉ có tứ chi",
+      "không có cánh trên người hắn.",
+      "anh ta không phải là một con chim"
+    ],
+    "answer": "không",
+    "question_id": "135690002",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Người trong ảnh đang bay trên một chiếc xe máy, không có cánh nào xuất hiện.",
+    "predict": "No"
+  },
+  {
+    "question": "Đây có phải là một phòng khách sạn không?",
+    "image_id": "528956",
+    "image_name": "COCO_val2014_000000528956.jpg",
+    "explanation": [
+      "những chiếc đèn treo trên tường thường có ở khách sạn",
+      "có một chiếc giường và một chiếc tivi trong một phòng chật chội.",
+      "đồ nội thất nhỏ và tất cả trong một căn phòng nhỏ với một chiếc TV nhỏ gắn trên tường"
+    ],
+    "answer": "có",
+    "question_id": "528956001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Phòng có giường, tủ quần áo, và màn hình TV, thường thấy trong các phòng khách sạn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Có phải trời nhiều mây không?",
+    "image_id": "398138",
+    "image_name": "COCO_val2014_000000398138.jpg",
+    "explanation": [
+      "bầu trời hoàn toàn trong xanh",
+      "mọi người đang thả diều trên một cánh đồng vào một ngày trời quang đãng.",
+      "không có một đám mây trên bầu trời"
+    ],
+    "answer": "không",
+    "question_id": "398138004",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Trời trong xanh, không có mây nào xuất hiện trong hình ảnh.",
+    "predict": "No"
+  },
+  {
+    "question": "Cô ấy đang mặc loại quần nào?",
+    "image_id": "398174",
+    "image_name": "COCO_val2014_000000398174.jpg",
+    "explanation": [
+      "chúng có màu xanh và gồ ghề",
+      "chúng có màu xanh lam và có vẻ ngoài giản dị",
+      "chúng được làm bằng chất liệu denim"
+    ],
+    "answer": "quần jean",
+    "question_id": "398174003",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Cô ấy đang mặc quần jean màu xanh nhạt.",
+    "predict": "Jeans"
+  },
+  {
+    "question": "Sự kiện gì đang diễn ra?",
+    "image_id": "4975",
+    "image_name": "COCO_val2014_000000004975.jpg",
+    "explanation": [
+      "họ đang mặc áo choàng và mũ tốt nghiệp, và cầm những chương trình in sẵn",
+      "mọi người đang mặc áo choàng tốt nghiệp bằng lụa",
+      "tất cả họ đều đang mặc áo choàng tốt nghiệp"
+    ],
+    "answer": "lễ tốt nghiệp",
+    "question_id": "4975000",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy các sinh viên tốt nghiệp đang mặc áo choàng tốt nghiệp và cầm ô, cho thấy đây là một buổi lễ tốt nghiệp.",
+    "predict": "Tổ chức tốt nghiệp"
+  },
+  {
+    "question": "Có phải là ban ngày không?",
+    "image_id": "529355",
+    "image_name": "COCO_val2014_000000529355.jpg",
+    "explanation": [
+      "mặt trời đang chiếu sáng trên cửa sổ xe buýt phía sau hai phụ nữ",
+      "có ánh nắng mặt trời chiếu qua cửa sổ xe buýt",
+      "bên ngoài trời nắng và sáng"
+    ],
+    "answer": "có",
+    "question_id": "529355003",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy ánh sáng tự nhiên chiếu vào bên trong xe buýt, cho thấy đây là ban ngày.",
+    "predict": "Có"
+  },
+  {
+    "question": "Ngân hàng nào tài trợ cho sự kiện này?",
+    "image_id": "503293",
+    "image_name": "COCO_val2014_000000503293.jpg",
+    "explanation": [
+      "có một tấm biển trên đào có logo và dòng chữ ngân hàng Mỹ",
+      "có một tấm áp phích của Bank of America ở phía sau",
+      "có một biển báo với logo"
+    ],
+    "answer": "bank of america",
+    "question_id": "503293003",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Bank of America"
+  },
+  {
+    "question": "Anh ấy đang làm gì?",
+    "image_id": "529455",
+    "image_name": "COCO_val2014_000000529455.jpg",
+    "explanation": [
+      "anh ấy đang ở trên ván lướt sóng",
+      "anh ấy đang ở trên ván lướt sóng trên biển và cưỡi sóng",
+      "anh ấy đang lướt trên một chiếc ván lướt trên mặt nước"
+    ],
+    "answer": "lướt sóng",
+    "question_id": "529455001",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Anh ấy đang đứng trên một con sóng, điều này cho thấy anh ấy đang tham gia vào môn thể thao surfing.",
+    "predict": "Surfing"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "54301",
+    "image_name": "COCO_val2014_000000054301.jpg",
+    "explanation": [
+      "có một người đánh ở phía trước một người bắt bóng và trọng tài",
+      "họ có một cây gậy bóng chày trên sân nhà",
+      "có một người đàn ông cầm gậy đứng ở một tấm"
+    ],
+    "answer": "bóng chày",
+    "question_id": "54301000",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người chơi đang đánh bóng trong một trận đấu bóng chày, với các thành viên khác của đội và trọng tài cũng xuất hiện trong khung hình.",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Cái này được chụp ở đâu?",
+    "image_id": "529528",
+    "image_name": "COCO_val2014_000000529528.jpg",
+    "explanation": [
+      "có một máy trộn đang được sử dụng",
+      "có một máy trộn cầm tay bên trong với bột văng ra khắp nơi",
+      "có một máy rửa chén và một quầy bếp có máy trộn đứng"
+    ],
+    "answer": "phòng bếp",
+    "question_id": "529528001",
+    "question_type": "none of the above",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Trong nhà bếp"
+  },
+  {
+    "question": "Môn thể thao này là gì?",
+    "image_id": "432993",
+    "image_name": "COCO_val2014_000000432993.jpg",
+    "explanation": [
+      "anh ta đang làm trò trên ván trượt.",
+      "ông là giữa không khí với hội đồng quản trị của mình một nửa trên tường",
+      "anh ấy đang chơi với một ván trượt"
+    ],
+    "answer": "trượt ván",
+    "question_id": "432993000",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang thực hiện một động tác trên ván trượt. Đây là một môn thể thao trượt ván.",
+    "predict": "Skateboarding"
+  },
+  {
+    "question": "Đồ uống nào trong cốc?",
+    "image_id": "5352",
+    "image_name": "COCO_val2014_000000005352.jpg",
+    "explanation": [
+      "bạn có thể thấy phần còn lại của bọt",
+      "nó là chất lỏng màu nâu và có một số bọt ở trên",
+      "bia có ga và được uống từ một ly"
+    ],
+    "answer": "bia",
+    "question_id": "5352001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Milk"
+  },
+  {
+    "question": "Những người đàn ông này có phải là người Mỹ không?",
+    "image_id": "136440",
+    "image_name": "COCO_val2014_000000136440.jpg",
+    "explanation": [
+      "lá cờ lớn trên bức tường phía sau những người đàn ông này là biểu tượng của liên minh từ Vương quốc Anh",
+      "có một lá cờ Anh lớn trên tường.",
+      "cờ Anh treo trên tường."
+    ],
+    "answer": "không",
+    "question_id": "136440002",
+    "question_type": "are these",
+    "answer_type": "yes/no",
+    "explain": "Trang phục và phong cách của họ gợi ý rằng họ có thể là người Mỹ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là chuyến bay của hãng hàng không Mỹ không?",
+    "image_id": "267521",
+    "image_name": "COCO_val2014_000000267521.jpg",
+    "explanation": [
+      "bên hông máy bay có chữ American và đuôi máy bay có logo của hãng hàng không Mỹ",
+      "logo của American Airlines có thể được nhìn thấy trên đuôi",
+      "đuôi máy bay có các chữ cái, \"aa\""
+    ],
+    "answer": "có",
+    "question_id": "267521005",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh hiển thị rõ ràng logo và tên hãng hàng không American Airlines trên các máy bay.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một chiếc máy bay hiện đại không?",
+    "image_id": "267521",
+    "image_name": "COCO_val2014_000000267521.jpg",
+    "explanation": [
+      "nó thuộc về một công ty hàng không hiện đại",
+      "máy bay là một máy bay chở khách phản lực kiểu mới hơn",
+      "máy bay có một động cơ lớn bên dưới cánh trái."
+    ],
+    "answer": "đúng",
+    "question_id": "267521025",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Máy bay trong ảnh có thiết kế hiện đại, với thân máy bay rộng và các chi tiết kỹ thuật tiên tiến.",
+    "predict": "Có"
+  },
+  {
+    "question": "Trời có mưa không?",
+    "image_id": "267537",
+    "image_name": "COCO_val2014_000000267537.jpg",
+    "explanation": [
+      "các phụ nữ đang cầm ô để giữ khô ráo",
+      "bốn người đang ngồi trên ghế dài với ô che đầu",
+      "những người phụ nữ đang cầm ô che cho họ"
+    ],
+    "answer": "có",
+    "question_id": "267537001",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Trời có mưa vì mọi người đều cầm ô.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là cửa hàng bán đồ nội thất không?",
+    "image_id": "568893",
+    "image_name": "COCO_val2014_000000568893.jpg",
+    "explanation": [
+      "không có nhiều đồ nội thất lắm",
+      "chỉ có một bộ đồ nội thất.",
+      "đồ nội thất nằm trong nhà để xe"
+    ],
+    "answer": "không",
+    "question_id": "568893000",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Không có bất kỳ dấu hiệu nào cho thấy đây là một cửa hàng bán đồ nội thất.  Hình ảnh chỉ hiển thị một căn phòng nhỏ, có vẻ như là một phòng ngủ hoặc phòng khách, với một chiếc giường, bàn, ghế và màn hình máy tính. Không có biển hiệu, cửa hàng hay bất kỳ sản phẩm nào được trưng bày.",
+    "predict": "No"
+  },
+  {
+    "question": "Có mây không?",
+    "image_id": "136584",
+    "image_name": "COCO_val2014_000000136584.jpg",
+    "explanation": [
+      "không có đám mây nào trên bầu trời và mặt trời đang chiếu sáng",
+      "bầu trời màu xanh và không có một đám mây nào nhìn thấy được",
+      "bầu trời trong xanh tuyệt đẹp"
+    ],
+    "answer": "không",
+    "question_id": "136584000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy bầu trời xanh, không có mây.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại chim nào?",
+    "image_id": "398748",
+    "image_name": "COCO_val2014_000000398748.jpg",
+    "explanation": [
+      "nó ở gần biển trên bãi biển",
+      "nó đang tìm kiếm thức ăn ở bãi biển",
+      "nó có màu trắng và xám đứng trên bãi biển"
+    ],
+    "answer": "mòng biển",
+    "question_id": "398748006",
+    "question_type": "what type of",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một con chim có bộ lông đặc trưng của loài seagull, với phần lưng màu xám và phần bụng màu trắng, đang đứng trên bãi biển.",
+    "predict": "Chim seagull"
+  },
+  {
+    "question": "Đây có phải là thức ăn lành mạnh không?",
+    "image_id": "136624",
+    "image_name": "COCO_val2014_000000136624.jpg",
+    "explanation": [
+      "nó được chiên và bao gồm khoai tây chiên và cuộn chiên",
+      "rất nhiều thức ăn trên đĩa đã được chiên ngập dầu.",
+      "có đồ chiên và khoai tây chiên"
+    ],
+    "answer": "không",
+    "question_id": "136624010",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Thức ăn trong hình có nhiều loại thực phẩm, bao gồm bánh mì chiên, khoai tây chiên, và các loại thịt, nhưng không có thông tin về thành phần dinh dưỡng cụ thể.  Việc đánh giá tính lành mạnh cần dựa trên nhiều yếu tố khác ngoài hình ảnh.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hươu cao cổ đang làm gì?",
+    "image_id": "398792",
+    "image_name": "COCO_val2014_000000398792.jpg",
+    "explanation": [
+      "miệng nó gần máng ăn",
+      "nó có cỏ khô trong miệng",
+      "miệng của nó đang mở và nó đang lấy một cái gì đó ra khỏi một thùng chứa dây"
+    ],
+    "answer": "ăn",
+    "question_id": "398792002",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Hươu cao cổ đang dùng chiếc răng dài của mình để lấy thức ăn từ một cái rổ treo cao.",
+    "predict": "Ăn"
+  },
+  {
+    "question": "Người phụ nữ trong bức ảnh này có mái tóc xoăn phải không?",
+    "image_id": "136718",
+    "image_name": "COCO_val2014_000000136718.jpg",
+    "explanation": [
+      "các kiểu tóc của cô ấy là thẳng",
+      "tóc cô ấy rất thẳng",
+      "tóc của cô ấy thẳng và có phần dài"
+    ],
+    "answer": "không",
+    "question_id": "136718001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Mái tóc của người phụ nữ được buộc gọn gàng thành một tết, không có dấu hiệu của tóc xoăn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Môn thể thao nào đang được chơi?",
+    "image_id": "136768",
+    "image_name": "COCO_val2014_000000136768.jpg",
+    "explanation": [
+      "các cầu thủ bóng chày đang vung gậy",
+      "họ đang vung gậy trên sân bóng chày",
+      "các cầu thủ bóng chày chuyên nghiệp mặc đồng phục đang luyện tập những cú đánh của họ trên khán đài đầy khán giả"
+    ],
+    "answer": "bóng chày",
+    "question_id": "136768001",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một trận đấu bóng chày, với các cầu thủ đang chơi và khán giả đang theo dõi.",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Cửa sổ có mở không?",
+    "image_id": "503412",
+    "image_name": "COCO_val2014_000000503412.jpg",
+    "explanation": [
+      "bạn có thể nhìn thấy sự phản chiếu trên sàn nhà",
+      "các rèm đang bay trong gió",
+      "rèm cửa đang bị gió thổi qua cửa sổ."
+    ],
+    "answer": "đúng",
+    "question_id": "503412002",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cửa sổ có rèm che, nhưng không có dấu hiệu nào cho thấy nó đang mở.",
+    "predict": "Có"
+  },
+  {
+    "question": "Cỏ có khỏe không?",
+    "image_id": "5820",
+    "image_name": "COCO_val2014_000000005820.jpg",
+    "explanation": [
+      "mặt đất có màu nâu",
+      "nó có màu nâu và khô",
+      "nó có màu nâu và đã chết"
+    ],
+    "answer": "không",
+    "question_id": "5820000",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cỏ trông khô và vàng, không có dấu hiệu của sự sống hoặc sự phát triển.",
+    "predict": "Không khỏe"
+  },
+  {
+    "question": "Đây có phải là một chiếc smartphone không?",
+    "image_id": "5860",
+    "image_name": "COCO_val2014_000000005860.jpg",
+    "explanation": [
+      "nó là một chiếc điện thoại Nokia cũ dựa vào cốc pepsi",
+      "chiếc điện thoại có một màn hình đen trắng nhỏ",
+      "nó là phiên bản cũ của điện thoại nokia"
+    ],
+    "answer": "không",
+    "question_id": "5860005",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh hiển thị một chiếc điện thoại di động Nokia, rõ ràng là một thiết bị điện tử.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người phụ nữ đang làm gì?",
+    "image_id": "268059",
+    "image_name": "COCO_val2014_000000268059.jpg",
+    "explanation": [
+      "cô ấy có một cái muỗng trong nồi.",
+      "cô ấy đang khuấy một cái nồi trên lửa",
+      "cô ấy đang khuấy các nguyên liệu trong một cái nồi lớn"
+    ],
+    "answer": "nấu ăn",
+    "question_id": "268059000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Người phụ nữ đang đứng bên cạnh một bếp lửa, cầm nồi và có khói bốc lên từ nồi, cho thấy cô ấy đang nấu một món ăn.",
+    "predict": "Đang nấu ăn"
+  },
+  {
+    "question": "Cô gái có vui vẻ với con diều của mình không?",
+    "image_id": "137003",
+    "image_name": "COCO_val2014_000000137003.jpg",
+    "explanation": [
+      "cô gái đang cười vui vẻ",
+      "cô ấy có nụ cười trên khuôn mặt.",
+      "cô ấy cười rất nhiều và có khuôn mặt rất đẹp"
+    ],
+    "answer": "có",
+    "question_id": "137003000",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cô gái đang cười và cầm con diều một cách vui vẻ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một bình hoa hiện đại không?",
+    "image_id": "530278",
+    "image_name": "COCO_val2014_000000530278.jpg",
+    "explanation": [
+      "nó là đồ cổ từ Hy Lạp",
+      "nó có những hình ảnh về thần thoại Hy Lạp hoặc La Mã",
+      "nó có hình ảnh của người cổ đại được vẽ trên đó"
+    ],
+    "answer": "không",
+    "question_id": "530278003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Đây là một bình hoa cổ, có kiểu dáng và họa tiết trang trí đặc trưng của các nền văn hóa cổ đại, khác với phong cách hiện đại.",
+    "predict": "No"
+  },
+  {
+    "question": "Một người phụ nữ có đang chơi với tóc của cô ấy không?",
+    "image_id": "530313",
+    "image_name": "COCO_val2014_000000530313.jpg",
+    "explanation": [
+      "cô ấy đang cầm phần cuối tóc của mình trong tay",
+      "người phụ nữ đang chạm vào mái tóc của mình",
+      "cô ấy dùng ngón út chạm vào tóc của mình"
+    ],
+    "answer": "có",
+    "question_id": "530313001",
+    "question_type": "is",
+    "answer_type": "yes/no",
+    "explain": "Cô ấy đang vuốt tóc của mình.",
+    "predict": "Có"
+  },
+  {
+    "question": "Những người này đang làm gì?",
+    "image_id": "205333",
+    "image_name": "COCO_val2014_000000205333.jpg",
+    "explanation": [
+      "họ đang ở trên đỉnh một ngọn núi cao phủ đầy tuyết, mang ván trượt",
+      "họ đang ở trên đỉnh một ngọn núi với ván trượt.",
+      "họ đang đeo ván trượt và dùng gậy trượt tuyết trên tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "205333002",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Họ đang đứng trên tuyết và sử dụng trượt tuyết, cho thấy họ đang tham gia vào hoạt động trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Trời đang mưa à?",
+    "image_id": "6074",
+    "image_name": "COCO_val2014_000000006074.jpg",
+    "explanation": [
+      "mặt đất ẩm ướt và đỉnh của chiếc ô trắng xanh có những giọt nước trên đó",
+      "đường nhựa ướt và đèn ô tô đang bật",
+      "đường trơn và trông ướt."
+    ],
+    "answer": "đúng",
+    "question_id": "6074000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Trời đang mưa, có thể thấy nước trên mặt đường phản chiếu ánh đèn và người đi bộ đang cầm ô.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hình ảnh này được chụp ở đâu?",
+    "image_id": "399369",
+    "image_name": "COCO_val2014_000000399369.jpg",
+    "explanation": [
+      "một người đàn ông trong quần short đang chạy qua cát",
+      "có cát ở khắp nơi",
+      "có cát ở khắp mọi nơi"
+    ],
+    "answer": "bãi biển",
+    "question_id": "399369001",
+    "question_type": "none of the above",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang chơi frisbee trên cát, rõ ràng là ở bãi biển.",
+    "predict": "Beach"
+  },
+  {
+    "question": "Con chó có đeo vòng cổ không?",
+    "image_id": "241326",
+    "image_name": "COCO_val2014_000000241326.jpg",
+    "explanation": [
+      "có vật liệu quanh cổ của nó",
+      "vòng cổ màu đỏ và trên cổ nó",
+      "có một dải vải màu đỏ quanh cổ của con chó"
+    ],
+    "answer": "đúng",
+    "question_id": "241326002",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Con chó trong ảnh có đeo một vòng cổ màu đỏ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Những ngọn núi có độ cao lớn không?",
+    "image_id": "268340",
+    "image_name": "COCO_val2014_000000268340.jpg",
+    "explanation": [
+      "chúng có những đỉnh núi cao phía sau biển báo dừng",
+      "núi xuất hiện ở đường chân trời cao hơn tầm mắt",
+      "chúng ở rất xa và vẫn cao hơn tất cả mọi thứ khác trong bức tranh."
+    ],
+    "answer": "có",
+    "question_id": "268340001",
+    "question_type": "do",
+    "answer_type": "yes/no",
+    "explain": "Những ngọn núi ở phía xa có vẻ cao hơn so với khu vực xung quanh, cho thấy độ cao lớn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng nào?",
+    "image_id": "6213",
+    "image_name": "COCO_val2014_000000006213.jpg",
+    "explanation": [
+      "hai bồn rửa mặt song sinh được chiếu sáng bên cạnh bồn tắm và vòi sen",
+      "có một bồn tắm và vòi sen ở đó",
+      "một bồn tắm và vòi sen có mặt ở nơi mọi người tự vệ sinh"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "6213003",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Cô gái này đang làm gì?",
+    "image_id": "399462",
+    "image_name": "COCO_val2014_000000399462.jpg",
+    "explanation": [
+      "một chân của cô ấy không ở trên mặt đất",
+      "cô ấy đang chuyển động cầm một con diều vẫy",
+      "cô ấy đang di chuyển với một chân trên mặt đất"
+    ],
+    "answer": "đang chạy",
+    "question_id": "399462000",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Cô gái đang chạy trên cỏ, không có dấu hiệu của việc đi bộ như bước chân hoặc tư thế.",
+    "predict": "Đi bộ"
+  },
+  {
+    "question": "Xe này có cần xăng không?",
+    "image_id": "268400",
+    "image_name": "COCO_val2014_000000268400.jpg",
+    "explanation": [
+      "nó có bánh xe và bạn sử dụng chân để di chuyển.",
+      "nó không có bình chứa",
+      "đó là một chiếc ván trượt có bánh xe."
+    ],
+    "answer": "không",
+    "question_id": "268400000",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Ảnh chụp một người đang chơi bóng chuyền, không liên quan đến xe hoặc xăng.",
+    "predict": "No"
+  },
+  {
+    "question": "Cô ấy đang làm gì?",
+    "image_id": "530558",
+    "image_name": "COCO_val2014_000000530558.jpg",
+    "explanation": [
+      "cô ấy đang đứng trên ván lướt sóng trong nước",
+      "anh ấy đang cưỡi trên một chiếc ván trên một đợt sóng",
+      "cô ấy đang cưỡi một đợt sóng trên một chiếc ván lướt"
+    ],
+    "answer": "lướt sóng",
+    "question_id": "530558002",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Cô ấy đang đứng trên ván trượt và di chuyển trên sóng biển.",
+    "predict": "Surfing"
+  },
+  {
+    "question": "Đây là loại tòa án gì vậy?",
+    "image_id": "399543",
+    "image_name": "COCO_val2014_000000399543.jpg",
+    "explanation": [
+      "một tấm lưới tennis được căng trên đó",
+      "có một cái lưới và các tay vợt tennis đang đánh bóng qua đó",
+      "có một người đàn ông đang phục vụ một quả bóng tennis cho người đàn ông khác trên đó."
+    ],
+    "answer": "quần vợt",
+    "question_id": "399543000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Tòa án đất"
+  },
+  {
+    "question": "Đây là con vật gì?",
+    "image_id": "530731",
+    "image_name": "COCO_val2014_000000530731.jpg",
+    "explanation": [
+      "nó có cặp sừng to và cong",
+      "nó nằm trên một ngọn đồi đá và có sừng xoăn.",
+      "sừng cừu rất to và cuộn quanh tai nó"
+    ],
+    "answer": "ram",
+    "question_id": "530731003",
+    "question_type": "what animal is",
+    "answer_type": "other",
+    "explain": "Con vật trong ảnh có bộ sừng đặc trưng của bighorn, một loài bighorn sừng lớn.",
+    "predict": "Con bighorn"
+  },
+  {
+    "question": "Đây là loại phương tiện gì?",
+    "image_id": "530766",
+    "image_name": "COCO_val2014_000000530766.jpg",
+    "explanation": [
+      "nó lớn hơn một cái bè, nhỏ hơn một con tàu và nổi trên mặt nước",
+      "đó là một con tàu lớn nổi trên mặt nước",
+      "nó nổi trên mặt nước và có thể chở người trong đó"
+    ],
+    "answer": "thuyền",
+    "question_id": "530766000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một con tàu đang neo đậu trên mặt nước, cho thấy đây là một phương tiện di chuyển trên biển.",
+    "predict": "Đại dương"
+  },
+  {
+    "question": "Màu túi có phù hợp với thảm không?",
+    "image_id": "399741",
+    "image_name": "COCO_val2014_000000399741.jpg",
+    "explanation": [
+      "cái túi màu đỏ và thảm màu xanh",
+      "cái túi không hòa quyện với tấm thảm",
+      "màu túi là màu đỏ nhưng thảm là màu xanh"
+    ],
+    "answer": "không",
+    "question_id": "399741005",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Túi có màu đỏ, tương tự như màu của thảm.",
+    "predict": "Có"
+  },
+  {
+    "question": "Anh ấy có điều khiển từ xa trong tay trái không?",
+    "image_id": "268670",
+    "image_name": "COCO_val2014_000000268670.jpg",
+    "explanation": [
+      "ông đang cầm một cái gì đó là hình chữ nhật",
+      "tay phải của anh ấy đang cầm một cốc cà phê và tay kia đang cầm điều khiển từ xa",
+      "nó là nhựa đen và anh ấy đang chỉ nó vào tivi"
+    ],
+    "answer": "có",
+    "question_id": "268670002",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Anh ấy đang cầm điều khiển từ xa trong tay phải.",
+    "predict": "Có"
+  },
+  {
+    "question": "Trời có mưa không?",
+    "image_id": "530854",
+    "image_name": "COCO_val2014_000000530854.jpg",
+    "explanation": [
+      "có rất nhiều ô che nắng cho mọi người khỏi mưa",
+      "có nước trên ô",
+      "các đầu ô bị ướt"
+    ],
+    "answer": "có",
+    "question_id": "530854003",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy nhiều người đang cầm ô, điều này thường xảy ra khi trời mưa.",
+    "predict": "Có"
+  },
+  {
+    "question": "Anh chàng này đang làm gì?",
+    "image_id": "530875",
+    "image_name": "COCO_val2014_000000530875.jpg",
+    "explanation": [
+      "anh ấy đang làm trò trên ván trượt",
+      "chân anh ấy được đặt trên một tấm ván có bánh xe",
+      "anh ấy đang lướt dọc theo mép của một đường ống nửa hình tròn"
+    ],
+    "answer": "trượt ván",
+    "question_id": "530875001",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Skateboarding"
+  },
+  {
+    "question": "Đây có phải là một chuyến tàu chở khách không?",
+    "image_id": "137727",
+    "image_name": "COCO_val2014_000000137727.jpg",
+    "explanation": [
+      "họ đang chất hành lý lên tàu và có những toa xe chở khách",
+      "họ đang chất vali lên tàu",
+      "nhiều kiện hành lý đang được chất lên"
+    ],
+    "answer": "đúng",
+    "question_id": "137727017",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Tàu có vẻ là tàu chở khách, có hành khách đang xuống tàu.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một cảng biển không?",
+    "image_id": "275881",
+    "image_name": "COCO_val2014_000000275881.jpg",
+    "explanation": [
+      "con thuyền đang ở giữa đại dương rộng mở và không có bến cảng nào trong tầm mắt",
+      "con tàu đang đi trên mặt nước",
+      "chiếc thuyền được bao quanh bởi nước ở tất cả các phía."
+    ],
+    "answer": "không",
+    "question_id": "275881004",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một con tàu đang di chuyển trên biển, cho thấy đây là một cảng biển.",
+    "predict": "Có"
+  },
+  {
+    "question": "Họ đang làm gì?",
+    "image_id": "269037",
+    "image_name": "COCO_val2014_000000269037.jpg",
+    "explanation": [
+      "mọi người mặc đồ lặn ở một máy tạo sóng nhân tạo ngoài trời và một người đang ở trên ván lướt sóng",
+      "có nước và họ đang lướt trên đó trên ván lướt sóng",
+      "họ đang cưỡi sóng trên ván lướt sóng"
+    ],
+    "answer": "lướt sóng",
+    "question_id": "269037001",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Trong hình ảnh, một nhóm người đang đứng trong một bể nước nhân tạo, sử dụng ván trượt để tạo sóng và thực hiện các động tác giống như bơi lội trên biển. Điều này cho thấy họ đang tham gia vào hoạt động surfing.",
+    "predict": "Surfing"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "531512",
+    "image_name": "COCO_val2014_000000531512.jpg",
+    "explanation": [
+      "nó có bầu vú rất lớn",
+      "nó có bầu vú rất lớn",
+      "nó có màu trắng và đen"
+    ],
+    "answer": "bò",
+    "question_id": "531512003",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một con bò đang được bơm sữa.",
+    "predict": "Cow"
+  },
+  {
+    "question": "Đây có phải là một sự kiện không?",
+    "image_id": "7260",
+    "image_name": "COCO_val2014_000000007260.jpg",
+    "explanation": [
+      "có rất nhiều người đang đứng và xem",
+      "có một số khán giả có mặt",
+      "có rất nhiều khán giả"
+    ],
+    "answer": "đúng",
+    "question_id": "7260004",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Trận đấu có khán giả, cho thấy đây là một sự kiện thể thao được tổ chức.",
+    "predict": "Có"
+  },
+  {
+    "question": "Sàn được làm bằng gì?",
+    "image_id": "269678",
+    "image_name": "COCO_val2014_000000269678.jpg",
+    "explanation": [
+      "nó mờ và trông mềm mại",
+      "nó trông bông xù và không cứng như gạch hoặc đá cẩm thạch",
+      "nó được làm từ sợi dệt lông dày"
+    ],
+    "answer": "thảm",
+    "question_id": "269678027",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Sàn nhà có màu be nhạt, giống như màu của thảm hoặc sàn lát gạch màu be nhạt.",
+    "predict": "Màu be"
+  },
+  {
+    "question": "Người đàn ông đang chơi trò chơi gì?",
+    "image_id": "138814",
+    "image_name": "COCO_val2014_000000138814.jpg",
+    "explanation": [
+      "anh ấy đang cầm vợt và đánh một quả bóng màu vàng",
+      "anh ấy có một cây vợt tennis trong tay",
+      "anh ấy đang cầm vợt và giao bóng"
+    ],
+    "answer": "quần vợt",
+    "question_id": "138814002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Nhân vật chính đang cầm vợt và thực hiện cú đánh, đây là các yếu tố đặc trưng của trò chơi tennis.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Người đàn ông có mặc quần đùi không?",
+    "image_id": "138838",
+    "image_name": "COCO_val2014_000000138838.jpg",
+    "explanation": [
+      "quần của người đàn ông không chạm xuống dưới đầu gối",
+      "có thể nhìn thấy phần dưới của chân anh ấy",
+      "đáy chân của anh ấy là có thể nhìn thấy."
+    ],
+    "answer": "đúng",
+    "question_id": "138838001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Nhân vật trong ảnh mặc quần đùi màu vàng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là môn thể thao nào?",
+    "image_id": "401244",
+    "image_name": "COCO_val2014_000000401244.jpg",
+    "explanation": [
+      "có một cái đĩa trắng trong tay người đàn ông.",
+      "người đàn ông cầm một chiếc đĩa và chuẩn bị ném nó",
+      "người đàn ông đang thực hiện động tác ném đĩa với chiếc đĩa trên tay"
+    ],
+    "answer": "đĩa ném đĩa",
+    "question_id": "401244017",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Frisbee"
+  },
+  {
+    "question": "Đây là giống chó gì?",
+    "image_id": "532381",
+    "image_name": "COCO_val2014_000000532381.jpg",
+    "explanation": [
+      "nó có hàm dưới và mặt tròn",
+      "nó có khuôn mặt phẳng và béo.",
+      "nó có một khuôn mặt phẳng"
+    ],
+    "answer": "chó bulldog",
+    "question_id": "532381002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Bulldog"
+  },
+  {
+    "question": "Đây là phòng gì?",
+    "image_id": "329030",
+    "image_name": "COCO_val2014_000000329030.jpg",
+    "explanation": [
+      "có một lò vi sóng ở trên tủ lạnh mini",
+      "có một lò vi sóng và tủ lạnh nhỏ trong đó",
+      "có một lò vi sóng trên một tủ lạnh nhỏ"
+    ],
+    "answer": "nhà bếp",
+    "question_id": "329030006",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng ngủ"
+  },
+  {
+    "question": "Cửa sổ có mở không?",
+    "image_id": "270351",
+    "image_name": "COCO_val2014_000000270351.jpg",
+    "explanation": [
+      "có một khoảng trống giữa đáy của cửa sổ và bệ cửa sổ",
+      "đáy cửa sổ đã được nâng lên một vài inch",
+      "có một khoảng trống giữa cửa sổ và bệ cửa sổ"
+    ],
+    "answer": "đúng",
+    "question_id": "270351002",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cửa sổ có vẻ mở, vì có thể nhìn thấy ánh sáng bên trong.",
+    "predict": "Có"
+  },
+  {
+    "question": "Loại chó này là gì?",
+    "image_id": "532575",
+    "image_name": "COCO_val2014_000000532575.jpg",
+    "explanation": [
+      "nó có dấu hiệu đặc trưng của bộ lông màu nâu đỏ quanh cổ",
+      "nó là một con chó lớn màu đen và vàng với mũi và tai nhọn.",
+      "nó có lông màu nâu và đen và tai nhọn."
+    ],
+    "answer": "chó chăn cừu Đức",
+    "question_id": "532575001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Thổng lỗ"
+  },
+  {
+    "question": "Người phụ nữ đang mặc gì?",
+    "image_id": "532732",
+    "image_name": "COCO_val2014_000000532732.jpg",
+    "explanation": [
+      "cô ấy đội một chiếc mũ màu đỏ trên đầu, phù hợp với chiếc váy của cô ấy",
+      "nó có vành rộng màu đỏ và được đặt trên đầu cô ấy",
+      "bạn có thể thấy viền màu đỏ và hoa văn màu trắng trên mũ"
+    ],
+    "answer": "mũ",
+    "question_id": "532732014",
+    "question_type": "what is the woman",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Chóp nón, váy đỏ, găng tay đen, kính gọng đen"
+  },
+  {
+    "question": "Đây có phải là một sự kiện không?",
+    "image_id": "305800",
+    "image_name": "COCO_val2014_000000305800.jpg",
+    "explanation": [
+      "có rất nhiều người có mặt",
+      "một số người đang đeo phù hiệu tên",
+      "mọi người đang tụ tập quanh một chiếc bàn được bày biện với chai rượu vang và nhiều ly"
+    ],
+    "answer": "có",
+    "question_id": "305800002",
+    "question_type": "is this an",
+    "answer_type": "yes/no",
+    "explain": "Trong hình ảnh có nhiều người đang tụ tập, uống rượu và có vẻ như đang tham gia một hoạt động xã hội, cho thấy đây là một sự kiện.",
+    "predict": "Có"
+  },
+  {
+    "question": "Ánh sáng của bức ảnh này có thực tế hay nó trông giống như một bộ lọc đã được sử dụng?",
+    "image_id": "401808",
+    "image_name": "COCO_val2014_000000401808.jpg",
+    "explanation": [
+      "phần lớn bức ảnh có tông màu xanh lục",
+      "cỏ không có màu xanh lá cây",
+      "màu sắc bị phơi sáng quá mức và cân bằng ánh sáng bị tắt"
+    ],
+    "answer": "bộ lọc",
+    "question_id": "401808001",
+    "question_type": "is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Thực tế"
+  },
+  {
+    "question": "Nơi này là gì?",
+    "image_id": "350961",
+    "image_name": "COCO_val2014_000000350961.jpg",
+    "explanation": [
+      "có một chiếc ghế dài và một bàn cà phê",
+      "có một chiếc ghế dài và bàn cà phê",
+      "có một chiếc ghế dài và khu vực tiếp khách"
+    ],
+    "answer": "phòng khách",
+    "question_id": "350961001",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "Căn phòng được thể hiện trong hình ảnh là một không gian sống, có bàn ghế, tủ sách và các vật dụng trang trí, cho thấy đây là một không gian sinh hoạt trong nhà.",
+    "predict": "Căn phòng"
+  },
+  {
+    "question": "Người đàn ông có râu không?",
+    "image_id": "401833",
+    "image_name": "COCO_val2014_000000401833.jpg",
+    "explanation": [
+      "có thể nhìn thấy cằm và môi trên của anh ấy",
+      "cằm của anh ấy rõ ràng",
+      "anh hiện đang cạo râu sạch sẽ."
+    ],
+    "answer": "không",
+    "question_id": "401833001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Chú chó có vui không?",
+    "image_id": "139872",
+    "image_name": "COCO_val2014_000000139872.jpg",
+    "explanation": [
+      "nó đang mỉm cười và thở hổn hển",
+      "nó đang được chú ý và chơi",
+      "nó có nụ cười trên khuôn mặt"
+    ],
+    "answer": "đúng",
+    "question_id": "139872003",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Chú chó đang nằm trên cỏ, miệng há hốc và lưỡi dài ra, biểu hiện rõ ràng sự vui vẻ và thoải mái.",
+    "predict": "Có"
+  },
+  {
+    "question": "Con vật gì đang ở trong bồn rửa?",
+    "image_id": "271035",
+    "image_name": "COCO_val2014_000000271035.jpg",
+    "explanation": [
+      "nó có lông và có đuôi",
+      "nó có đuôi dài, lông và tai nhọn",
+      "nó có bộ lông màu tam thể và một cái đuôi đang treo trên bồn rửa"
+    ],
+    "answer": "mèo",
+    "question_id": "271035000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Trong hình ảnh có một con mèo đang nằm trong bồn rửa.",
+    "predict": "Cat"
+  },
+  {
+    "question": "Người đó đang làm gì?",
+    "image_id": "8981",
+    "image_name": "COCO_val2014_000000008981.jpg",
+    "explanation": [
+      "họ đang cưỡi ván lướt sóng trên một con sóng",
+      "họ đang ở trên ván lướt sóng",
+      "người đang đứng trên một ván lướt sóng trên một con sóng"
+    ],
+    "answer": "lướt sóng",
+    "question_id": "8981001",
+    "question_type": "what is the person",
+    "answer_type": "other",
+    "explain": "Người trong ảnh đang đứng trên ván trượt sóng, điều này cho thấy họ đang tham gia vào môn thể thao surfing.",
+    "predict": "Surfing"
+  },
+  {
+    "question": "Đây có phải là một nhà hàng không?",
+    "image_id": "533281",
+    "image_name": "COCO_val2014_000000533281.jpg",
+    "explanation": [
+      "hình ảnh này có tủ trưng bày bằng kính và lò nướng gỗ thương mại",
+      "đó là một nhà hàng pizza với lò đốt củi lớn",
+      "có tấm chắn bắn nước trước lò công nghiệp"
+    ],
+    "answer": "có",
+    "question_id": "533281002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một lò nướng lớn, thường được sử dụng trong nhà hàng để nướng bánh mì hoặc các loại bánh khác.",
+    "predict": "Có"
+  },
+  {
+    "question": "Cô ấy đang đội cái gì trên đầu vậy?",
+    "image_id": "533283",
+    "image_name": "COCO_val2014_000000533283.jpg",
+    "explanation": [
+      "nó có phần bảo vệ ở trên đỉnh và dây đeo quanh phần dưới đầu của cô ấy",
+      "cô ấy đang cưỡi ngựa và muốn tự bảo vệ mình",
+      "nó ở trên đỉnh đầu cô ấy được giữ bởi một dây đeo dưới cằm cô ấy"
+    ],
+    "answer": "mũ bảo hiểm",
+    "question_id": "533283003",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Cô ấy đội một chiếc mũ bảo hiểm trên đầu, bảo vệ an toàn khi đi xe ngựa.",
+    "predict": "Cái mũ bảo hiểm"
+  },
+  {
+    "question": "Chuột có phải không dây không?",
+    "image_id": "1503",
+    "image_name": "COCO_val2014_000000001503.jpg",
+    "explanation": [
+      "không có dây nào gắn vào chuột",
+      "con chuột của imac không có bất kỳ dây",
+      "không có dây kết nối nó với máy tính"
+    ],
+    "answer": "đúng",
+    "question_id": "1503002",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Chuột trong hình ảnh là chuột không dây, có thể nhìn thấy rõ ràng từ thiết kế và không có dây nối.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là sở thú không?",
+    "image_id": "533464",
+    "image_name": "COCO_val2014_000000533464.jpg",
+    "explanation": [
+      "nó là một công viên thành phố ngoại ô.",
+      "không có bất kỳ chuồng nào hay động vật nào",
+      "không có động vật hoặc chuồng nào"
+    ],
+    "answer": "không",
+    "question_id": "533464020",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Có phải đang mưa không?",
+    "image_id": "533480",
+    "image_name": "COCO_val2014_000000533480.jpg",
+    "explanation": [
+      "cái ô của người đàn ông bị ướt và đường phố cũng ướt",
+      "bạn có thể thấy những giọt mưa và gạt nước kính chắn gió đang hoạt động trên chiếc xe đỏ",
+      "các giọt mưa đang rơi xuống mặt đường"
+    ],
+    "answer": "đúng",
+    "question_id": "533480002",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Loại đồ uống gì trong chai?",
+    "image_id": "533506",
+    "image_name": "COCO_val2014_000000533506.jpg",
+    "explanation": [
+      "nó được quảng cáo trên mặt chai",
+      "nó được gắn nhãn với logo của một công ty bia",
+      "nó có budweiser trên nhãn"
+    ],
+    "answer": "bia",
+    "question_id": "533506001",
+    "question_type": "what type of",
+    "answer_type": "other",
+    "explain": "Chai trong ảnh có nhãn hiệu Budweiser, một loại bia nổi tiếng.",
+    "predict": "Budweiser"
+  },
+  {
+    "question": "Đây có phải là một tấm nệm không?",
+    "image_id": "140435",
+    "image_name": "COCO_val2014_000000140435.jpg",
+    "explanation": [
+      "nó là hình chữ nhật và dày như một tấm nệm",
+      "nó lớn và có hoa văn",
+      "đây là thứ mọi người ngủ trên đó"
+    ],
+    "answer": "đúng",
+    "question_id": "140435002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là ở Mỹ không?",
+    "image_id": "140456",
+    "image_name": "COCO_val2014_000000140456.jpg",
+    "explanation": [
+      "biển báo đường phố viết bằng ngôn ngữ khác",
+      "có những ký tự trong bảng hiệu không phải là ký tự Latin",
+      "biển báo bằng tiếng Đức"
+    ],
+    "answer": "không",
+    "question_id": "140456002",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh hiển thị một biển báo đường phố bằng tiếng Đức, cho thấy đây không phải là ở Mỹ.",
+    "predict": "No"
+  },
+  {
+    "question": "Bãi biển có đông người không?",
+    "image_id": "140490",
+    "image_name": "COCO_val2014_000000140490.jpg",
+    "explanation": [
+      "có nhiều người và nhiều ghế",
+      "có nhiều người trên bãi biển gần gũi với nhau",
+      "có rất nhiều người và không có nhiều phòng trống"
+    ],
+    "answer": "có",
+    "question_id": "140490001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Ảnh cho thấy nhiều người đang ở bãi biển, cả trên bãi cát và trong nước.",
+    "predict": "Có"
+  },
+  {
+    "question": "Cây gì mà con ngựa vằn lớn đang ăn?",
+    "image_id": "9548",
+    "image_name": "COCO_val2014_000000009548.jpg",
+    "explanation": [
+      "nó được làm bằng lưỡi dao và bao phủ mặt đất",
+      "nó dài và nâu và là hình dạng của cỏ trên những đồng cỏ châu Phi",
+      "khuôn mặt của nó đang ở trong cỏ"
+    ],
+    "answer": "cỏ",
+    "question_id": "9548001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Con ngựa vằn đang ăn cỏ, và cỏ là loại thảo mộc thường thấy trong môi trường sống của chúng.",
+    "predict": "Thảo"
+  },
+  {
+    "question": "Người đàn ông có đang mặc đồ bảo hộ không?",
+    "image_id": "140651",
+    "image_name": "COCO_val2014_000000140651.jpg",
+    "explanation": [
+      "mũ bảo hiểm và bộ đồ da của anh ấy sẽ bảo vệ anh ấy nếu xe máy bị tai nạn",
+      "miếng đệm đầu gối đặc biệt có thể nhìn thấy trên quần của anh ấy",
+      "anh ấy đội mũ bảo hiểm và bảo vệ chân"
+    ],
+    "answer": "đúng",
+    "question_id": "140651002",
+    "question_type": "is the man",
+    "answer_type": "yes/no",
+    "explain": "Nhân vật trong ảnh mặc áo giáp bảo vệ đầy đủ, bao gồm mũ bảo hiểm và áo giáp bảo vệ toàn thân.",
+    "predict": "Có"
+  },
+  {
+    "question": "Trời đang mưa à?",
+    "image_id": "9647",
+    "image_name": "COCO_val2014_000000009647.jpg",
+    "explanation": [
+      "bầu trời trong xanh phía sau những người đang cắt băng khánh thành",
+      "mặt trời đang chiếu sáng rực rỡ.",
+      "mặt đất không bị ướt và không ai cầm ô"
+    ],
+    "answer": "không",
+    "question_id": "9647000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Không có dấu hiệu của mưa trong hình ảnh. Bầu trời trong xanh và không có mây đen hay mưa.",
+    "predict": "No"
+  },
+  {
+    "question": "Đây có phải là một sở thú không?",
+    "image_id": "332027",
+    "image_name": "COCO_val2014_000000332027.jpg",
+    "explanation": [
+      "hươu cao cổ được chụp trong tự nhiên",
+      "hươu cao cổ không được rào chắn trong một khu vực",
+      "không có lồng hoặc chuồng để giữ con vật trong"
+    ],
+    "answer": "không",
+    "question_id": "332027005",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một con ngựa vằn trong một môi trường tự nhiên, nhưng có vẻ như được chăm sóc và quản lý bởi con người, đặc biệt là sự hiện diện của các tảng đá được sắp xếp có chủ đích. Điều này gợi ý rằng đây có thể là một khu vực trong một sở thú.",
+    "predict": "Có"
+  },
+  {
+    "question": "Trông anh chàng có vui không?",
+    "image_id": "9729",
+    "image_name": "COCO_val2014_000000009729.jpg",
+    "explanation": [
+      "mặt anh ta cau lại.",
+      "anh ấy không cười và tỏ ra khó chịu.",
+      "anh ấy không cười và trông có vẻ bực bội."
+    ],
+    "answer": "không",
+    "question_id": "9729001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Anh chàng đang cười và có vẻ vui vẻ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Bữa ăn này có vẻ đã được nấu chín phải không?",
+    "image_id": "534019",
+    "image_name": "COCO_val2014_000000534019.jpg",
+    "explanation": [
+      "chúng trông mềm và chín quá",
+      "màu sắc của rau củ thì tối",
+      "miếng bông cải xanh rất đen"
+    ],
+    "answer": "có",
+    "question_id": "534019002",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Thịt đã chuyển sang màu nâu đậm, cho thấy đã được nấu chín.",
+    "predict": "Có"
+  },
+  {
+    "question": "Nước có gợn sóng không?",
+    "image_id": "534038",
+    "image_name": "COCO_val2014_000000534038.jpg",
+    "explanation": [
+      "không có sóng lớn và không có gió",
+      "con thuyền đang ở trên mặt nước mà không có sóng xung quanh",
+      "nước yên tĩnh và bằng phẳng và ai đó đang sử dụng một chiếc thuyền"
+    ],
+    "answer": "không",
+    "question_id": "534038010",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Nước có gợn sóng nhẹ, có thể nhìn thấy trên mặt nước.",
+    "predict": "Có"
+  },
+  {
+    "question": "Họ đang chơi trò chơi gì?",
+    "image_id": "402971",
+    "image_name": "COCO_val2014_000000402971.jpg",
+    "explanation": [
+      "người chơi đang ném bóng chày và đeo găng tay bóng chày",
+      "người ném bóng đang ném một quả bóng vào một sân vận động đầy người.",
+      "người chơi đang ở trên một sân bóng chày và ném một quả bóng chày"
+    ],
+    "answer": "bóng chày",
+    "question_id": "402971004",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Đây là con vật gì?",
+    "image_id": "402992",
+    "image_name": "COCO_val2014_000000402992.jpg",
+    "explanation": [
+      "bạn có thể nhận ra qua đặc điểm của đầu nó",
+      "nó là một loài động vật lớn màu nâu với đôi tai và bầu vú to",
+      "nó có một cái đầu lớn với đôi tai lớn"
+    ],
+    "answer": "bò",
+    "question_id": "402992000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một đàn bò đang nằm trên cỏ.",
+    "predict": "Cow"
+  },
+  {
+    "question": "Đây là phòng nào trong nhà?",
+    "image_id": "403145",
+    "image_name": "COCO_val2014_000000403145.jpg",
+    "explanation": [
+      "có một bồn tắm và bồn rửa mặt trong hình",
+      "có chậu rửa và bồn cầu",
+      "nó có chậu rửa và bồn tắm"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "403145001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Đây có phải là hình ảnh gần đây không?",
+    "image_id": "141002",
+    "image_name": "COCO_val2014_000000141002.jpg",
+    "explanation": [
+      "người chơi quần vợt trong hình ảnh này là một vận động viên chuyên nghiệp hiện tại",
+      "người chơi tennis có kiểu tóc hiện đại và đang cầm một cây vợt hiện đại",
+      "máy ảnh hiện đại chụp ảnh độ nét cao"
+    ],
+    "answer": "đúng",
+    "question_id": "141002010",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Có phải trời nhiều mây không?",
+    "image_id": "272153",
+    "image_name": "COCO_val2014_000000272153.jpg",
+    "explanation": [
+      "nó trông rất xám xịt và như thể trời sắp mưa",
+      "rất ít màu xanh có thể nhìn thấy trên bầu trời",
+      "bầu trời u ám và phủ đầy mây"
+    ],
+    "answer": "có",
+    "question_id": "272153005",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông đang làm gì?",
+    "image_id": "403255",
+    "image_name": "COCO_val2014_000000403255.jpg",
+    "explanation": [
+      "ông đang ở trong một chiếc xe trên mặt nước với một động cơ",
+      "anh ấy đang lái một chiếc thuyền trong nước",
+      "bạn có thể thấy chiếc thuyền đang ở trên nước."
+    ],
+    "answer": "chèo thuyền",
+    "question_id": "403255003",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang ngồi trên thuyền và điều khiển nó trên mặt nước.",
+    "predict": "Đi thuyền"
+  },
+  {
+    "question": "Đây là phòng nào?",
+    "image_id": "10114",
+    "image_name": "COCO_val2014_000000010114.jpg",
+    "explanation": [
+      "có một tủ lạnh, bếp nấu và nhiều tủ đựng đồ",
+      "có tủ và bếp trong đó",
+      "tủ lạnh và bếp gần nhau"
+    ],
+    "answer": "nhà bếp",
+    "question_id": "10114000",
+    "question_type": "which",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị các thiết bị và đồ vật đặc trưng của một khu vực bếp, bao gồm tủ lạnh, bếp gas, và các thiết bị nhà bếp khác.",
+    "predict": "Khu vực bếp"
+  },
+  {
+    "question": "Quần vợt có phải là môn thể thao cạnh tranh cao không?",
+    "image_id": "272262",
+    "image_name": "COCO_val2014_000000272262.jpg",
+    "explanation": [
+      "có một lượng lớn vận động viên tài năng",
+      "chàng trai trẻ đang chơi có vẻ mặt rất nghiêm túc khi đánh bóng",
+      "cậu bé dường như đang tập trung rất nhiều vào việc chiến thắng"
+    ],
+    "answer": "đúng",
+    "question_id": "272262000",
+    "question_type": "is",
+    "answer_type": "yes/no",
+    "explain": "Quần vợt là một môn thể thao đòi hỏi kỹ thuật và tốc độ, thường được chơi ở cấp độ chuyên nghiệp.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là sở thú không?",
+    "image_id": "141219",
+    "image_name": "COCO_val2014_000000141219.jpg",
+    "explanation": [
+      "ngựa vằn được rào chắn và ăn uống ra khỏi một máng",
+      "ngựa vằn có hàng rào xung quanh chúng",
+      "các loài động vật ở trong chuồng được cung cấp thức ăn và nước uống"
+    ],
+    "answer": "có",
+    "question_id": "141219003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy các con ngựa được nuôi trong chuồng, đây là đặc trưng của sở thú.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người phụ nữ trong gương có vẻ buồn bã không?",
+    "image_id": "403378",
+    "image_name": "COCO_val2014_000000403378.jpg",
+    "explanation": [
+      "có vẻ như cô ấy đang khóc.",
+      "cô ấy có những giọt nước mắt chảy dài trên khuôn mặt",
+      "hình ảnh của cô ấy trong gương cho thấy một giọt nước mắt chảy xuống từ mắt cô ấy"
+    ],
+    "answer": "có",
+    "question_id": "403378001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Bức tượng này có mô tả một con vật thần thoại không?",
+    "image_id": "141475",
+    "image_name": "COCO_val2014_000000141475.jpg",
+    "explanation": [
+      "nó đang mô tả một con kỳ lân",
+      "hình đó có vẻ là một con pegasus",
+      "ngựa chỉ có cánh trong thần thoại"
+    ],
+    "answer": "đúng",
+    "question_id": "141475002",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Tượng có hình dạng một con thiên nga, một con vật thần thoại trong nhiều nền văn hóa.",
+    "predict": "Có"
+  },
+  {
+    "question": "Những người đàn ông đang chơi trò gì?",
+    "image_id": "10442",
+    "image_name": "COCO_val2014_000000010442.jpg",
+    "explanation": [
+      "họ đang mặc đồng phục bóng chày trên sân bóng chày",
+      "các cầu thủ có găng tay bóng chày và đang đi trên một viên kim cương bóng chày",
+      "họ đang ở trên một sân bóng chày và mặc đồng phục bóng chày"
+    ],
+    "answer": "bóng chày",
+    "question_id": "10442001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Cậu bé đang làm gì?",
+    "image_id": "10526",
+    "image_name": "COCO_val2014_000000010526.jpg",
+    "explanation": [
+      "cậu ấy đang cưỡi ván trượt",
+      "cậu ấy đang đứng trên một tấm ván có bánh xe",
+      "cậu ấy đang nhảy lên không trung với ván trượt dưới chân"
+    ],
+    "answer": "trượt ván",
+    "question_id": "10526000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Đạp xe lướt"
+  },
+  {
+    "question": "Căn phòng này là phòng nào?",
+    "image_id": "272673",
+    "image_name": "COCO_val2014_000000272673.jpg",
+    "explanation": [
+      "có khăn treo và bồn rửa",
+      "có một bồn rửa và khăn tay",
+      "có bồn rửa và gương để chuẩn bị"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "272673007",
+    "question_type": "which",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Đây có phải là một trang trại gia đình không?",
+    "image_id": "403758",
+    "image_name": "COCO_val2014_000000403758.jpg",
+    "explanation": [
+      "đó là một người đàn ông dẫn ngựa qua đường phố",
+      "có một con đường được trang bị cống thoát nước mưa và vỉa hè trải nhựa",
+      "các loài động vật đang ở trên đường phố"
+    ],
+    "answer": "không",
+    "question_id": "403758002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Bữa ăn này là gì?",
+    "image_id": "272694",
+    "image_name": "COCO_val2014_000000272694.jpg",
+    "explanation": [
+      "nó bao gồm một cái bánh nướng xốp và một quả chuối",
+      "cà phê và bánh nướng xốp theo truyền thống được dùng trong bữa sáng",
+      "có cà phê, bánh ngọt và chuối"
+    ],
+    "answer": "bữa sáng",
+    "question_id": "272694002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một cốc cà phê, một chiếc bánh ngọt và một quả chuối, thường được coi là một phần của bữa ăn sáng.",
+    "predict": "Ăn sáng"
+  },
+  {
+    "question": "Động vật nào trong bức tranh?",
+    "image_id": "10580",
+    "image_name": "COCO_val2014_000000010580.jpg",
+    "explanation": [
+      "có cái cổ dài, có tàn nhang và cái đầu hươu cao cổ",
+      "nó có cái cổ dài và có đốm",
+      "chúng có cổ rất dài"
+    ],
+    "answer": "hươu cao cổ",
+    "question_id": "10580002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị ba con ngựa hươu cao cổ, có thể nhận biết qua bộ lông đặc trưng và hình dáng cơ thể.",
+    "predict": "Giraffe"
+  },
+  {
+    "question": "Đây là cái gì?",
+    "image_id": "403864",
+    "image_name": "COCO_val2014_000000403864.jpg",
+    "explanation": [
+      "một động cơ đang kéo những toa xe gắn trên đường ray đi qua nhà ga",
+      "đó là một chiếc xe lớn, dài trên đường ray",
+      "nó đang đi trên đường ray xe lửa"
+    ],
+    "answer": "xe lửa",
+    "question_id": "403864002",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một chiếc xe lửa tốc độ cao, đặc trưng của loại xe lửa này là thiết kế mũi nhọn và thân xe mỏng, phù hợp với tốc độ cao.",
+    "predict": "Đệ tử lửa"
+  },
+  {
+    "question": "Cô gái có thích rau không?",
+    "image_id": "10785",
+    "image_name": "COCO_val2014_000000010785.jpg",
+    "explanation": [
+      "cô ấy trông rất vui khi được ăn chúng",
+      "cô ấy đang cho chúng vào miệng.",
+      "cô ấy đang ăn một miếng bông cải xanh"
+    ],
+    "answer": "có",
+    "question_id": "10785003",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Cô gái đang ăn bông cải xanh, một loại rau.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hình ảnh được chụp ở đâu?",
+    "image_id": "141882",
+    "image_name": "COCO_val2014_000000141882.jpg",
+    "explanation": [
+      "có một số nhà ga sân bay.",
+      "mọi người đang chờ chuyến đi với hành lý của họ",
+      "có những người mang vali và biển hiệu American Airlines trong nền."
+    ],
+    "answer": "sân bay",
+    "question_id": "141882004",
+    "question_type": "where is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Quảng trường sân bay"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "535106",
+    "image_name": "COCO_val2014_000000535106.jpg",
+    "explanation": [
+      "nó có đôi tai hình tam giác và bộ râu dài",
+      "có một con mèo bên cạnh đứa trẻ đang chơi đồ chơi",
+      "nó ở trong một ngôi nhà và có râu"
+    ],
+    "answer": "con mèo",
+    "question_id": "535106002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một con mèo nằm trên sàn nhà.",
+    "predict": "Cat"
+  },
+  {
+    "question": "Anh ấy có ở gần đỉnh sóng không?",
+    "image_id": "535135",
+    "image_name": "COCO_val2014_000000535135.jpg",
+    "explanation": [
+      "anh ấy gần chạm vào đỉnh sóng.",
+      "ván lướt sóng của anh ấy gần đạt tới đỉnh",
+      "anh ấy đang lướt ván gần đỉnh sóng"
+    ],
+    "answer": "có",
+    "question_id": "535135007",
+    "question_type": "is he",
+    "answer_type": "yes/no",
+    "explain": "Anh ấy đang đứng trên ván trượt ván, gần đỉnh của một gợn sóng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Tàu có chuyển động không?",
+    "image_id": "404071",
+    "image_name": "COCO_val2014_000000404071.jpg",
+    "explanation": [
+      "nó đang chạy trên đường ray và không dừng lại ở ga",
+      "tàu này đang chạy trên một đoạn đường ray trống và không dừng ở ga",
+      "nó đang trên đường ray xa ga với tài xế nhìn thấy được"
+    ],
+    "answer": "có",
+    "question_id": "404071000",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Tàu đang di chuyển trên đường ray, động cơ đang hoạt động.",
+    "predict": "Có"
+  },
+  {
+    "question": "Cửa sổ có mở không?",
+    "image_id": "10995",
+    "image_name": "COCO_val2014_000000010995.jpg",
+    "explanation": [
+      "cửa sổ không được đóng kín hoàn toàn",
+      "mặt trời đang chiếu qua",
+      "có một khoảng trống ở giữa hai bên của nó"
+    ],
+    "answer": "có",
+    "question_id": "10995004",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cửa sổ đang mở, có thể nhìn thấy bên ngoài.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hươu cao cổ có ở môi trường sống tự nhiên của nó không?",
+    "image_id": "404262",
+    "image_name": "COCO_val2014_000000404262.jpg",
+    "explanation": [
+      "nó đang đi trên một khu vực đá sỏi đã được làm sạch",
+      "bạn có thể thấy hàng rào ở phía sau",
+      "nó bị giam giữ trong sở thú"
+    ],
+    "answer": "không",
+    "question_id": "404262001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Cái bàn được làm bằng gì?",
+    "image_id": "11172",
+    "image_name": "COCO_val2014_000000011172.jpg",
+    "explanation": [
+      "nó có vẻ ngoài thô ráp, mộc mạc.",
+      "bàn có màu nâu với vân gỗ",
+      "cái bàn có màu nâu và được hoàn thiện bằng gỗ"
+    ],
+    "answer": "gỗ",
+    "question_id": "11172001",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Bàn được làm từ gỗ, có thể nhìn thấy rõ ràng chất liệu gỗ của bàn trong hình ảnh.",
+    "predict": "Mộc"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "142249",
+    "image_name": "COCO_val2014_000000142249.jpg",
+    "explanation": [
+      "có các cầu thủ bóng chày trong hầm với hành động đang diễn ra trên sân.",
+      "người đàn ông cầm gậy bóng chày và có một trọng tài",
+      "có những người đang chơi bóng chày trong một sân vận động với người xem."
+    ],
+    "answer": "bóng chày",
+    "question_id": "142249001",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một trận đấu bóng chày, với các cầu thủ đang chơi trên sân và khán giả đang theo dõi.",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Cô ấy có vẻ vui vẻ không?",
+    "image_id": "535506",
+    "image_name": "COCO_val2014_000000535506.jpg",
+    "explanation": [
+      "cô ấy đang nhăn mặt nhìn về phía camera",
+      "người phụ nữ đang cầm một con dao và đôi mắt cô ấy nheo lại khi cô ấy nhìn vào máy ảnh",
+      "cô ấy có khuôn mặt không có nụ cười."
+    ],
+    "answer": "không",
+    "question_id": "535506003",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Cô ấy đang nhìn thẳng vào máy ảnh với biểu cảm tươi tắn, thể hiện sự vui vẻ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Loại bia nào ở phía trước?",
+    "image_id": "404526",
+    "image_name": "COCO_val2014_000000404526.jpg",
+    "explanation": [
+      "có một nhãn hiệu budweiser trên chai",
+      "chai có một nhãn hiệu budweiser",
+      "nhãn được đọc và ghi tên thương hiệu đó"
+    ],
+    "answer": "budweiser",
+    "question_id": "404526001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Bottle in the foreground clearly shows the Budweiser logo.",
+    "predict": "Budweiser"
+  },
+  {
+    "question": "Đây có phải là một trò chơi chuyên nghiệp?",
+    "image_id": "273493",
+    "image_name": "COCO_val2014_000000273493.jpg",
+    "explanation": [
+      "trông như hai người bạn đang chơi đùa cho vui",
+      "không có đám đông xem trận đấu quần vợt này",
+      "không có đám đông nào đang xem trò chơi"
+    ],
+    "answer": "không",
+    "question_id": "273493011",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Trò chơi diễn ra trên sân cỏ chuyên nghiệp, có lưới và số hiệu, cho thấy đây là một trận đấu có tổ chức.",
+    "predict": "Có"
+  },
+  {
+    "question": "Họ đang chơi trò chơi gì?",
+    "image_id": "142665",
+    "image_name": "COCO_val2014_000000142665.jpg",
+    "explanation": [
+      "các cầu thủ đang sử dụng gậy bóng chày",
+      "có nhiều người đàn ông trên sân bóng chày với đồng phục và gậy",
+      "một trọng tài đang đứng sau người bắt bóng và người đánh bóng"
+    ],
+    "answer": "bóng chày",
+    "question_id": "142665000",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một trận đấu bóng chày, với các thành viên tham gia bao gồm người chơi đánh bóng, người bắt bóng, và người umpire.",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Ấm đun nước đã được cắm chưa?",
+    "image_id": "535977",
+    "image_name": "COCO_val2014_000000535977.jpg",
+    "explanation": [
+      "có một sợi dây đi vào một ổ cắm",
+      "cái phích cắm được kết nối với tường",
+      "dây được kết nối với ổ cắm trên tường"
+    ],
+    "answer": "có",
+    "question_id": "535977001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Điện thoại đang được cắm vào ổ cắm trên tường.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "273909",
+    "image_name": "COCO_val2014_000000273909.jpg",
+    "explanation": [
+      "một cô gái mặc đồng phục đang ở trên không trung cố gắng lấy quả bóng đá",
+      "các cô gái đang trên sân theo đuổi một quả bóng đá.",
+      "họ đang chơi với một quả bóng đá"
+    ],
+    "answer": "bóng đá",
+    "question_id": "273909003",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một trận đấu bóng đá, với hai cầu thủ nữ đang tranh chấp bóng.",
+    "predict": "Soccer"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "526257",
+    "image_name": "COCO_val2014_000000526257.jpg",
+    "explanation": [
+      "một trong những cầu thủ đang chuẩn bị ném bóng chày.",
+      "người đàn ông ở base một đang ném bóng chày.",
+      "các cầu thủ đang ném bóng chày và sử dụng găng tay"
+    ],
+    "answer": "bóng chày",
+    "question_id": "526257000",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một trận đấu bóng chày, với các thành viên đội đang chơi trên sân và khán giả đang theo dõi.",
+    "predict": "Baseball"
+  },
+  {
+    "question": "Đây có phải là tàu chở khách không?",
+    "image_id": "536168",
+    "image_name": "COCO_val2014_000000536168.jpg",
+    "explanation": [
+      "toa tàu đầy hàng hóa",
+      "các container được vận chuyển mà không có cửa sổ",
+      "toa tàu không có cửa sổ"
+    ],
+    "answer": "không",
+    "question_id": "536168001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Tàu chở nhiều container, thường là loại tàu chở hàng hóa, chứ không phải khách.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là nhà hàng không?",
+    "image_id": "405192",
+    "image_name": "COCO_val2014_000000405192.jpg",
+    "explanation": [
+      "có một chiếc bàn với đĩa thức ăn trên đó",
+      "mọi người chuẩn bị thưởng thức bữa ăn ở nơi công cộng",
+      "có thức ăn trên bàn trước mặt hai người"
+    ],
+    "answer": "có",
+    "question_id": "405192004",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một bàn ăn được trang trí, có đĩa pizza, đĩa mì ống và các dụng cụ ăn uống, gợi ý về một nhà hàng hoặc quán ăn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một công viên cho chó không?",
+    "image_id": "405279",
+    "image_name": "COCO_val2014_000000405279.jpg",
+    "explanation": [
+      "có nhiều người đang thả diều trong công viên nhưng không có chó",
+      "không có chó trong công viên.",
+      "không có con chó nào trong bức ảnh"
+    ],
+    "answer": "không",
+    "question_id": "405279011",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Ảnh cho thấy một công viên người, có người đi bộ, ghế đá và nhiều người đang thả diều, không có dấu hiệu của một khu vực dành riêng cho chó.",
+    "predict": "No"
+  },
+  {
+    "question": "Những người này đang làm gì?",
+    "image_id": "536370",
+    "image_name": "COCO_val2014_000000536370.jpg",
+    "explanation": [
+      "tất cả họ đều đang trượt tuyết trên một ngọn đồi",
+      "họ đang cưỡi ván trượt tuyết và thực hiện các pha nhào lộn",
+      "tất cả họ đều có ván trượt tuyết và có tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "536370001",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Họ đang chạy lên và xuống một dốc trượt tuyết, thể hiện rõ ràng qua tư thế và vị trí của họ trên đường trượt.",
+    "predict": "Đua xe trượt tuyết"
+  },
+  {
+    "question": "Họ đang chơi trò chơi gì?",
+    "image_id": "12120",
+    "image_name": "COCO_val2014_000000012120.jpg",
+    "explanation": [
+      "họ đang cầm vợt tennis.",
+      "họ đang cầm vợt tennis",
+      "hai người chơi đang đánh bóng bằng vợt qua lưới"
+    ],
+    "answer": "quần vợt",
+    "question_id": "12120001",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Họ đang chơi trò chơi gì?",
+    "image_id": "536428",
+    "image_name": "COCO_val2014_000000536428.jpg",
+    "explanation": [
+      "bạn có thể thấy frisbee trong tay của một trong những người chơi",
+      "một trong những người đàn ông đang cầm một đĩa frisbee",
+      "người đàn ông đang cầm một frisbee sát người anh ta"
+    ],
+    "answer": "frisbee",
+    "question_id": "536428000",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một nhóm người đang chơi trò chơi Frisbee trên sân cỏ.",
+    "predict": "Frisbee"
+  },
+  {
+    "question": "Đây có phải là một sự kiện đặc biệt?",
+    "image_id": "274352",
+    "image_name": "COCO_val2014_000000274352.jpg",
+    "explanation": [
+      "có nhiều người ở một bàn",
+      "có vẻ như là những người đến với nhau để ăn.",
+      "có rất nhiều người ở đó"
+    ],
+    "answer": "đúng",
+    "question_id": "274352001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Trang phục của những người trong ảnh khá lịch sự và họ đang ngồi ăn tại một nhà hàng, cho thấy đây có thể là một sự kiện hoặc dịp đặc biệt.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông đang làm gì?",
+    "image_id": "12238",
+    "image_name": "COCO_val2014_000000012238.jpg",
+    "explanation": [
+      "ông đang ngồi trên một chiếc xe máy",
+      "anh ấy đang trên đường với chiếc xe máy",
+      "anh ấy đang ngồi trên chiếc xe máy di chuyển xuống đường"
+    ],
+    "answer": "đi xe máy",
+    "question_id": "12238002",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang lái một chiếc xe máy trên đường.",
+    "predict": "Đi xe máy"
+  },
+  {
+    "question": "Đây là trò chơi gì?",
+    "image_id": "274411",
+    "image_name": "COCO_val2014_000000274411.jpg",
+    "explanation": [
+      "cô ấy đang ở trên sân tennis với một cây vợt.",
+      "cô ấy đang cầm một cây vợt quần vợt và đang chuẩn bị đánh bóng quay trở lại qua lưới",
+      "cô gái đang cầm một cây vợt tennis và quả bóng tennis"
+    ],
+    "answer": "quần vợt",
+    "question_id": "274411002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang chơi tennis, cầm vợt và chuẩn bị đánh bóng.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Cậu bé mặc quần xanh trông có vui không?",
+    "image_id": "405534",
+    "image_name": "COCO_val2014_000000405534.jpg",
+    "explanation": [
+      "cậu bé có vẻ mặt buồn bã",
+      "khuôn mặt của cậu ấy trông buồn và không mỉm cười.",
+      "cậu bé trông rất buồn."
+    ],
+    "answer": "không",
+    "question_id": "405534001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Cậu bé mặc quần xanh có vẻ tập trung vào việc cầm vợt tennis, cho thấy sự vui vẻ trong hoạt động thể thao.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng nào?",
+    "image_id": "12326",
+    "image_name": "COCO_val2014_000000012326.jpg",
+    "explanation": [
+      "có những bát trái cây xếp cạnh bếp lò",
+      "nhà bếp chứa nhiều tủ và thiết bị",
+      "bạn có thể thấy một bếp và rau trên quầy"
+    ],
+    "answer": "phòng bếp",
+    "question_id": "12326004",
+    "question_type": "which",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một bếp nấu ăn, tủ bếp và các thiết bị nhà bếp khác, cho thấy đây là khu vực bếp trong nhà.",
+    "predict": "Khu vực bếp"
+  },
+  {
+    "question": "Đây là loại phòng gì?",
+    "image_id": "536683",
+    "image_name": "COCO_val2014_000000536683.jpg",
+    "explanation": [
+      "có một cái bồn cầu và tường lát gạch",
+      "nó có một cái bồn cầu và một bức tường gạch",
+      "có một nhà vệ sinh và sàn gạch"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "536683001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Người đàn ông đang làm gì?",
+    "image_id": "274549",
+    "image_name": "COCO_val2014_000000274549.jpg",
+    "explanation": [
+      "anh ấy đang trượt tuyết trên mặt đất đầy tuyết",
+      "anh ta đang cầm gậy trượt tuyết và có ván trượt trên chân trong khi tuyết ở bên dưới",
+      "anh ta đang trượt tuyết trong tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "274549000",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang đi trượt tuyết trên sương mù.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Người đàn ông đang làm gì?",
+    "image_id": "143576",
+    "image_name": "COCO_val2014_000000143576.jpg",
+    "explanation": [
+      "anh ấy đang ở trong bếp với nồi và chảo",
+      "anh ấy đang khuấy cái gì đó trong một nồi lớn bên cạnh một chảo sâu.",
+      "anh ta đang ở trong bếp, khuấy trong nồi"
+    ],
+    "answer": "nấu ăn",
+    "question_id": "143576000",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang đứng trước bếp, có vẻ như đang chuẩn bị hoặc nấu ăn.",
+    "predict": "Cooking"
+  },
+  {
+    "question": "Máy tính xách tay có bật không?",
+    "image_id": "405740",
+    "image_name": "COCO_val2014_000000405740.jpg",
+    "explanation": [
+      "bạn có thể thấy người đàn ông đang lướt google",
+      "có một hình ảnh trên màn hình",
+      "người đàn ông đang nhìn vào một màn hình sáng lên"
+    ],
+    "answer": "có",
+    "question_id": "405740017",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Máy tính xách tay đang bật, màn hình hiển thị rõ ràng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Pizza đã được nướng chưa?",
+    "image_id": "536894",
+    "image_name": "COCO_val2014_000000536894.jpg",
+    "explanation": [
+      "phô mai đã tan chảy và lớp vỏ bánh có màu nâu vàng",
+      "phô mai tan chảy và vỏ bánh được nướng",
+      "lớp vỏ đã tăng lên và có màu nâu vàng"
+    ],
+    "answer": "có",
+    "question_id": "536894000",
+    "question_type": "has",
+    "answer_type": "yes/no",
+    "explain": "Thành phần pizza đã được nướng vàng, cho thấy pizza đã được nướng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Con mèo có nhận ra ai không?",
+    "image_id": "143824",
+    "image_name": "COCO_val2014_000000143824.jpg",
+    "explanation": [
+      "nó đang nhìn chằm chằm vào tivi",
+      "anh ta đang nhìn chằm chằm vào màn hình.",
+      "mèo đang nhìn một con chó trên màn hình tivi"
+    ],
+    "answer": "có",
+    "question_id": "143824003",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Con mèo đang nhìn vào màn hình TV, cho thấy nó có thể nhận ra hình ảnh trên đó.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là môi trường sống tự nhiên của hươu cao cổ không?",
+    "image_id": "537053",
+    "image_name": "COCO_val2014_000000537053.jpg",
+    "explanation": [
+      "không có vỏ bọc xung quanh nó giữ nó trong",
+      "không có lồng nào xung quanh những con hươu cao cổ",
+      "hươu cao cổ sống ngoài trời ở vùng cỏ"
+    ],
+    "answer": "có",
+    "question_id": "537053003",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy hươu cao cổ đang ở trong một khu vực có thảm thực vật tương tự như môi trường sống tự nhiên của chúng, với cây cối và thảm cỏ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Môn thể thao nào đang được chơi?",
+    "image_id": "537124",
+    "image_name": "COCO_val2014_000000537124.jpg",
+    "explanation": [
+      "người đàn ông đang ở trên sân tennis với một cây vợt.",
+      "người đàn ông đang đứng trên sân tennis cầm vợt tennis",
+      "người chơi có một cây vợt tennis"
+    ],
+    "answer": "quần vợt",
+    "question_id": "537124005",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đàn ông đang cầm vợt tennis và đứng trên sân tennis, rõ ràng là đang chơi tennis.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Có phải cái này ở Mỹ không?",
+    "image_id": "143931",
+    "image_name": "COCO_val2014_000000143931.jpg",
+    "explanation": [
+      "xe buýt vận động tranh cử là dành cho scott brown và nó có quốc kỳ Mỹ trên đó",
+      "có một quảng cáo của Mỹ ở bên cạnh xe buýt",
+      "scott Brown là một chính trị gia Mỹ."
+    ],
+    "answer": "đúng",
+    "question_id": "143931003",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh có biểu tượng cờ Mỹ và khẩu hiệu \"He's for us\", cho thấy đây là một chiến dịch quảng cáo ở Mỹ.",
+    "predict": "Có"
+  },
+  {
+    "question": "Con chim đang làm gì?",
+    "image_id": "12959",
+    "image_name": "COCO_val2014_000000012959.jpg",
+    "explanation": [
+      "con chim đang bay lượn trên bầu trời",
+      "nó ở trên không với đôi cánh dang rộng",
+      "nó đang bay lên phía trên một tòa nhà"
+    ],
+    "answer": "bay",
+    "question_id": "12959004",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Chim đang bay và có vẻ như đang nhảy hoặc lướt nhẹ trên không.",
+    "predict": "Nhảy"
+  },
+  {
+    "question": "Xe buýt này có sơn lót không?",
+    "image_id": "526459",
+    "image_name": "COCO_val2014_000000526459.jpg",
+    "explanation": [
+      "các cửa sổ được che phủ và nó có màu trắng",
+      "nó đang trong quá trình được sơn",
+      "chiếc xe buýt được phủ hai màu sơn"
+    ],
+    "answer": "có",
+    "question_id": "526459000",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Xe buýt có sơn lót, thể hiện qua lớp sơn màu xanh nhạt trên thân xe.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một nhà hàng không?",
+    "image_id": "144162",
+    "image_name": "COCO_val2014_000000144162.jpg",
+    "explanation": [
+      "có màn hình máy tính trong đó và không có thức ăn",
+      "có khá một vài màn hình máy tính và bàn làm việc",
+      "có một cái bàn và một bức tường toàn màn hình máy tính"
+    ],
+    "answer": "không",
+    "question_id": "144162001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Không có bàn ăn, ghế ngồi hoặc bất kỳ dấu hiệu nào của một nhà hàng trong hình ảnh.  Đây là một phòng máy tính hoặc trung tâm điều khiển.",
+    "predict": "No"
+  },
+  {
+    "question": "Đây là loại phòng gì thế?",
+    "image_id": "537513",
+    "image_name": "COCO_val2014_000000537513.jpg",
+    "explanation": [
+      "có một tấm nệm với những chiếc gối",
+      "có sẵn giường và tủ quần áo",
+      "có một cái giường."
+    ],
+    "answer": "phòng ngủ",
+    "question_id": "537513006",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng khách sạn"
+  },
+  {
+    "question": "Đây là loại phòng nào?",
+    "image_id": "537672",
+    "image_name": "COCO_val2014_000000537672.jpg",
+    "explanation": [
+      "có một cái tủ lạnh lớn với nam châm trên đó",
+      "nó có một thiết bị được thiết kế đặc biệt để làm mát và đông lạnh thực phẩm dễ hỏng",
+      "tủ lạnh ở trong bếp và sàn nhà lát gạch"
+    ],
+    "answer": "bếp",
+    "question_id": "537672004",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Phòng có ghế, tủ lạnh và không gian mở, phù hợp với không gian sinh hoạt chung.",
+    "predict": "Phòng khách"
+  },
+  {
+    "question": "Vòi chữa cháy có cần sơn không?",
+    "image_id": "537964",
+    "image_name": "COCO_val2014_000000537964.jpg",
+    "explanation": [
+      "nó có nhiều vết xước",
+      "sơn trên đó đang bong tróc",
+      "có những vết đổi màu trên thân"
+    ],
+    "answer": "có",
+    "question_id": "537964002",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Vòi chữa cháy có sơn màu đỏ, cho thấy nó đã được sơn.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng gì?",
+    "image_id": "538092",
+    "image_name": "COCO_val2014_000000538092.jpg",
+    "explanation": [
+      "có một bếp và bồn rửa bên trái và tủ trên tường",
+      "nó có một cái bếp và một cái bồn rửa",
+      "nơi này dùng để lưu trữ nguyên liệu và chuẩn bị bữa ăn"
+    ],
+    "answer": "phòng bếp",
+    "question_id": "538092000",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Khu vực bếp"
+  },
+  {
+    "question": "Người đàn ông này đang làm gì?",
+    "image_id": "407067",
+    "image_name": "COCO_val2014_000000407067.jpg",
+    "explanation": [
+      "anh ta đang ở trên không với một chiếc ván trượt.",
+      "anh ấy đang thực hiện những pha nhào lộn với ván trượt và rào chắn",
+      "anh ấy đang làm trò trên ván trượt"
+    ],
+    "answer": "trượt ván",
+    "question_id": "407067000",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Đạp xe lướt"
+  },
+  {
+    "question": "Đây là nơi như thế nào?",
+    "image_id": "482927",
+    "image_name": "COCO_val2014_000000482927.jpg",
+    "explanation": [
+      "có một chuyến tàu dừng lại ở trung tâm của địa điểm",
+      "có những người đang đứng trên sân ga chờ lên tàu",
+      "có một bến tàu có mái che mà mọi người ra vào tàu"
+    ],
+    "answer": "ga xe lửa",
+    "question_id": "482927003",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một toà nhà lớn, có vẻ là một nhà ga tàu hỏa hoặc nhà ga xe lửa, với một đoàn tàu đang đậu.  Kiến trúc của nhà ga có vẻ cổ điển, với mái vòm và các cột trụ lớn.  Điều này cho thấy đây là một nơi giao thông công cộng quan trọng, có lẽ là một nhà ga lớn hoặc một nhà ga có lịch sử lâu đời.",
+    "predict": "Tổng hợp"
+  },
+  {
+    "question": "Bếp ga hay điện?",
+    "image_id": "13991",
+    "image_name": "COCO_val2014_000000013991.jpg",
+    "explanation": [
+      "hai trong số các đầu đốt của nó có thể nhìn thấy",
+      "các lò đốt trên bếp này sử dụng gas để nấu ăn",
+      "có thể nhìn thấy đầu đốt gas"
+    ],
+    "answer": "gas",
+    "question_id": "13991003",
+    "question_type": "is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Điện"
+  },
+  {
+    "question": "Môn thể thao nào đang được chơi?",
+    "image_id": "407291",
+    "image_name": "COCO_val2014_000000407291.jpg",
+    "explanation": [
+      "người đàn ông đang đánh một quả bóng tennis bằng vợt",
+      "nó diễn ra trên một sân quần vợt",
+      "người chơi đang vung cây vợt tennis vào một quả tennis"
+    ],
+    "answer": "quần vợt",
+    "question_id": "407291001",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một người đang chơi tennis, với vợt và quả bóng tennis rõ ràng.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Đây là loại ga nào?",
+    "image_id": "538463",
+    "image_name": "COCO_val2014_000000538463.jpg",
+    "explanation": [
+      "có một đoàn tàu trên đường ray",
+      "có một đầu máy vào khung cảnh",
+      "mọi người đang chờ đợi để được lên tàu"
+    ],
+    "answer": "ga tàu",
+    "question_id": "538463001",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Ga tàu"
+  },
+  {
+    "question": "Đây là loại phòng gì?",
+    "image_id": "538497",
+    "image_name": "COCO_val2014_000000538497.jpg",
+    "explanation": [
+      "có một nhà vệ sinh được xây dựng trên sàn",
+      "có một nhà vệ sinh trong sàn",
+      "có nhà vệ sinh và thùng rác."
+    ],
+    "answer": "phòng tắm",
+    "question_id": "538497000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng vệ sinh"
+  },
+  {
+    "question": "Đây có phải là tàu chở khách không?",
+    "image_id": "276437",
+    "image_name": "COCO_val2014_000000276437.jpg",
+    "explanation": [
+      "đây là tàu Amtrak và chúng chở hành khách.",
+      "các toa tàu là hai tầng với cửa sổ cho hành khách nhìn ra ngoài",
+      "những toa tàu có nhiều cửa sổ trên đó"
+    ],
+    "answer": "có",
+    "question_id": "276437007",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Tàu có cửa sổ và thiết kế của một tàu chở khách",
+    "predict": "Có"
+  },
+  {
+    "question": "Cái gì ở trên bồn cầu?",
+    "image_id": "14352",
+    "image_name": "COCO_val2014_000000014352.jpg",
+    "explanation": [
+      "có một cửa sổ với ánh sáng chiếu xuyên qua nó trên trần nhà",
+      "có ánh sáng chiếu vào phòng từ bên ngoài từ trên cao",
+      "bầu trời có thể được nhìn thấy qua lớp kính"
+    ],
+    "answer": "cửa sổ trời",
+    "question_id": "14352003",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Trần nhà nằm trên bồn cầu, thể hiện vị trí của nó trong không gian phòng tắm.",
+    "predict": "Trần nhà"
+  },
+  {
+    "question": "Cậu bé nhỏ có đang chạy không?",
+    "image_id": "155319",
+    "image_name": "COCO_val2014_000000155319.jpg",
+    "explanation": [
+      "anh ấy đang cố gắng lấy con diều",
+      "đầu gối của cậu bé bị cong và hai chân của cậu ấy đang di chuyển trước chân kia",
+      "chân anh ấy đang chuyển động và anh ấy đang vung tay"
+    ],
+    "answer": "có",
+    "question_id": "155319001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Cậu bé nhỏ đang chạy theo hướng của chiếc diều.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người này đang cầm cái gì?",
+    "image_id": "155319",
+    "image_name": "COCO_val2014_000000155319.jpg",
+    "explanation": [
+      "có một sợi dây buộc vào đồ chơi để bay lên không trung",
+      "người đàn ông có một sợi dây trong tay và các con của anh ấy đang đứng cạnh một cái diều đã rơi xuống đất",
+      "có một con diều gắn vào một sợi dây trong tay người đàn ông"
+    ],
+    "answer": "diều",
+    "question_id": "155319003",
+    "question_type": "what is this",
+    "answer_type": "other",
+    "explain": "Người đàn ông ở phía bên phải hình ảnh đang cầm dây của một chiếc diều đang bay trên cát.",
+    "predict": "Kite"
+  },
+  {
+    "question": "Đây có phải là đường ray xe lửa không?",
+    "image_id": "14450",
+    "image_name": "COCO_val2014_000000014450.jpg",
+    "explanation": [
+      "có vật liệu theo mẫu trên mặt đất",
+      "một con tàu đang sử dụng nó để di chuyển",
+      "có ba đường ray trên mặt đất"
+    ],
+    "answer": "đúng",
+    "question_id": "14450002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh rõ ràng cho thấy một đường ray xe lửa được xây dựng trên địa hình gồ ghề, với một đoàn tàu đang di chuyển trên đó.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một bữa ăn lành mạnh?",
+    "image_id": "461172",
+    "image_name": "COCO_val2014_000000461172.jpg",
+    "explanation": [
+      "nó bao gồm rau củ và chỉ một lượng nhỏ trái cây",
+      "đó là món salad trái cây và rau củ",
+      "có rất nhiều rau củ và trái cây"
+    ],
+    "answer": "có",
+    "question_id": "461172000",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một bữa ăn có nhiều loại thực phẩm tươi sống, bao gồm rau xanh, trái cây, đậu và sữa chua, tất cả đều là những nguồn cung cấp chất dinh dưỡng tốt cho sức khỏe.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một trò chơi chuyên nghiệp?",
+    "image_id": "264572",
+    "image_name": "COCO_val2014_000000264572.jpg",
+    "explanation": [
+      "một đứa trẻ đang chuẩn bị ném bóng",
+      "đó là một trò chơi giải đấu nhỏ với trẻ em chơi",
+      "đó là một cậu bé tuổi đi học đang ném bóng chày"
+    ],
+    "answer": "không",
+    "question_id": "264572002",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Trò chơi diễn ra trên một sân vận động có bảng hiệu, cho thấy đây là một trận đấu chuyên nghiệp.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là khu dân cư?",
+    "image_id": "538913",
+    "image_name": "COCO_val2014_000000538913.jpg",
+    "explanation": [
+      "đó là một bãi biển có nhân viên cứu hộ làm nhiệm vụ đảm bảo an toàn",
+      "đó là một nhân viên cứu hộ đứng ở một bãi biển",
+      "các nhân viên cứu hộ được tìm thấy trên các bãi biển công cộng"
+    ],
+    "answer": "không",
+    "question_id": "538913006",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một bãi biển với một tòa nhà lặn và một người phụ nữ mặc đồ bơi, không có dấu hiệu của một khu dân cư.",
+    "predict": "No"
+  },
+  {
+    "question": "Phòng này có vẻ thoải mái không?",
+    "image_id": "145746",
+    "image_name": "COCO_val2014_000000145746.jpg",
+    "explanation": [
+      "nó trông sạch sẽ và dễ chịu",
+      "căn phòng có một bồn tắm lớn, sâu và một chiếc giường",
+      "có một bồn tắm lớn ở giữa phòng"
+    ],
+    "answer": "đúng",
+    "question_id": "145746001",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Phòng có giường, tủ, và bồn tắm, tạo cảm giác thoải mái và tiện nghi.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hàng rào trông có vẻ được xây dựng bằng tay?",
+    "image_id": "14743",
+    "image_name": "COCO_val2014_000000014743.jpg",
+    "explanation": [
+      "nó không được dựng lên một cách tốt",
+      "hàng rào rất không đều và được làm từ những mảnh thô",
+      "nó được làm một cách thô sơ và khoảng cách giữa các phần không đều"
+    ],
+    "answer": "có",
+    "question_id": "14743000",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Hàng rào được làm từ các thanh gỗ nhỏ, có vẻ như được cắt và lắp ráp thủ công, không phải là hàng rào hiện đại được sản xuất bằng máy móc.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông đang chơi thể thao gì?",
+    "image_id": "145824",
+    "image_name": "COCO_val2014_000000145824.jpg",
+    "explanation": [
+      "anh ấy đang đi giày trượt tuyết và cầm gậy trượt tuyết",
+      "ông có các thiết bị thích hợp, và có tuyết",
+      "anh ấy đang đeo ván trượt và leo núi bằng gậy"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "145824002",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang đi trượt tuyết trên sườn đồi phủ đầy tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Đứa trẻ đang cầm cái gì?",
+    "image_id": "548592",
+    "image_name": "COCO_val2014_000000548592.jpg",
+    "explanation": [
+      "bạn có thể thấy sợi dây gắn vào con diều mà cậu bé đang thả",
+      "cậu bé đang cầm một sợi dây mang theo một đồ vật bay trong không khí.",
+      "cậu ấy đang chạy với tay cầm dây diều."
+    ],
+    "answer": "chiếc diều",
+    "question_id": "548592001",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Đứa trẻ đang cầm một cái lò xo, có thể dùng để kéo dây của chiếc diều.",
+    "predict": "Cái lò xo"
+  },
+  {
+    "question": "Cậu bé đội mũ đỏ đang làm gì?",
+    "image_id": "408049",
+    "image_name": "COCO_val2014_000000408049.jpg",
+    "explanation": [
+      "anh ta đang đi trên ván trượt.",
+      "cậu ấy có trang thiết bị phù hợp, và có tuyết",
+      "họ đang trượt tuyết trong tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "408049000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "Cậu bé đội mũ đỏ đang đứng trên tuyết, không có hành động nào khác được thể hiện trong hình ảnh.",
+    "predict": "Đang đứng"
+  },
+  {
+    "question": "Tàu đang di chuyển?",
+    "image_id": "539143",
+    "image_name": "COCO_val2014_000000539143.jpg",
+    "explanation": [
+      "nó không đậu ở ga xe lửa và dường như không có cánh cửa nào của nó mở",
+      "nó không dừng lại ở nhà ga và đang di chuyển dưới một cây cầu",
+      "nó đang di chuyển trên đường ray dưới gầm cầu"
+    ],
+    "answer": "đúng",
+    "question_id": "539143008",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Tàu đang dừng tại ga, nhưng vẫn đang di chuyển trên đường ray.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là một quán bar không?",
+    "image_id": "277020",
+    "image_name": "COCO_val2014_000000277020.jpg",
+    "explanation": [
+      "có đồ uống trên một quầy dài với mọi người đang ăn uống",
+      "họ được phục vụ đồ ăn và thức uống tại quầy",
+      "những người đàn ông ngồi ở một quầy cao với đồ uống"
+    ],
+    "answer": "đúng",
+    "question_id": "277020003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng nào?",
+    "image_id": "264628",
+    "image_name": "COCO_val2014_000000264628.jpg",
+    "explanation": [
+      "bồn rửa và gương được thắp sáng để sử dụng",
+      "có một thanh treo khăn bên cạnh bồn rửa và kệ có cuộn giấy vệ sinh",
+      "có một khăn tắm trong phòng"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "264628001",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Thời tiết có ấm không?",
+    "image_id": "277174",
+    "image_name": "COCO_val2014_000000277174.jpg",
+    "explanation": [
+      "mọi người đang chơi trong đại dương dưới ánh mặt trời rực rỡ",
+      "mọi người đang ở bãi biển với quần áo mùa hè",
+      "mọi người đang ở bãi biển"
+    ],
+    "answer": "có",
+    "question_id": "277174003",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy bầu trời xanh trong, không có mây đen, điều này thường cho thấy thời tiết nắng đẹp và ấm áp.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người phụ nữ có đang hút thuốc bằng tay trái không?",
+    "image_id": "343149",
+    "image_name": "COCO_val2014_000000343149.jpg",
+    "explanation": [
+      "người phụ nữ đang cầm một điếu xì gà bằng tay trái",
+      "cô ấy đang hút thuốc bên phải.",
+      "bạn có thể thấy cánh tay trái của cô ấy ở bên cạnh"
+    ],
+    "answer": "không",
+    "question_id": "343149002",
+    "question_type": "is the woman",
+    "answer_type": "yes/no",
+    "explain": "Nữ giới đang cầm một vật thể gần miệng, có thể là điếu thuốc, bằng tay trái.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại tòa nhà gì?",
+    "image_id": "539557",
+    "image_name": "COCO_val2014_000000539557.jpg",
+    "explanation": [
+      "bạn có thể thấy đỉnh tòa nhà được thiết kế giống như một ngọn hải đăng",
+      "đỉnh tòa nhà có cửa sổ với ánh sáng phía sau",
+      "một con tàu đang đến gần tòa nhà."
+    ],
+    "answer": "ngọn hải đăng",
+    "question_id": "539557002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Tòa nhà"
+  },
+  {
+    "question": "Ai đang đi xe máy màu đỏ?",
+    "image_id": "68093",
+    "image_name": "COCO_val2014_000000068093.jpg",
+    "explanation": [
+      "cô ấy đang mặc một chiếc áo len làm nổi bật hình dáng của mình",
+      "cô ấy có bộ ngực lớn và quần jean bó sát",
+      "cô ấy đang mặc quần áo nữ tính và có bộ ngực"
+    ],
+    "answer": "người phụ nữ",
+    "question_id": "68093002",
+    "question_type": "who is",
+    "answer_type": "other",
+    "explain": "Người phụ nữ đang ngồi trên xe máy màu đỏ, thể hiện rõ ràng hành động lái xe máy.",
+    "predict": "Người phụ nữ"
+  },
+  {
+    "question": "Người đàn ông bên phải đang làm gì?",
+    "image_id": "539636",
+    "image_name": "COCO_val2014_000000539636.jpg",
+    "explanation": [
+      "anh ấy đi trượt tuyết và có gậy",
+      "anh ta có hai gậy trượt tuyết và ván trượt",
+      "anh ấy có trang bị phù hợp, và có tuyết."
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "539636003",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang đứng trên tuyết và cầm tay vịn, cho thấy anh ta đang đi trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Có phải là ban ngày không?",
+    "image_id": "408624",
+    "image_name": "COCO_val2014_000000408624.jpg",
+    "explanation": [
+      "có đèn sáng để chiếu sáng khu vực",
+      "những ngọn đèn được thắp sáng và bầu trời tối tăm",
+      "bầu trời đen kịt và có đèn bật sáng"
+    ],
+    "answer": "không",
+    "question_id": "408624003",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh chụp ban đêm, trời tối và không có ánh sáng mặt trời.",
+    "predict": "No"
+  },
+  {
+    "question": "Loại gia súc nào đang gặm cỏ?",
+    "image_id": "539784",
+    "image_name": "COCO_val2014_000000539784.jpg",
+    "explanation": [
+      "chúng có áo khoác len, cơ thể nhẹ và đầu tối",
+      "tất cả chúng đều được bao phủ bởi len",
+      "chúng được bao phủ trong len"
+    ],
+    "answer": "cừu",
+    "question_id": "539784001",
+    "question_type": "what type of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một đàn heo đang gặm cỏ trên một bãi cỏ cạnh đường.",
+    "predict": "Heo"
+  },
+  {
+    "question": "Đứa trẻ này có biết sự khác biệt giữa bánh maple và bánh rán sô cô la không?",
+    "image_id": "539787",
+    "image_name": "COCO_val2014_000000539787.jpg",
+    "explanation": [
+      "đứa trẻ chỉ là một đứa bé",
+      "đứa trẻ vẫn còn là một em bé.",
+      "cậu bé không chú ý và còn quá nhỏ để hiểu"
+    ],
+    "answer": "không",
+    "question_id": "539787000",
+    "question_type": "does this",
+    "answer_type": "yes/no",
+    "explain": "Đứa trẻ đang được ăn một chiếc bánh rán sô cô la, cho thấy sự khác biệt về hương vị và màu sắc so với bánh maple.",
+    "predict": "Có"
+  },
+  {
+    "question": "Loại mèo gì đây?",
+    "image_id": "408736",
+    "image_name": "COCO_val2014_000000408736.jpg",
+    "explanation": [
+      "anh ta có màu xám với mặt và chân đen",
+      "nó có lông trắng và mắt xanh.",
+      "nó có cơ thể trắng với mặt đen"
+    ],
+    "answer": "siêm",
+    "question_id": "408736004",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Mèo trong ảnh có bộ lông màu xám với các đốm đen đặc trưng của giống Siamese.",
+    "predict": "Siamese"
+  },
+  {
+    "question": "Trời đang mưa à?",
+    "image_id": "408773",
+    "image_name": "COCO_val2014_000000408773.jpg",
+    "explanation": [
+      "mặt đất không ướt",
+      "môi trường và mọi người trong đó đều khô ráo",
+      "không có nước trên bánh xe ván trượt"
+    ],
+    "answer": "không",
+    "question_id": "408773001",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Không có dấu hiệu của mưa trong hình ảnh. Bầu trời và không gian xung quanh đều khô ráo.",
+    "predict": "No"
+  },
+  {
+    "question": "Loại trò chơi giải trí nào ở hậu cảnh?",
+    "image_id": "277865",
+    "image_name": "COCO_val2014_000000277865.jpg",
+    "explanation": [
+      "nó cao và tròn và có thể dễ dàng nhìn thấy từ xa",
+      "nó cao và tròn",
+      "nó tròn và có chỗ ngồi ở bên ngoài đi xung quanh"
+    ],
+    "answer": "đu quay",
+    "question_id": "277865003",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Thang cuốn"
+  },
+  {
+    "question": "Đây có phải là một khách sạn không?",
+    "image_id": "277865",
+    "image_name": "COCO_val2014_000000277865.jpg",
+    "explanation": [
+      "bồn tắm nhìn ra một vùng nước với một công viên giải trí ở đối diện",
+      "cửa sổ của phòng tắm nhìn ra một khu vực du lịch",
+      "chai cỡ du lịch được đặt cạnh bồn tắm"
+    ],
+    "answer": "có",
+    "question_id": "277865007",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Trang trí sang trọng và thiết bị hiện đại trong phòng tắm cho thấy đây có thể là một phòng khách sạn cao cấp.",
+    "predict": "Có"
+  },
+  {
+    "question": "Xe buýt này đi đâu?",
+    "image_id": "408950",
+    "image_name": "COCO_val2014_000000408950.jpg",
+    "explanation": [
+      "tấm biển phía trước xe buýt ghi \"victoria\"",
+      "đó là những gì biển báo trên mặt trước của xe buýt.",
+      "biển báo điểm đến cho biết nó sẽ đi đến Victoria"
+    ],
+    "answer": "victoria",
+    "question_id": "408950001",
+    "question_type": "none of the above",
+    "answer_type": "other",
+    "explain": "Xe buýt hiển thị tuyến số 38 và đến Victoria.",
+    "predict": "Victoria"
+  },
+  {
+    "question": "Bức tranh này có màu không?",
+    "image_id": "146813",
+    "image_name": "COCO_val2014_000000146813.jpg",
+    "explanation": [
+      "chiếc giường có đầy đủ màu sắc",
+      "màu rám nắng của tấm ga trải giường có mặt",
+      "bạn có thể thấy màu be trên ga trải giường"
+    ],
+    "answer": "đúng",
+    "question_id": "146813008",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Trời có mưa không?",
+    "image_id": "540093",
+    "image_name": "COCO_val2014_000000540093.jpg",
+    "explanation": [
+      "nội thất được che bằng bạt để bảo vệ",
+      "xi măng và nhựa đường bị ướt",
+      "họ là những người sử dụng ô khi đi bộ trên vỉa hè"
+    ],
+    "answer": "có",
+    "question_id": "540093000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Trời có mưa vì có người đang cầm ô và mặt đường ướt.",
+    "predict": "Có"
+  },
+  {
+    "question": "Những loại động vật được hiển thị?",
+    "image_id": "540107",
+    "image_name": "COCO_val2014_000000540107.jpg",
+    "explanation": [
+      "chúng có đôi tai dài và vòi",
+      "chúng lớn, màu nâu, với đầu và thân voi",
+      "chúng là những con vật lớn với vòi"
+    ],
+    "answer": "voi",
+    "question_id": "540107000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một đàn tê giác đang đi bộ trên bờ sông.",
+    "predict": "Tê giác"
+  },
+  {
+    "question": "Cửa sổ có mở không?",
+    "image_id": "278006",
+    "image_name": "COCO_val2014_000000278006.jpg",
+    "explanation": [
+      "có ánh sáng chói phản chiếu từ những tấm kính",
+      "bầu trời đang phản chiếu ra khỏi các tấm cửa sổ kính được đóng lại",
+      "cửa sổ nằm ngang với bệ cửa sổ"
+    ],
+    "answer": "không",
+    "question_id": "278006005",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Các cửa sổ trong hình ảnh đều có vẻ mở ra, cho thấy ánh sáng tự nhiên đang chiếu vào bên trong.",
+    "predict": "Có"
+  },
+  {
+    "question": "Sàn nhà được làm bằng gì?",
+    "image_id": "374017",
+    "image_name": "COCO_val2014_000000374017.jpg",
+    "explanation": [
+      "nó có nhiều sắc thái màu nâu khác nhau và bạn có thể thấy các vân gỗ",
+      "sàn nhà có màu nâu và vân gỗ rất rõ",
+      "bạn có thể thấy các đường vân trong gỗ"
+    ],
+    "answer": "gỗ",
+    "question_id": "374017000",
+    "question_type": "what is the",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Màu gỗ"
+  },
+  {
+    "question": "Cô ấy có đang cầu nguyện không?",
+    "image_id": "374017",
+    "image_name": "COCO_val2014_000000374017.jpg",
+    "explanation": [
+      "cô ấy đang nằm trên giường.",
+      "cô ấy dường như không chắp tay hoặc quỳ gối",
+      "cô ấy đang nằm ngửa"
+    ],
+    "answer": "không",
+    "question_id": "374017002",
+    "question_type": "is",
+    "answer_type": "yes/no",
+    "explain": "Cô ấy đang đặt tay lên đầu, biểu hiện thường thấy khi cầu nguyện.",
+    "predict": "Có"
+  },
+  {
+    "question": "Trong cốc có đồ uống gì?",
+    "image_id": "540172",
+    "image_name": "COCO_val2014_000000540172.jpg",
+    "explanation": [
+      "nó ở trong một cốc cà phê và có màu nâu",
+      "có một tách cà phê đầy cà phê cạnh bánh mì baguette",
+      "đồ uống có màu nâu và đã được khuấy"
+    ],
+    "answer": "cà phê",
+    "question_id": "540172002",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Cốc có vẻ chứa cà phê, dựa trên màu sắc và hình dạng của nó.",
+    "predict": "Cà phê"
+  },
+  {
+    "question": "Người đàn ông đang ăn gì?",
+    "image_id": "540196",
+    "image_name": "COCO_val2014_000000540196.jpg",
+    "explanation": [
+      "có một quả màu vàng trong tay phải của mình giống như một quả chuối",
+      "nó là một loại trái cây màu vàng có vỏ trên đó",
+      "nó màu vàng và có vỏ"
+    ],
+    "answer": "chuối",
+    "question_id": "540196000",
+    "question_type": "what is the man",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang cầm và ăn một quả chuối.",
+    "predict": "Banana"
+  },
+  {
+    "question": "Đây là môn thể thao gì?",
+    "image_id": "409178",
+    "image_name": "COCO_val2014_000000409178.jpg",
+    "explanation": [
+      "người đàn ông có ván trượt dưới chân và gậy trượt tuyết",
+      "cây gậy trong tay anh ấy bên cạnh hai ván trượt trên chân anh ấy",
+      "người đó đang đeo kính trượt tuyết và có hai ván trượt dưới chân"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "409178007",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang đi trượt tuyết trên sương mù, rõ ràng là môn thể thao trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Đây có phải là một con thú nhồi bông không?",
+    "image_id": "15978",
+    "image_name": "COCO_val2014_000000015978.jpg",
+    "explanation": [
+      "nó có vẻ ngoài lông tự nhiên",
+      "nó còn sống và đang thở",
+      "con vật này là một con mèo sống thật"
+    ],
+    "answer": "không",
+    "question_id": "15978001",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Có một con mèo trong hình, không phải thú nhồi bông.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây có phải là Thomas the Tank Engine không?",
+    "image_id": "409241",
+    "image_name": "COCO_val2014_000000409241.jpg",
+    "explanation": [
+      "nó là một chiếc tàu thật, không phải đồ chơi",
+      "nó là một chuyến tàu thật không phải là phim hoạt hình",
+      "đây là tàu chạy bằng động cơ hơi nước ngoài đời thực"
+    ],
+    "answer": "không",
+    "question_id": "409241002",
+    "question_type": "is this",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy hai đoàn tàu hơi nước, không phải Thomas the Tank Engine.",
+    "predict": "No"
+  },
+  {
+    "question": "Đây có phải là một chuyến tàu hiện đại?",
+    "image_id": "409241",
+    "image_name": "COCO_val2014_000000409241.jpg",
+    "explanation": [
+      "nó là một đầu máy xe lửa hơi nước từ cuối những năm 1900.",
+      "nó cần than và hơi nước để hoạt động.",
+      "nó có hình dạng đen cổ điển."
+    ],
+    "answer": "không",
+    "question_id": "409241003",
+    "question_type": "is this a",
+    "answer_type": "yes/no",
+    "explain": "Tàu trong ảnh là loại tàu hơi nước cổ điển, không phải tàu hiện đại.",
+    "predict": "No"
+  },
+  {
+    "question": "Họ đang chơi gì vậy?",
+    "image_id": "409291",
+    "image_name": "COCO_val2014_000000409291.jpg",
+    "explanation": [
+      "cô bé có găng tay bóng chày trên tay",
+      "cả hai người phụ nữ và cô gái đều mặc áo bóng chày và cô gái đeo găng tay bóng chày",
+      "cô ấy đang mặc áo bóng chày và cô gái có găng tay bóng chày"
+    ],
+    "answer": "bóng chày",
+    "question_id": "409291004",
+    "question_type": "what are",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người lớn và một trẻ em đang mặc áo đồng phục thể thao, có vẻ như đang chơi bóng chày.",
+    "predict": "Thể thao"
+  },
+  {
+    "question": "Có mây không?",
+    "image_id": "278295",
+    "image_name": "COCO_val2014_000000278295.jpg",
+    "explanation": [
+      "có những đám mây trên bầu trời",
+      "có những đám mây tích lũy trắng cao trong ảnh",
+      "có những đám mây trắng phía trên những ngọn núi"
+    ],
+    "answer": "đúng",
+    "question_id": "278295000",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy rõ ràng nhiều đám mây trắng bao phủ khu vực xung quanh núi.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng gì?",
+    "image_id": "278338",
+    "image_name": "COCO_val2014_000000278338.jpg",
+    "explanation": [
+      "có một bồn tắm và bồn rửa trong phòng",
+      "có một bồn rửa và bồn tắm trong đó",
+      "có một bồn tắm nằm cạnh một nhóm hai bồn rửa mặt"
+    ],
+    "answer": "phòng tắm",
+    "question_id": "278338000",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một phòng tắm với bồn tắm, bồn rửa mặt, gương, khăn tắm và các vật dụng vệ sinh khác.",
+    "predict": "Phòng tắm"
+  },
+  {
+    "question": "Món ăn nào được chụp trong ảnh?",
+    "image_id": "278365",
+    "image_name": "COCO_val2014_000000278365.jpg",
+    "explanation": [
+      "có hộp pizza trước mặt người phụ nữ",
+      "có những hộp pizza và một miếng pizza trên đĩa",
+      "nó có hình tam giác và có sốt đỏ và phô mai vàng"
+    ],
+    "answer": "pizza",
+    "question_id": "278365003",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Ảnh chụp một chiếc đĩa pizza trên bàn.",
+    "predict": "Pizza"
+  },
+  {
+    "question": "Người đó đang làm gì?",
+    "image_id": "540556",
+    "image_name": "COCO_val2014_000000540556.jpg",
+    "explanation": [
+      "anh ấy đang trượt ván trên đoạn đường dốc",
+      "anh ấy đang ở trên một tấm ván có 4 bánh xe nhỏ",
+      "anh đang cưỡi ván trượt tại một công viên trượt ván"
+    ],
+    "answer": "trượt ván",
+    "question_id": "540556000",
+    "question_type": "what is the person",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Đạp xe lướt"
+  },
+  {
+    "question": "Người phụ nữ có trông như là một skater có kinh nghiệm không?",
+    "image_id": "16285",
+    "image_name": "COCO_val2014_000000016285.jpg",
+    "explanation": [
+      "tay cô ấy dang ra hai bên để giữ thăng bằng và cô ấy căng thẳng như thể đang lo lắng",
+      "tay cô ấy ở tư thế thăng bằng không chắc chắn",
+      "cô ấy đang gặp vấn đề khi lên ván"
+    ],
+    "answer": "không",
+    "question_id": "16285002",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Người phụ nữ đang điều khiển xe đẩy một cách tự tin và có kỹ năng, cho thấy kinh nghiệm trong việc điều khiển xe đẩy.",
+    "predict": "Có"
+  },
+  {
+    "question": "Người đàn ông trong nước đang chơi môn thể thao nào?",
+    "image_id": "409523",
+    "image_name": "COCO_val2014_000000409523.jpg",
+    "explanation": [
+      "anh ấy đang cưỡi một chiếc ván lướt sóng màu trắng và xanh lá cây trên đỉnh một con sóng",
+      "anh ta đang cưỡi ván lướt sóng.",
+      "anh ấy đang ở trên một tấm ván trên một con sóng"
+    ],
+    "answer": "lướt sóng",
+    "question_id": "409523000",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Người đàn ông đang đứng trên ván trượt sóng, điều này cho thấy anh ta đang chơi môn thể thao surfing.",
+    "predict": "Surfing"
+  },
+  {
+    "question": "Đây là trò chơi gì?",
+    "image_id": "16308",
+    "image_name": "COCO_val2014_000000016308.jpg",
+    "explanation": [
+      "serena Williams đang chơi và cô ấy là một vận động viên quần vợt",
+      "người phụ nữ đang mặc một bộ quần vợt cầm một cây vợt",
+      "người phụ nữ sắp chơi một trận quần vợt"
+    ],
+    "answer": "quần vợt",
+    "question_id": "16308000",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một người đang cầm vợt tennis và đứng trên sân cỏ, đây là đặc điểm của môn thể thao tennis.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Cô ấy đang làm gì vậy?",
+    "image_id": "147393",
+    "image_name": "COCO_val2014_000000147393.jpg",
+    "explanation": [
+      "cô ấy có trang bị phù hợp và có tuyết",
+      "cô ấy đang đeo găng tay và trượt tuyết trên ván trượt",
+      "cô ấy đang trượt trên ván trượt"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "147393001",
+    "question_type": "what is",
+    "answer_type": "other",
+    "explain": "Cô ấy đang đứng trên tuyết và sử dụng trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Có phải đang có bão không?",
+    "image_id": "278535",
+    "image_name": "COCO_val2014_000000278535.jpg",
+    "explanation": [
+      "những đám mây đen tối và đáng ngại",
+      "có rất nhiều mây trên bầu trời.",
+      "có những đám mây bão trên bầu trời"
+    ],
+    "answer": "đúng",
+    "question_id": "278535002",
+    "question_type": "is it",
+    "answer_type": "yes/no",
+    "explain": "Trời trong ảnh có nhiều mây đen, cho thấy có khả năng có bão.",
+    "predict": "Có"
+  },
+  {
+    "question": "Có phải đa số cửa sổ của xe tải mở xuống không?",
+    "image_id": "278601",
+    "image_name": "COCO_val2014_000000278601.jpg",
+    "explanation": [
+      "tất cả cửa sổ xe tải đều mở",
+      "không có ánh sáng chói ở khoảng trống trên cửa",
+      "bạn có thể nhìn thấy cửa sổ mở xuống một nửa ở phía bên phải của xe tải"
+    ],
+    "answer": "có",
+    "question_id": "278601006",
+    "question_type": "are",
+    "answer_type": "yes/no",
+    "explain": "Xe tải có ít nhất một cửa sổ mở xuống, và có thể có thêm cửa sổ khác mở xuống nhưng không nhìn thấy rõ trong ảnh.",
+    "predict": "Có"
+  },
+  {
+    "question": "Chuột có không dây không?",
+    "image_id": "540926",
+    "image_name": "COCO_val2014_000000540926.jpg",
+    "explanation": [
+      "có một dây nối ở phía sau máy tính xách tay được kết nối với chuột",
+      "có một dây nối với chuột và máy tính",
+      "có một sợi dây nối từ chuột tới laptop"
+    ],
+    "answer": "không",
+    "question_id": "540926001",
+    "question_type": "is the",
+    "answer_type": "yes/no",
+    "explain": "Chuột được đặt trên bàn, có dây nối với máy tính xách tay, cho thấy nó là chuột không dây.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại phòng nào?",
+    "image_id": "540962",
+    "image_name": "COCO_val2014_000000540962.jpg",
+    "explanation": [
+      "có một chiếc ghế sofa và một chiếc ghế dài đối diện với lò sưởi",
+      "nó chứa một bộ phòng phía trước",
+      "nó có hai ghế sofa, một chiếc tivi và một lò sưởi"
+    ],
+    "answer": "phòng khách",
+    "question_id": "540962002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Phòng có bàn ghế, TV, và lò sưởi, đặc trưng của một phòng khách.",
+    "predict": "Phòng khách"
+  },
+  {
+    "question": "Có ai yêu chủ nhân của mình không?",
+    "image_id": "147787",
+    "image_name": "COCO_val2014_000000147787.jpg",
+    "explanation": [
+      "tất cả những con chó đang nhìn ra ngoài",
+      "họ đang nhìn ra ngoài cửa sổ chờ họ về nhà",
+      "ba con chó nhìn ra ngoài cửa sổ chờ ai đó."
+    ],
+    "answer": "đúng",
+    "question_id": "147787002",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Dogs đang nhìn ra ngoài cửa sổ, có vẻ như đang quan sát điều gì đó thu hút sự chú ý của chúng.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hoạt động nào sắp diễn ra?",
+    "image_id": "105732",
+    "image_name": "COCO_val2014_000000105732.jpg",
+    "explanation": [
+      "mọi người đang đứng trên ván trượt",
+      "họ đang ở trên ván trượt và có cột trượt tuyết",
+      "có một số người mặc ván trượt và cầm gậy trượt tuyết"
+    ],
+    "answer": "trượt tuyết",
+    "question_id": "105732007",
+    "question_type": "what",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy nhiều người đang đứng trên tuyết, mặc trang phục và đội mũ bảo hiểm, cầm dùi cui, tất cả đều đang chuẩn bị hoặc đang trong quá trình đi trượt tuyết.",
+    "predict": "Skiing"
+  },
+  {
+    "question": "Môn thể thao nào đang được chơi?",
+    "image_id": "409964",
+    "image_name": "COCO_val2014_000000409964.jpg",
+    "explanation": [
+      "người đàn ông chuẩn bị vung vợt tennis",
+      "người đàn ông đang vung vợt trong một sân kín",
+      "người đàn ông đang vung vợt tennis"
+    ],
+    "answer": "quần vợt",
+    "question_id": "409964009",
+    "question_type": "what sport is",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một người đàn ông đang cầm vợt tennis và chuẩn bị đánh bóng, cho thấy rõ ràng môn thể thao là tennis.",
+    "predict": "Tennis"
+  },
+  {
+    "question": "Những chiếc bánh pizza này có lớp phủ bên trên giống nhau không?",
+    "image_id": "155714",
+    "image_name": "COCO_val2014_000000155714.jpg",
+    "explanation": [
+      "tất cả các phần trông giống hệt nhau",
+      "tất cả đều trông giống nhau về hình thức với sốt đỏ trên cùng",
+      "tất cả các mảnh đều đồng nhất"
+    ],
+    "answer": "có",
+    "question_id": "155714003",
+    "question_type": "do",
+    "answer_type": "yes/no",
+    "explain": "Tất cả các chiếc bánh pizza đều có lớp phủ giống nhau, với phô mai, rau xanh và sốt cà chua.",
+    "predict": "Có"
+  },
+  {
+    "question": "Hôm nay một người có nên mang theo ô không?",
+    "image_id": "147921",
+    "image_name": "COCO_val2014_000000147921.jpg",
+    "explanation": [
+      "bầu trời rất trong xanh",
+      "bầu trời thật quang đãng",
+      "bầu trời xanh và không có mây"
+    ],
+    "answer": "không",
+    "question_id": "147921013",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là loại thức ăn gì?",
+    "image_id": "461572",
+    "image_name": "COCO_val2014_000000461572.jpg",
+    "explanation": [
+      "nó có sốt, phô mai và các loại phủ như pizza",
+      "đó là một miếng bột được phủ sốt và nhân",
+      "nó tròn với lớp vỏ, phô mai và sốt"
+    ],
+    "answer": "pizza",
+    "question_id": "461572002",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "",
+    "predict": "Pizza"
+  },
+  {
+    "question": "Đây là loại động vật gì?",
+    "image_id": "16995",
+    "image_name": "COCO_val2014_000000016995.jpg",
+    "explanation": [
+      "nó có cổ dài và hoa văn đốm của hươu cao cổ",
+      "nó có một cái cổ dài với những đốm",
+      "nó có cổ siêu dài, cao và có đốm nâu"
+    ],
+    "answer": "hươu cao cổ",
+    "question_id": "16995000",
+    "question_type": "what kind of",
+    "answer_type": "other",
+    "explain": "Hình ảnh hiển thị một con ngựa vằn, một loài động vật có vằn đặc trưng trên da, thường thấy ở châu Phi.",
+    "predict": "Giraffe"
+  },
+  {
+    "question": "Người phụ nữ có vẻ thoải mái?",
+    "image_id": "148193",
+    "image_name": "COCO_val2014_000000148193.jpg",
+    "explanation": [
+      "cô đang ngồi xuống và đọc một cuốn sách",
+      "cơ thể cô ấy không cử động và nằm trên mặt đất.",
+      "cô ấy đang ngồi trên một chiếc ghế đọc sách"
+    ],
+    "answer": "có",
+    "question_id": "148193001",
+    "question_type": "does the",
+    "answer_type": "yes/no",
+    "explain": "Người phụ nữ đang ngồi thư giãn trên ghế, đọc sách và có vẻ như đang tận hưởng không gian yên tĩnh.",
+    "predict": "Có"
+  },
+  {
+    "question": "Đây là phòng gì?",
+    "image_id": "279437",
+    "image_name": "COCO_val2014_000000279437.jpg",
+    "explanation": [
+      "có một cái giường trong đó",
+      "có một cái giường trong phòng",
+      "nó có một cái giường với một tấm chăn"
+    ],
+    "answer": "phòng ngủ",
+    "question_id": "279437000",
+    "question_type": "what room is",
+    "answer_type": "other",
+    "explain": "Hình ảnh cho thấy một chiếc giường, một chiếc bàn và một cửa sổ, tất cả đều là các vật dụng thường thấy trong phòng ngủ.",
+    "predict": "Phòng ngủ"
+  },
+  {
+    "question": "Nó có mùi thơm không?",
+    "image_id": "410627",
+    "image_name": "COCO_val2014_000000410627.jpg",
+    "explanation": [
+      "người đàn ông có nụ cười rạng rỡ trên khuôn mặt khi khuấy súp",
+      "người đàn ông khá hài lòng với cái đầu của mình trên cái nồi",
+      "đó là thức ăn trong chảo và người đầu bếp rất vui"
+    ],
+    "answer": "có",
+    "question_id": "410627002",
+    "question_type": "none of the above",
+    "answer_type": "yes/no",
+    "explain": "Hình ảnh cho thấy một người đang nấu ăn, có thể là một món ăn có mùi thơm.",
+    "predict": "Có"
+  },
+  {
+    "question": "Mọi người đang làm gì?",
+    "image_id": "279558",
+    "image_name": "COCO_val2014_000000279558.jpg",
+    "explanation": [
+      "có những con diều trên bầu trời và bạn có thể thấy sợi dây thừng trong tay anh ấy.",
+      "những người dân trên ngọn đồi cỏ này đang nắm giữ những sợi dây được gắn vào những con diều đang bay phía trên họ.",
+      "họ đang ở bãi biển, cầm một sợi dây với một chiếc diều lớn ở giữa không trung"
+    ],
+    "answer": "thả diều",
+    "question_id": "279558003",
+    "question_type": "what are the",
+    "answer_type": "other",
+    "explain": "Mọi người đang thả và quan sát các chiếc diều",
+    "predict": "Kite flying"
+  }
+]

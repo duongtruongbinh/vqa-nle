@@ -18,10 +18,10 @@ TEMPERATURE=1.0
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=250
+MAX_STEPS=2000
 LEARNING_RATE=1e-7
 
-SAVE_STEPS=50
+SAVE_STEPS=150
 LOGGING_STEPS=1
 EVAL_STEPS=1
 
@@ -32,8 +32,8 @@ swift rlhf \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward custom_reasoning_reward \
-    --reward_weights 1 1 1 1 \
+    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward \
+    --reward_weights 1 1 1 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 16 \

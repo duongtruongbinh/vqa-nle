@@ -270,7 +270,6 @@ def evaluate_file(json_path: str, device: str = "cuda", batch_size: int = 8) -> 
     total = 0  
     correct = 0
     all_gt_expls, all_pred_expls = [], []
-    by_type = {}
     
     for item in data:
         total += 1 
@@ -283,34 +282,15 @@ def evaluate_file(json_path: str, device: str = "cuda", batch_size: int = 8) -> 
         all_gt_expls.append(gt_expls)
         all_pred_expls.append(pred_expl)
         
-        ans_type = item["answer_type"]
-        if ans_type not in by_type:
-            by_type[ans_type] = {"gt_expls": [], "pred_expls": [], "total": 0, "correct": 0}
-        
-        by_type[ans_type]["gt_expls"].append(gt_expls)
-        by_type[ans_type]["pred_expls"].append(pred_expl)
-        by_type[ans_type]["total"] += 1
-        
         if pred_ans == gt_ans:
             correct += 1
-            by_type[ans_type]["correct"] += 1
     
     results = {
         "accuracy": (correct / total * 100) if total > 0 else 0,
         "total_examples": total,
         "correct_count": correct,
         "unfiltered_scores": get_nlg_scores(all_gt_expls, all_pred_expls, device, batch_size=batch_size),
-        "by_answer_type": {}
     }
-    
-    for ans_type, data_type in by_type.items():
-        scores = get_nlg_scores(data_type["gt_expls"], data_type["pred_expls"], device, batch_size=batch_size)
-        results["by_answer_type"][ans_type] = {
-            "accuracy": (data_type["correct"] / data_type["total"] * 100),
-            "total_examples": data_type["total"],
-            "correct_count": data_type["correct"],
-            "unfiltered_scores": scores,
-        }
     
     return results
 
@@ -319,11 +299,11 @@ def evaluate_file(json_path: str, device: str = "cuda", batch_size: int = 8) -> 
 # MAIN
 # ============================================================================
 
-FILES_TO_EVALUATE = ['1_250_curr_anstype_ver_3.json', '2_250_curr_anstype_ver_3.json', '3_500_curr_anstype_ver_3.json']
+FILES_TO_EVALUATE = ['sft/checkpoint-2000-merged.json']
 
 def main():
     parser = argparse.ArgumentParser(description="Evaluate VQA predictions")
-    parser.add_argument("--input-dir", type=str, default="results")
+    parser.add_argument("--input-dir", type=str, default="/home/vlai-vqa-nle/minhtq/vqa-nle/src/inference/results")
     parser.add_argument("--device", type=str, default="cuda")
     parser.add_argument("--batch-size", type=int, default=8)
     args = parser.parse_args()
@@ -348,27 +328,18 @@ def main():
         
         all_rows.append({
             "model": model_name,
-            "answer_type": "Overall",
             "total": result["total_examples"],
             "correct": result["correct_count"],
             "accuracy": round(result["accuracy"], 2),
             **{k: round(v, 2) for k, v in result["unfiltered_scores"].items()}
         })
         
-        for ans_type, type_data in result["by_answer_type"].items():
-            all_rows.append({
-                "model": model_name,
-                "answer_type": ans_type,
-                "total": type_data["total_examples"],
-                "correct": type_data["correct_count"],
-                "accuracy": round(type_data["accuracy"], 2),
-                **{k: round(v, 2) for k, v in type_data["unfiltered_scores"].items()}
-            })
-        
         print(f"   ✅ {model_name}: Accuracy={result['accuracy']:.2f}%")
     
     df = pd.DataFrame(all_rows)
-    first_model = os.path.splitext(files[0])[0]
+    # Extract just the filename without subdirectory path
+    first_file_basename = os.path.basename(files[0])
+    first_model = os.path.splitext(first_file_basename)[0]
     csv_path = os.path.join(args.input_dir, f"evaluate_{first_model}_{timestamp}.csv")
     
     df.to_csv(csv_path, index=False, encoding="utf-8")

@@ -5,10 +5,10 @@ export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 MODEL_ID_OR_PATH="/home/vlai-vqa-nle/.cache/huggingface/hub/models--5CD-AI--Vintern-3B-R-beta/snapshots/4fd34d713dfca446cdecc00d921f5038909e3efb"
 MODEL_TYPE="internvl3"
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum/stage1/ViVQA-X_train_stage1.jsonl"
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/only_explain_answer/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
 # OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/only_explain_answer"
 
 # Tham số GRPO
 MAX_LENGTH=4096
@@ -18,10 +18,10 @@ TEMPERATURE=1.0
 EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=250
+MAX_STEPS=1000
 LEARNING_RATE=1e-7
 
-SAVE_STEPS=50
+SAVE_STEPS=150
 LOGGING_STEPS=1
 EVAL_STEPS=1
 
@@ -32,8 +32,8 @@ swift rlhf \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward custom_reasoning_reward \
-    --reward_weights 1 1 1 1 \
+    --reward_funcs custom_format_reward_ViVQA_X_Only_Explain_Answer custom_accuracy_reward custom_explaination_reward_only_explain_answer \
+    --reward_weights 1 1 1 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 16 \
@@ -71,4 +71,4 @@ swift rlhf \
 # dự kiến có thể sử dụng 8 bit sau này
     # --enable_gfpo true \
 #        --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B/v11-20251116-185104/checkpoint-550 \
-echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation + Reasoning"
+echo "Complete!"

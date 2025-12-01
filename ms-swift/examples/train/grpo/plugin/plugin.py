@@ -97,6 +97,90 @@ class CountdownORM(ORM):
 
 orms['external_countdown'] = CountdownORM
 
+class CustomFormatReward_ViVQA_X_Only_Think_Answer(ORM):
+    def __call__(self, completions: List[str], **kwargs) -> List[float]:
+
+        completion_contents = completions
+
+        # Regex cho từng cặp thẻ
+        pat_think = re.compile(r"<think>.*?</think>", re.DOTALL)
+        pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+        
+        scores = []
+        for content in completion_contents:
+            if len(content) == 0 or not content.strip():
+                    scores.append(-1.0)
+                    continue
+            n_pair_think = len(pat_think.findall(content))
+            n_pair_answer = len(pat_answer.findall(content))
+
+            n_think_open   = len(re.findall(r"<think>", content))
+            n_think_close  = len(re.findall(r"</think>", content))
+            n_answer_open  = len(re.findall(r"<answer>", content))
+            n_answer_close = len(re.findall(r"</answer>", content))
+            # base score
+            b_think = 0.5 if n_pair_think >= 1 else (0.25 if n_think_open or n_think_close == 1 else 0.0)
+            b_answer = 0.5 if n_pair_answer >= 1 else (0.25 if n_answer_open or n_answer_close == 1 else 0.0)
+            b_total = b_think + b_answer
+            
+            # penalty score
+            # Đếm số thẻ mở/đóng riêng lẻ
+            # Thẻ đơn dư = (mở + đóng) - 2 (không âm)
+            think_singles   = max(0, n_think_open   + n_think_close   - 2 )
+            answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
+
+            p_think = think_singles * (1/6)
+            p_answer = answer_singles * (1/6)
+            p_total = p_think + p_answer
+            total = float(b_total - p_total)
+            scores.append(total)
+        return scores
+
+    
+orms['custom_format_reward_ViVQA_X_Only_Think_Answer'] = CustomFormatReward_ViVQA_X_Only_Think_Answer
+
+
+class CustomFormatReward_ViVQA_X_Only_Explain_Answer(ORM):
+    def __call__(self, completions: List[str], **kwargs) -> List[float]:
+
+        completion_contents = completions
+
+        # Regex cho từng cặp thẻ
+        pat_think = re.compile(r"<explain>.*?</explain>", re.DOTALL)
+        pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+        
+        scores = []
+        for content in completion_contents:
+            if len(content) == 0 or not content.strip():
+                    scores.append(-1.0)
+                    continue
+            n_pair_think = len(pat_think.findall(content))
+            n_pair_answer = len(pat_answer.findall(content))
+
+            n_think_open   = len(re.findall(r"<explain>", content))
+            n_think_close  = len(re.findall(r"</explain>", content))
+            n_answer_open  = len(re.findall(r"<answer>", content))
+            n_answer_close = len(re.findall(r"</answer>", content))
+            # base score
+            b_think = 0.5 if n_pair_think >= 1 else (0.25 if n_think_open or n_think_close == 1 else 0.0)
+            b_answer = 0.5 if n_pair_answer >= 1 else (0.25 if n_answer_open or n_answer_close == 1 else 0.0)
+            b_total = b_think + b_answer
+            
+            # penalty score
+            # Đếm số thẻ mở/đóng riêng lẻ
+            # Thẻ đơn dư = (mở + đóng) - 2 (không âm)
+            think_singles   = max(0, n_think_open   + n_think_close   - 2 )
+            answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
+
+            p_think = think_singles * (1/6)
+            p_answer = answer_singles * (1/6)
+            p_total = p_think + p_answer
+            total = float(b_total - p_total)
+            scores.append(total)
+        return scores
+
+    
+orms['custom_format_reward_ViVQA_X_Only_Explain_Answer'] = CustomFormatReward_ViVQA_X_Only_Explain_Answer
 
 class CustomFormatReward_ViVQA_X(ORM):
     def __call__(self, completions: List[str], **kwargs) -> List[float]:
@@ -384,6 +468,142 @@ class CustomExplainationReward(ORM):
             rewards = [0.0] * len(contents)
 
         return rewards
+
+class CustomExplainationRewardOnlyThinkAnswer(ORM):
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        contents = completions
+        scorer = initialize_explanation_customized_scorer(alpha=0.5)
+        
+        ground_truths_list = []
+        predictions_list = []
+        image_paths_list = [] # Initialize list for image paths
+        print(f"num_generations in explaination reward: {NUM_GENERATIONS}")
+        prompt_ids = [i // NUM_GENERATIONS for i in range(len(completions))]
+        # --- MODIFIED: Extract image paths from list[dict] structure ---
+        if 'images' in kwargs:
+            batch_image_data = kwargs['images'] # This is likely List[List[Dict[str, str]]]
+            if len(batch_image_data) != len(contents):
+                print(f"Error in explanation_reward: Mismatch between image data count ({len(batch_image_data)}) and completions count ({len(contents)}).")
+                return [0.0] * len(contents)
+
+            for img_data_list in batch_image_data:
+                # Expecting img_data_list to be like [{'bytes': None, 'path': '...'}]
+                if isinstance(img_data_list, list) and len(img_data_list) > 0 and \
+                   isinstance(img_data_list[0], dict) and 'path' in img_data_list[0]:
+                    image_paths_list.append(img_data_list[0]['path']) # Extract the path from the dict
+                else:
+                    # Handle unexpected format within the batch element
+                    print(f"Warning: Unexpected image data format found: {img_data_list}. Appending None.")
+                    image_paths_list.append(None) # Use None or "" as a placeholder
+
+        else:
+            print("Error in explanation_reward: 'images' key not found in kwargs.")
+            return [0.0] * len(contents)
+        # --- END MODIFIED ---
+
+        # Extract explanations (same as before)
+        for content, sol in zip(contents, solution):
+            sol_match = re.search(r'<think>(.*?)</think>', sol, re.DOTALL)
+            gt_explanation = sol_match.group(1).strip() if sol_match else ""
+            ground_truths_list.append([gt_explanation]) # Ensure scorer expects List[List[str]]
+
+            content_match = re.search(r'<think>(.*?)</think>', content, re.DOTALL)
+            pred_explanation = content_match.group(1).strip() if content_match else ""
+            predictions_list.append(pred_explanation)
+
+        # Ensure lists are consistent before scoring
+        if not (len(predictions_list) == len(ground_truths_list) == len(image_paths_list)):
+             print("Error: Length mismatch between predictions, ground truths, and image paths after processing.")
+             return [0.0] * len(contents)
+
+        # Call the scorer
+        try:
+            rewards = scorer.explanation_rewards(
+                ground_truths=ground_truths_list,
+                predictions=predictions_list,
+                image_paths=image_paths_list,
+                prompt_ids=prompt_ids
+            )
+            if len(rewards) != len(contents):
+                print(f"Error: Scorer returned {len(rewards)} rewards, expected {len(contents)}.")
+                rewards = [0.0] * len(contents)
+
+        except Exception as e:
+            print(f"Error during scorer.explanation_rewards calculation: {e}")
+            rewards = [0.0] * len(contents)
+
+        return rewards
+
+orms['custom_explaination_reward_only_think_answer'] = CustomExplainationRewardOnlyThinkAnswer
+
+class CustomExplainationRewardOnlyExplainAnswer(ORM):
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        contents = completions
+        scorer = initialize_explanation_customized_scorer(alpha=0.5)
+        
+        ground_truths_list = []
+        predictions_list = []
+        image_paths_list = [] # Initialize list for image paths
+        print(f"num_generations in explaination reward: {NUM_GENERATIONS}")
+        prompt_ids = [i // NUM_GENERATIONS for i in range(len(completions))]
+        # --- MODIFIED: Extract image paths from list[dict] structure ---
+        if 'images' in kwargs:
+            batch_image_data = kwargs['images'] # This is likely List[List[Dict[str, str]]]
+            if len(batch_image_data) != len(contents):
+                print(f"Error in explanation_reward: Mismatch between image data count ({len(batch_image_data)}) and completions count ({len(contents)}).")
+                return [0.0] * len(contents)
+
+            for img_data_list in batch_image_data:
+                # Expecting img_data_list to be like [{'bytes': None, 'path': '...'}]
+                if isinstance(img_data_list, list) and len(img_data_list) > 0 and \
+                   isinstance(img_data_list[0], dict) and 'path' in img_data_list[0]:
+                    image_paths_list.append(img_data_list[0]['path']) # Extract the path from the dict
+                else:
+                    # Handle unexpected format within the batch element
+                    print(f"Warning: Unexpected image data format found: {img_data_list}. Appending None.")
+                    image_paths_list.append(None) # Use None or "" as a placeholder
+
+        else:
+            print("Error in explanation_reward: 'images' key not found in kwargs.")
+            return [0.0] * len(contents)
+        # --- END MODIFIED ---
+
+        # Extract explanations (same as before)
+        for content, sol in zip(contents, solution):
+            sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
+            gt_explanation = sol_match.group(1).strip() if sol_match else ""
+            ground_truths_list.append([gt_explanation]) # Ensure scorer expects List[List[str]]
+
+            content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
+            pred_explanation = content_match.group(1).strip() if content_match else ""
+            predictions_list.append(pred_explanation)
+
+        # Ensure lists are consistent before scoring
+        if not (len(predictions_list) == len(ground_truths_list) == len(image_paths_list)):
+             print("Error: Length mismatch between predictions, ground truths, and image paths after processing.")
+             return [0.0] * len(contents)
+
+        # Call the scorer
+        try:
+            rewards = scorer.explanation_rewards(
+                ground_truths=ground_truths_list,
+                predictions=predictions_list,
+                image_paths=image_paths_list,
+                prompt_ids=prompt_ids
+            )
+            if len(rewards) != len(contents):
+                print(f"Error: Scorer returned {len(rewards)} rewards, expected {len(contents)}.")
+                rewards = [0.0] * len(contents)
+
+        except Exception as e:
+            print(f"Error during scorer.explanation_rewards calculation: {e}")
+            rewards = [0.0] * len(contents)
+
+        return rewards
+
+orms['custom_explaination_reward_only_explain_answer'] = CustomExplainationRewardOnlyExplainAnswer
+
+
 class CustomExplainationReward_Stage3(ORM):
     def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
         contents = completions
