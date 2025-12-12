@@ -1,26 +1,34 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=2
+export CUDA_VISIBLE_DEVICES=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage1_250_curr_anstype_ver_3"
+# Model Configuration
+MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/merged/stage1_250_curr_noun_ver3"
 MODEL_TYPE="internvl3"
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum/stage2/ViVQA-X_train_stage2.jsonl"
-PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
-# OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/minh-vintern3BR/stage1"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/stage2"
 
-# Tham số GRPO
-MAX_LENGTH=4096
-MAX_COMPLETION_LENGTH=1024
+# Data Configuration
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum_reasoning_noun_based/stage2/ViVQA-X_train_stage2.jsonl"
+PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
+
+# Output Configuration
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/stage2"
+FAILED_PROMPTS_LOG="failed_question_ids_stage2.json"
+
+# GRPO Training Parameters
 NUM_GENERATIONS=8
 TEMPERATURE=1.0
-EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=250
 LEARNING_RATE=1e-7
 
+# Length Limits
+MAX_LENGTH=4096
+MAX_COMPLETION_LENGTH=2048
+
+# Training Schedule
+EPOCHS=1
+MAX_STEPS=250
 SAVE_STEPS=50
 LOGGING_STEPS=1
 EVAL_STEPS=1
@@ -30,11 +38,10 @@ swift rlhf \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
-    --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/stage2/v6-20251126-001343/checkpoint-150 \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_ViVQA_X custom_accuracy_reward custom_explaination_reward custom_reasoning_reward \
-    --reward_weights 1 1 1 1 \
+    --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_reasoning_reward \
+    --reward_weights 1 1 1 \
     --train_type lora \
     --lora_rank 8 \
     --lora_alpha 16 \
@@ -42,20 +49,20 @@ swift rlhf \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
     --per_device_eval_batch_size $NUM_GENERATIONS \
-    --max_completion_length $MAX_COMPLETION_LENGTH \
-    --num_train_epochs $EPOCHS \
     --per_device_train_batch_size $BATCH_SIZE_PER_DEVICE \
     --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
-    --learning_rate $LEARNING_RATE \
-    --save_steps $SAVE_STEPS \
+    --num_train_epochs $EPOCHS \
     --max_steps $MAX_STEPS \
-    --logging_steps $LOGGING_STEPS \
-    --eval_strategy steps \
-    --eval_steps $EVAL_STEPS \
+    --max_completion_length $MAX_COMPLETION_LENGTH \
+    --learning_rate $LEARNING_RATE \
     --num_generations $NUM_GENERATIONS \
     --temperature $TEMPERATURE \
     --top_p 0.9 \
     --beta 0.001 \
+    --save_steps $SAVE_STEPS \
+    --logging_steps $LOGGING_STEPS \
+    --eval_strategy steps \
+    --eval_steps $EVAL_STEPS \
     --log_completions true \
     --torch_dtype bfloat16 \
     --save_only_model false \
@@ -68,7 +75,9 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
-    # --enable_gfpo true \
-# dự kiến có thể sử dụng 8 bit sau này
-#        --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B/v11-20251116-185104/checkpoint-550 \
-echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Accuracy + Explanation + Reasoning"
+    --failed_prompts_log $FAILED_PROMPTS_LOG
+
+
+
+echo "Training completed. Failed prompts logged to: $OUTPUT_DIR/$FAILED_PROMPTS_LOG"
+

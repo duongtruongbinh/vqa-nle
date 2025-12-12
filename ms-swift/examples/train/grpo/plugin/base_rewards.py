@@ -13,7 +13,7 @@ class BaseRewardScorer:
     _model_path = None
     
     @classmethod
-    def initialize_bertscore(cls, model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base"):
+    def initialize_bertscore(cls, model_name_or_path="google-bert/bert-base-uncased"):
         """
         Khởi tạo shared BERTScore model với tham số model path tùy chỉnh.
         """
@@ -34,7 +34,7 @@ class BaseRewardScorer:
     
     @classmethod
     def calculate_bertscore_batch(cls, ground_truths: dict, predictions: dict, 
-                                model_name_or_path="/mnt/dataset1/pretrained_fm/vinai/phobert-base") -> dict:
+                                model_name_or_path="google-bert/bert-base-uncased") -> dict:
         """
         Tính BERTScore cho batch predictions bằng cách xử lý từng sample riêng biệt.
         Đảm bảo mỗi sample được tính độc lập, không bị ảnh hưởng bởi samples khác.

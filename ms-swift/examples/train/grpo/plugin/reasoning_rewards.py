@@ -47,7 +47,7 @@ class ReasoningRewardScorer:
         6: {"NOUN": 0.60, "VERB": 0.30, "ADJ": 0.10},
     }
 
-    NOUN_TAGS = ["N", "Nc", "Np", "Nu", "Ny", "P"]
+    NOUN_TAGS = ["N", "Np"]
     VERB_TAGS = ["V", "Vy"]
     ADJ_TAGS = ["A"]
 
@@ -74,14 +74,7 @@ class ReasoningRewardScorer:
             return ""
 
         try:
-            # Step 1: Text normalization (sửa lỗi chính tả tiếng Việt)
-            normalized = text_normalize(text)
-
-            # Step 2: Word tokenization (tách từ tiếng Việt)
-            # Format "text" để giữ các từ được nối bằng dấu _
-            tokenized = word_tokenize(normalized, format="text")
-
-            return tokenized
+            return text_normalize(text)
         except Exception as e:
             print(f"Error in preprocessing: {e}")
             return text
@@ -125,6 +118,39 @@ class ReasoningRewardScorer:
         except Exception as e:
             print(f"Error in POS tagging: {e}")
             return {"NOUN": set(), "VERB": set(), "ADJ": set(), "OTHERS": set()}
+
+    def extract_object_extraction(self, solution: str) -> set:
+        """
+        Trích xuất danh sách object từ thẻ <object_extraction>
+        
+        Args:
+            solution: Ground truth chứa thẻ <object_extraction>
+        
+        Returns:
+            set: Tập hợp các object đã được normalize
+        """
+        obj_match = re.search(
+            r"<object_extraction>(.*?)</object_extraction>",
+            solution,
+            flags=re.DOTALL | re.IGNORECASE
+        )
+        
+        if not obj_match:
+            return set()
+        
+        obj_text = obj_match.group(1).strip()
+        
+        # Split by comma và normalize từng object
+        objects = set()
+        for obj in obj_text.split(','):
+            obj_clean = obj.strip()
+            if obj_clean:
+
+                if self.use_preprocessing:
+                    obj_clean = self.preprocess_text(obj_clean)
+                objects.add(obj_clean.lower())
+        
+        return objects
 
     def jaccard_similarity(self, set1: set, set2: set) -> float:
         """Tính Jaccard similarity"""
@@ -223,7 +249,58 @@ class ReasoningRewardScorer:
         #     return -1.0
 
         return reward
-
+        
+    def reasoning_reward_with_object_extraction(self, completion: str, solution: str) -> float:
+        """
+        Tính reward dựa trên so khớp giữa danh từ trong reasoning và object_extraction
+        
+        Args:
+            completion: Output từ model (chứa <REASONING>)
+            solution: Ground truth (chứa <object_extraction>)
+        
+        Returns:
+            float: Reward score
+        """
+        # Extract reasoning (prediction)
+        reasoning_match = re.search(
+            r"<REASONING>(.*?)</REASONING>",
+            completion,
+            flags=re.DOTALL | re.IGNORECASE
+        )
+        reasoning_text = reasoning_match.group(1).strip() if reasoning_match else ""
+        
+        # Validation
+        if not reasoning_text:
+            return -1.0
+        
+        # Extract noun_count từ GT
+        noun_count_match = re.search(
+            r"<noun_count>(\d+)</noun_count>",
+            solution,
+            flags=re.DOTALL | re.IGNORECASE
+        )
+        gt_noun_count = int(noun_count_match.group(1)) if noun_count_match else 0
+        
+        # Extract object_extraction
+        gt_objects = self.extract_object_extraction(solution)
+        if len(gt_objects) < gt_noun_count:
+            reference_count = len(gt_objects)
+        else:
+            reference_count = gt_noun_count
+        
+        if reference_count == 0:
+            return 0.0
+        
+        # POS tagging để lấy danh từ từ reasoning
+        reasoning_pos = self.extract_pos_tags(reasoning_text)
+        reasoning_nouns = reasoning_pos["NOUN"]
+        
+        overlap = len(reasoning_nouns & gt_objects)
+        reward = overlap / reference_count
+        reward = min(reward, 1.0)
+        
+        return reward
+        
     def reasoning_rewards_batch(
         self,
         completions: List[str],
@@ -237,7 +314,7 @@ class ReasoningRewardScorer:
 
         rewards = []
         for i, (completion, solution) in enumerate(zip(completions, solutions)):
-            reward = self.reasoning_reward(completion, solution)
+            reward = self.reasoning_reward_with_object_extraction(completion, solution)
 
             if reward == -1.0:
                 print(f"  [Sample {i}] Empty reasoning or below threshold -> Penalty={reward}")

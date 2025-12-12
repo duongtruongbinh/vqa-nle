@@ -103,6 +103,15 @@ def get_grpo_system_prompt(question: str):
     <REASONING>Quá trình suy luận chi tiết dẫn đến câu trả lời cuối cùng</REASONING>
     <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
     <explain>Giải thích một câu ngắn gọn chứng minh câu trả lời</explain>""".strip()
+
+    system_instruction_vintern3BR=f"""<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc.
+    Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong ba giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+    <REASONING>[Đưa ra phân tích lập luận chi tiết, từng bước để giải quyết vấn đề.]</REASONING>
+    <CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+    <EXPLANATION>[Tổng hợp các thông tin từ REASONING và cho ra câu mô tả ngắn gọn các phân tích đặc điểm.] Hình ảnh cho thấy...</EXPLANATION>
+    
+    Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+    Câu trả lời:""".strip()
     
     return system_instruction_vintern3BR
 
@@ -172,16 +181,34 @@ def parse_output_grpo(response: str) -> tuple[str, str, str]:
     m_think = re.search(r"<REASONING>(.*?)</REASONING>", text, re.DOTALL)
     if m_think:
         think = m_think.group(1).strip()
+    else:
+        # Fallback: có thẻ mở nhưng không có thẻ đóng
+        # Lấy từ <REASONING> đến thẻ tiếp theo hoặc hết chuỗi
+        m_think_open = re.search(r"<REASONING>(.*?)(?=<CONCLUSION>|$)", text, re.DOTALL)
+        if m_think_open:
+            think = m_think_open.group(1).strip()
 
     # 2. Trích xuất nội dung thẻ <answer>
-    m_ans = re.search(r"<answer>(.*?)</answer>", text, re.DOTALL)
+    m_ans = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", text, re.DOTALL)
     if m_ans:
         answer = m_ans.group(1).strip()
+    else:
+        # Fallback: có thẻ mở nhưng không có thẻ đóng
+        # Lấy từ <CONCLUSION> đến thẻ tiếp theo hoặc hết chuỗi
+        m_ans_open = re.search(r"<CONCLUSION>(.*?)(?=<EXPLANATION>|$)", text, re.DOTALL)
+        if m_ans_open:
+            answer = m_ans_open.group(1).strip()
 
     # 3. Trích xuất nội dung thẻ <explain>
-    m_exp = re.search(r"<explain>(.*?)</explain>", text, re.DOTALL)
+    m_exp = re.search(r"<EXPLANATION>(.*?)</EXPLANATION>", text, re.DOTALL)
     if m_exp:
         explanation = m_exp.group(1).strip()
+    else:
+        # Fallback: có thẻ mở nhưng không có thẻ đóng
+        # Lấy tất cả nội dung từ <EXPLANATION> đến hết chuỗi
+        m_exp_open = re.search(r"<EXPLANATION>(.*?)$", text, re.DOTALL)
+        if m_exp_open:
+            explanation = m_exp_open.group(1).strip()
 
     # 4. Fallback: (Ít quan trọng hơn khi dùng thẻ, nhưng vẫn giữ lại)
     #    Nếu không tìm thấy bất kỳ thẻ nào

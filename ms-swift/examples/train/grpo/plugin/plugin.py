@@ -238,6 +238,51 @@ class CustomFormatReward_ViVQA_X(ORM):
         #             f.write(f"Score: {score:.2f}\n")
         return scores
 
+class CustomFormatReward_VER3(ORM):
+    def __call__(self, completions: List[str], **kwargs) -> List[float]:
+        REQUIRED_TAGS = ["REASONING", "CONCLUSION", "EXPLANATION"]
+        num_tags = len(REQUIRED_TAGS)
+        
+        BASE_WEIGHT = 1.0 / num_tags if num_tags > 0 else 0.0
+        PENALTY_FACTOR = (BASE_WEIGHT / num_tags * 2) if num_tags > 0 else 0.0
+        
+        scores = []
+
+        for content in completions:
+            # Xử lý trường hợp rỗng
+            if not content or not content.strip():
+                scores.append(0.0)
+                continue
+            
+            b_total = 0.0  # Tổng điểm thưởng
+            p_total = 0.0  # Tổng điểm phạt
+
+            for tag in REQUIRED_TAGS:
+                # Đếm số thẻ
+                n_open = len(re.findall(fr"<{tag}>", content))
+                n_close = len(re.findall(fr"</{tag}>", content))
+                n_pair = len(re.findall(fr"<{tag}>.*?</{tag}>", content, re.DOTALL))
+
+                # Tính điểm thưởng
+                if n_pair >= 1:
+                    b_tag = BASE_WEIGHT  # Full điểm
+                elif n_open > 0 or n_close > 0:
+                    b_tag = BASE_WEIGHT * 0.5  # Nửa điểm
+                else:
+                    b_tag = 0.0
+                
+                b_total += b_tag
+
+                # Tính điểm phạt
+                excess_count = max(0, n_open + n_close - 2)
+                p_total += excess_count * PENALTY_FACTOR
+
+            # Tổng kết và chuẩn hóa
+            total = max(0.0, min(1.0, b_total - p_total))
+            scores.append(total)
+
+        return scores
+
 class CustomFormatReward_ViVQA_X_Stage2(ORM):
     def __call__(self, completions: List[str], **kwargs) -> List[float]:
 
@@ -330,6 +375,7 @@ class CustomFormatReward_Caption(ORM):
 orms['custom_format_reward_ViVQA_X'] = CustomFormatReward_ViVQA_X
 orms['custom_format_reward_ViVQA_X_Stage2'] = CustomFormatReward_ViVQA_X_Stage2
 orms['custom_format_reward_Caption'] = CustomFormatReward_Caption
+orms['custom_format_reward_ver3'] = CustomFormatReward_VER3
 
 tokenizer = None
 def initialize_tokenizer(model_path):
@@ -442,7 +488,7 @@ class CustomExplainationReward(ORM):
             gt_explanation = sol_match.group(1).strip() if sol_match else ""
             ground_truths_list.append([gt_explanation]) # Ensure scorer expects List[List[str]]
 
-            content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
+            content_match = re.search(r'<EXPLANATION>(.*?)</EXPLANATION>', content, re.DOTALL)
             pred_explanation = content_match.group(1).strip() if content_match else ""
             predictions_list.append(pred_explanation)
 

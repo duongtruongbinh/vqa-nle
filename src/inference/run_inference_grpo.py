@@ -1,128 +1,125 @@
-import os
-import json
+"""Run inference with GRPO-trained VQA models."""
+
 import argparse
+import json
+import os
+from pathlib import Path
 from tqdm import tqdm
-from models.utils import set_seed
+
+# Environment configuration
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+
+from models.utils import set_seed
+
 MODELS = {
     "internvl": "models.internvl.InternVLModel",
-    "molmo": "models.molmo.MolmoModel", 
+    "molmo": "models.molmo.MolmoModel",
     "qwenvl": "models.qwenvl.QwenVLModel",
     "videollama": "models.videollama.VideoLLaMAModel",
     "phi": "models.phi.PhiModel",
     "ovis": "models.ovis.OvisModel",
     "minicpm": "models.minicpm.MiniCPMModel",
-    "vintern1b": "models.vintern1b.Vintern1BModel"
+    "vintern1b": "models.vintern1b.Vintern1BModel",
 }
+
+# Default paths
+DEFAULT_IMAGE_FOLDER = "/mnt/VLAI_data/COCO_Images/val2014"
+DEFAULT_DATA_PATH = "/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json"
+DEFAULT_OUTPUT_DIR = "src/inference/results/grpo/"
 
 
 def import_model_class(model_key: str):
-    """
-    Dynamically import model class only when needed to avoid environment conflicts.
-    
-    Args:
-        model_key: Key from MODELS dict
-        
-    Returns:
-        Model class
-    """
+    """Dynamically import model class to avoid environment conflicts."""
     if model_key not in MODELS:
         raise ValueError(f"Unknown model: {model_key}. Available: {list(MODELS.keys())}")
-    
-    module_path, class_name = MODELS[model_key].rsplit('.', 1)
-    
-    try:
-        print(f"📦 Importing {class_name} from {module_path}...")
-        module = __import__(module_path, fromlist=[class_name])
-        model_class = getattr(module, class_name)
-        return model_class
-    except ImportError as e:
-        print(f"❌ Failed to import {class_name}: {e}")
-        print(f"💡 Make sure the required dependencies for {model_key} are installed")
-        raise
-    except AttributeError as e:
-        print(f"❌ Class {class_name} not found in {module_path}: {e}")
-        raise
+
+    module_path, class_name = MODELS[model_key].rsplit(".", 1)
+    print(f"📦 Importing {class_name} from {module_path}...")
+
+    module = __import__(module_path, fromlist=[class_name])
+    return getattr(module, class_name)
 
 
-def main():
-    parser = argparse.ArgumentParser(
-        description="Run inference with a selected model")
-    parser.add_argument("model", type=str, choices=MODELS.keys(),
-                        help=f"Name of the model to run. Choices: {list(MODELS.keys())}")
-    parser.add_argument("--image_folder", type=str,
-                        default="/mnt/VLAI_data/COCO_Images/val2014", help="Directory of input images.")
-    parser.add_argument("--data_path", type=str, default="/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json",
-                        help="Path to the JSON file of sample questions.")
-    parser.add_argument("--seed", type=int, default=42, help="Random seed for reproducibility.")
-    parser.add_argument("--output_dir", type=str, default="src/inference/results/grpo/", help="Directory to save the results.")
-    parser.add_argument("--output_name", type=str, default=None, help="Optional: specific name for the output JSON file (e.g., 'my_test_run').")
-    args = parser.parse_args()
+def process_sample(model, item: dict, image_folder: Path) -> dict:
+    """Process a single sample and return updated item."""
+    img_path = image_folder / item["image_name"]
 
+    if not img_path.exists():
+        print(f"⚠️  Image not found: {img_path}")
+        item["predict"] = "ERROR: Image file not found"
+        return item
+
+    think, answer, explanation = model.infer_grpo(item["question"], str(img_path))
+    item["thinking"] = think
+    item["predict"] = answer
+    item["pred_explanation"] = explanation
+
+    print(f"Q: {item['question']}")
+    print(f"Thinking: {think}")
+    print(f"Predicted: {answer} | GT: {item['answer']}")
+    print(f"Explanation: {explanation}")
+
+    return item
+
+
+def parse_args() -> argparse.Namespace:
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Run inference with a selected model")
+    parser.add_argument("model", choices=MODELS.keys(), help="Model to run")
+    parser.add_argument("--image_folder", default=DEFAULT_IMAGE_FOLDER)
+    parser.add_argument("--data_path", default=DEFAULT_DATA_PATH)
+    parser.add_argument("--seed", type=int, default=42)
+    parser.add_argument("--output_dir", default=DEFAULT_OUTPUT_DIR)
+    parser.add_argument("--output_name", default=None, help="Custom output filename")
+    parser.add_argument("--limit", type=int, default=300, help="Limit number of samples")
+    return parser.parse_args()
+
+
+def main() -> int:
+    args = parse_args()
     set_seed(args.seed)
-    
+
+    # Load model
     print(f"🚀 Initializing {args.model} model...")
     try:
-        ModelClass = import_model_class(args.model)
-        model = ModelClass()
-        clean_model_name = model.model_name
-        print(f"✅ Successfully loaded {clean_model_name}")
+        model = import_model_class(args.model)()
+        print(f"✅ Successfully loaded {model.model_name}")
     except Exception as e:
-        print(f"❌ Failed to initialize {args.model} model: {e}")
+        print(f"❌ Failed to initialize model: {e}")
         return 1
-    
+
+    # Load data
     print(f"📂 Loading data from {args.data_path}...")
-    with open(args.data_path, 'r', encoding='utf-8') as f:
-        data = json.load(f)
-        
-    data = data[:300]
-    os.makedirs(args.output_dir, exist_ok=True)
-    if args.output_name:
-        # Nếu người dùng cung cấp tên, sử dụng nó. Thêm .json nếu chưa có.
-        name = args.output_name if args.output_name.endswith('.json') else f"{args.output_name}.json"
-        output_filename = os.path.join(args.output_dir, name)
-    else:
-        # Giữ nguyên hành vi mặc định
-        output_filename = os.path.join(args.output_dir, f"{clean_model_name}.json")
-    
-    print(f"📝 Processing {len(data)} samples with {clean_model_name}...")
-    print(f"💾 Results will be saved to: {output_filename}")
-    
+    with open(args.data_path, "r", encoding="utf-8") as f:
+        data = json.load(f)[: args.limit]
 
-    for i, item in enumerate(tqdm(data, desc=f"Running {clean_model_name}")):
-        img_path = os.path.join(args.image_folder, item['image_name'])
-        if not os.path.exists(img_path):
-            print(f"⚠️  Image not found: {img_path}")
-            item["predict"] = "ERROR: Image file not found"
-            continue
-        
+    # Setup output
+    output_dir = Path(args.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    output_name = args.output_name or model.model_name
+    output_file = output_dir / f"{output_name}.json"
+
+    print(f"📝 Processing {len(data)} samples...")
+    print(f"💾 Results will be saved to: {output_file}")
+
+    # Process samples
+    image_folder = Path(args.image_folder)
+    for item in tqdm(data, desc=f"Running {model.model_name}"):
         try:
-            think, answer, explanation = model.infer_grpo(item['question'], img_path)
-            item["thinking"] = think
-            item["predict"] = answer
-            item["pred_explanation"] = explanation
-            
-            print(f"Q: {item['question']}")
-            print(f"Thinking: {think}")
-            print(f"Predicted: {answer} | GT: {item['answer']}")
-            print(f"Explanation: {explanation}")
-            
-            # answer, explanation = model.infer(item['question'], img_path)
-            # item["predict"] = answer
-            # item["pred_explanation"] = explanation
-                
+            process_sample(model, item, image_folder)
         except Exception as e:
-            print(f"❌ Error processing item {item['image_id']}: {e}")
-            item["predict"] = f"ERROR: {str(e)}"
+            print(f"❌ Error processing {item.get('image_id', 'unknown')}: {e}")
+            item["predict"] = f"ERROR: {e}"
 
-    print(f"✅ Inference complete!")    
-    print(f"💾 Saving final results to {output_filename}")
-    with open(output_filename, 'w', encoding='utf-8') as f:
+    # Save results
+    print(f"💾 Saving results to {output_file}")
+    with open(output_file, "w", encoding="utf-8") as f:
         json.dump(data, f, ensure_ascii=False, indent=2)
 
     print("🎉 All done!")
     return 0
 
+
 if __name__ == "__main__":
-    exit(main()) 
+    exit(main())

@@ -121,7 +121,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
         sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
         ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
-        content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
+        content_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", completion, flags=re.DOTALL | re.IGNORECASE)
         student_answer = content_match.group(1).strip() if content_match else ""
 
         # Apply cleaning và normalization
@@ -164,7 +164,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
             sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
             ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
-            content_match = re.search(r"<answer>(.*?)</answer>", completion, flags=re.DOTALL | re.IGNORECASE)
+            content_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", completion, flags=re.DOTALL | re.IGNORECASE)
             student_answer = content_match.group(1).strip() if content_match else ""
             
             # Apply cleaning và normalization trước khi tính metrics

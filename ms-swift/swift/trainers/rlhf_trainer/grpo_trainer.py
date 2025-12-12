@@ -136,6 +136,11 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
         # Buffer the batch to reuse generated outputs across multiple updates. For more details, see
         # `_get_train_sampler` and `_prepare_inputs`.
         self._buffered_inputs = None
+        
+        # Track question_ids where all generations have accuracy = -1
+        self._failed_question_ids = set()
+        failed_log_name = getattr(self.args, 'failed_prompts_log', 'failed_question_ids.json')
+        self._failed_prompts_log_path = os.path.join(self.args.output_dir, failed_log_name)
 
     def _get_train_sampler(self, train_dataset=None):
         if self.template.sequence_parallel_size > 1:
@@ -225,12 +230,12 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
 
         total_rewards_per_func = self._score_completions(inputs)
         mode = 'train' if self.model.training else 'eval'
-            # === DEBUG: Rewards Before GFPO ===
-        print(f"\n Rewards: {total_rewards_per_func}")
+        
         if total_rewards_per_func.dim() == 2:
             final_rewards = (total_rewards_per_func * self.reward_weights.unsqueeze(0)).nansum(dim=1)
-            print(f"[BEFORE GFPO] Aggregated: {final_rewards.tolist()}")
-
+                
+        # Track prompts where all generations have accuracy = -1
+        self._track_failed_prompts(inputs, total_rewards_per_func)
 
         # GFPO filtering
         enable_gfpo = getattr(self.args, 'enable_gfpo', False)
@@ -245,14 +250,8 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
                 length_penalty=length_penalty,
                 filter_ratio=filter_ratio
             )
-
-            # === DEBUG: After GFPO ===
-            print(f"\n[AFTER GFPO] Mask: {mask.tolist()}")
-            print(f"[AFTER GFPO] Retained: {int(mask.sum())}/{len(mask)}")
-
         else:
             mask = None
-
 
         if self.dynamic_sample and mode == 'train':
             # dynamic sampling for std=0 groups
@@ -378,6 +377,78 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
                            'Please ensure that at least one reward function returns a valid reward.')
 
         return rewards_per_func
+
+    def _extract_question_id_from_solution(self, solution: str) -> Optional[str]:
+        """
+        Extract question_id from solution string with XML-style tags.
+        
+        Args:
+            solution: String containing <question_id>...</question_id>
+            
+        Returns:
+            question_id string or None if not found
+        """
+        import re
+        match = re.search(r'<question_id>(.*?)</question_id>', solution, re.IGNORECASE)
+        if match:
+            return match.group(1).strip()
+        return None
+
+    def _track_failed_prompts(self, inputs: DataType, rewards_per_func: torch.Tensor):
+        """
+        Track prompts where all generations have accuracy = -1.
+        Assumes accuracy is at index 1 in rewards_per_func.
+        
+        Args:
+            inputs: List of input dictionaries
+            rewards_per_func: Tensor of shape (num_samples, num_reward_funcs)
+        """
+        if rewards_per_func.dim() != 2 or rewards_per_func.shape[1] < 2:
+            return  # Need at least 2 reward functions (index 1 = accuracy)
+        
+        num_samples = len(inputs)
+        num_generations = getattr(self, 'num_generations', 8)
+        num_prompts = num_samples // num_generations
+        
+        # Extract accuracy scores (index 1)
+        accuracy_scores = rewards_per_func[:, 1].cpu().tolist()
+        
+        for prompt_idx in range(num_prompts):
+            start_idx = prompt_idx * num_generations
+            end_idx = start_idx + num_generations
+            
+            # Get accuracy for all generations of this prompt
+            group_accuracies = accuracy_scores[start_idx:end_idx]
+            
+            # Check if all are -1
+            if all(acc == -1 for acc in group_accuracies):
+                # Extract question_id from first sample of the group
+                if 'solution' in inputs[start_idx]:
+                    solution = inputs[start_idx]['solution']
+                    question_id = self._extract_question_id_from_solution(solution)
+                    
+                    if question_id:
+                        self._failed_question_ids.add(question_id)
+                        print(f"[FAILED PROMPT] question_id: {question_id} - All {num_generations} generations have accuracy=-1")
+        
+        # Save to JSON file periodically (every 10 tracking calls)
+        if len(self._failed_question_ids) > 0 and self._step % 10 == 0:
+            self._save_failed_question_ids()
+
+    def _save_failed_question_ids(self):
+        """Save failed question_ids to JSON file."""
+        try:
+            import json
+            failed_list = sorted(list(self._failed_question_ids))
+            with open(self._failed_prompts_log_path, 'w', encoding='utf-8') as f:
+                json.dump({
+                    'failed_question_ids': failed_list,
+                    'count': len(failed_list),
+                    'step': self._step
+                }, f, indent=2, ensure_ascii=False)
+            print(f"[SAVED] {len(failed_list)} failed question_ids to {self._failed_prompts_log_path}")
+        except Exception as e:
+            logger.warning(f"Failed to save failed_question_ids: {e}")
 
     def filter_by_rpt(
         self,
@@ -616,7 +687,7 @@ class GRPOTrainer(RolloutTrainerMixin, SwiftMixin, HFGRPOTrainer):
         per_group_stats = []
         if mask is not None:
             num_samples = len(rewards)
-            num_generations = getattr(self, 'num_generations', 4)
+            num_generations = getattr(self, 'num_generations', 8)
             num_prompts = num_samples // num_generations
             
             advantages = torch.zeros_like(rewards)

@@ -4,19 +4,19 @@ export CUDA_VISIBLE_DEVICES=1
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Model Configuration
-MODEL_ID_OR_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/merged/stage2_250_curr_noun_ver3"
+MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-2B"
 MODEL_TYPE="internvl3"
 
 # Data Configuration
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/curriculum_reasoning_noun_based/stage3/ViVQA-X_train_stage3.jsonl"
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed_EN/VQA-X_train_grpo.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
 
 # Output Configuration
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/stage3"
-FAILED_PROMPTS_LOG="failed_question_ids_stage3.json"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/vqax"
+FAILED_PROMPTS_LOG="failed_question_ids_vqax.json"
 
 # GRPO Training Parameters
-NUM_GENERATIONS=8
+NUM_GENERATIONS=4
 TEMPERATURE=1.0
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
@@ -28,7 +28,7 @@ MAX_COMPLETION_LENGTH=1024
 
 # Training Schedule
 EPOCHS=1
-MAX_STEPS=250
+MAX_STEPS=1000
 SAVE_STEPS=50
 LOGGING_STEPS=1
 EVAL_STEPS=1
@@ -43,8 +43,8 @@ swift rlhf \
     --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_explaination_reward \
     --reward_weights 1 1 1 \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 16 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -77,7 +77,8 @@ swift rlhf \
     --gradient_checkpointing true \
     --failed_prompts_log $FAILED_PROMPTS_LOG
 
-
-
-echo "Training completed."
+    # --enable_gfpo true \
+# dự kiến có thể sử dụng 8 bit sau này
+#        --resume_from_checkpoint /home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/dat-vinternvl3B/v11-20251116-185104/checkpoint-550 \
+echo "Training completed. Failed prompts logged to: $OUTPUT_DIR/$FAILED_PROMPTS_LOG"
 

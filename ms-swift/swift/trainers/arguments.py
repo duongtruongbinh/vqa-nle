@@ -331,6 +331,12 @@ class GRPOArgumentsMixin(RolloutTrainerArgumentsMixin):
     # dataset
     dataset_shuffle: Optional[bool] = True
     
+    # failed prompts logging
+    failed_prompts_log: Optional[str] = field(
+        default='failed_question_ids.json',
+        metadata={'help': 'Filename for logging failed prompts (prompts where all generations have accuracy -1)'}
+    )
+    
     # -- GFPO --
     enable_gfpo: bool = field(
         default=False,

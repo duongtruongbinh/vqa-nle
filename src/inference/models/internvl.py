@@ -82,7 +82,7 @@ class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #self.model_path = '5CD-AI/Vintern-3B-R-beta'
-        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_anstype/merged/stage3_500_curr_anstype_ver_3'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/merged/stage3_250_curr_noun_ver3'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -120,10 +120,9 @@ class InternVLModel(VQAModel):
                 pixel_values,
                 prompt,
                 generation_config={
-                "max_new_tokens": 2048,  # Tăng từ 600
-                "temperature": 0.7,       # Thêm temperature (0.7-0.8)
-                "top_p": 0.95,           # Optional: nucleus sampling
-                "do_sample": True,        # Bật sampling
+                "max_new_tokens": 4096,  # Tăng từ 600
+                "temperature": 0.01,       # Thêm temperature (0.7-0.8)
+                "do_sample": False,        # Bật sampling
                 "pad_token_id": self.tokenizer.eos_token_id,
                 "eos_token_id": self.tokenizer.eos_token_id,
                 }
