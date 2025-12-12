@@ -15,13 +15,13 @@ MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024  
 NUM_GENERATIONS=4
 TEMPERATURE=0.9
-EPOCHS=1
+EPOCHS=2
 BATCH_SIZE_PER_DEVICE=1
-GRAD_ACCUM_STEPS=4
-MAX_STEPS=500
+GRAD_ACCUM_STEPS=8
+MAX_STEPS=1000
 LEARNING_RATE=1e-5
 
-SAVE_STEPS=50
+SAVE_STEPS=100
 LOGGING_STEPS=1
 EVAL_STEPS=1
 
@@ -33,8 +33,8 @@ swift rlhf \
     --external_plugins "$PLUGIN_PATH" \
     --reward_funcs custom_format_reward_stage1 custom_caption_reward \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 32 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -60,13 +60,11 @@ swift rlhf \
     --save_only_model false \
     --save_total_limit 2 \
     --warmup_ratio 0.05 \
-    --dataloader_num_workers 1 \
-    --dataset_num_proc 1 \
+    --dataloader_num_workers 4 \
+    --dataset_num_proc 4 \
     --report_to wandb \
     --quant_method bnb \
     --quant_bits 4 \
     --bnb_4bit_quant_type nf4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true
-
-echo "Hoàn thành huấn luyện GRPO Stage 1 - Format + Caption!"

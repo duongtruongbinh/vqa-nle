@@ -1,0 +1,6 @@
+[submodule "CPSRank"]
+	path = CPSRank
+	url = https://github.com/Splo2t/CPSRank.git
+[submodule "uqlm"]
+	path = uqlm
+	url = https://github.com/cvs-health/uqlm.git
