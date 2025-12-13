@@ -245,6 +245,7 @@ a96 `
     
     files_map = {}
     count_map = {stage: 0 for stage in stages}
+    stage3_buffer = []
 
 
     for stage in stages:
@@ -313,9 +314,22 @@ a96 `
             }
 
             # Ghi vào file tương ứng
-            files_map[target_stage].write(json.dumps(entry, ensure_ascii=False) + '\n')
-            count_map[target_stage] += 1
-            print("Mapping")
+            if target_stage == "stage3":
+                stage3_buffer.append((max_noun_count, entry))
+                count_map[target_stage] += 1
+            else:
+                files_map[target_stage].write(json.dumps(entry, ensure_ascii=False) + '\n')
+                count_map[target_stage] += 1
+
+            if sum(count_map.values()) % 1000 == 0:
+                print(f"Processed {sum(count_map.values())} samples...")
+
+        # Sort and write stage 3 data
+        if stage3_buffer:
+            print(f"Sorting {len(stage3_buffer)} samples for stage3...")
+            stage3_buffer.sort(key=lambda x: x[0])
+            for _, entry in stage3_buffer:
+                files_map['stage3'].write(json.dumps(entry, ensure_ascii=False) + '\n')
 
     finally:
         # Đóng tất cả files

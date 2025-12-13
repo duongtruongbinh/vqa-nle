@@ -53,7 +53,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
                   alpha=0.5 => 50% BERTScore, 50% ROUGE-L
             threshold: Ngưỡng tối thiểu, nếu reward < threshold thì gán -1.0
         """
-        self.initialize_bertscore()
+        self.initialize_bertscore(model_name_or_path="google-bert/bert-base-uncased")
         self.rouge_scorer = Rouge()
         self.alpha = alpha
         self.threshold = threshold

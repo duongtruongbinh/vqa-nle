@@ -1,6 +1,6 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Model Configuration
@@ -40,7 +40,7 @@ swift rlhf \
     --model "$MODEL_ID_OR_PATH" \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_explaination_reward \
+    --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_reasoning_reward \
     --reward_weights 1 1 1 \
     --train_type lora \
     --lora_rank 8 \

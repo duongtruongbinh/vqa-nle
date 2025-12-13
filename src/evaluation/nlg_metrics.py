@@ -68,8 +68,12 @@ def compute_traditional_metrics(gts: dict, res: dict) -> dict[str, float]:
 # BERTSCORE
 # ============================================================================
 
+# ============================================================================
+# BERTSCORE
+# ============================================================================
+
 def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]], 
-                              device: str = "cuda") -> list[float]:
+                              device: str = "cuda", model_type: str = "bert") -> list[float]:
     """
     Compute BERTScore F1 with max over multiple references.
     
@@ -80,6 +84,7 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
         hypotheses: List of predicted texts
         references: List of reference lists (each sample can have multiple refs)
         device: Device for computation ("cuda" or "cpu")
+        model_type: "bert" or "phobert"
         
     Returns:
         List of max F1 scores (scaled to 0-100)
@@ -87,7 +92,7 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
     if not hypotheses:
         return []
     
-    bertscore = SharedBERTScoreModel.get_instance(device=device)
+    bertscore = SharedBERTScoreModel.get_instance(device=device, model_type=model_type)
     max_scores = []
     
     for hyp, refs in zip(hypotheses, references):
@@ -119,7 +124,7 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
 # ============================================================================
 
 def get_nlg_scores(references: list[list[str]], hypotheses: list[str], 
-                   device: str = "cuda", max_len: int = 150) -> dict[str, float]:
+                   device: str = "cuda", max_len: int = 150, model_type: str = "bert") -> dict[str, float]:
     """
     Compute all NLG metrics for Vietnamese text.
     
@@ -130,6 +135,7 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str],
         hypotheses: List of predictions
         device: Device for BERTScore computation
         max_len: Maximum words per text (for truncation)
+        model_type: "bert" or "phobert" for BERTScore
         
     Returns:
         Dictionary with all metric scores
@@ -150,7 +156,7 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str],
     scores = compute_traditional_metrics(gts, res)
     
     # Compute BERTScore
-    max_f1_scores = compute_bertscore_max_ref(hypotheses, references, device)
+    max_f1_scores = compute_bertscore_max_ref(hypotheses, references, device, model_type=model_type)
     scores["BERTScore_F1"] = (sum(max_f1_scores) / len(max_f1_scores)) if max_f1_scores else 0.0
     
     return scores
@@ -162,7 +168,8 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str],
 
 def compute_smile_scores(questions: list[str], gt_answers: list[str], 
                          predictions: list[str], 
-                         synthetic_answers: list[str] = None) -> dict[str, float]:
+                         synthetic_answers: list[str] = None,
+                         model_type: str = "bert") -> dict[str, float]:
     """
     Compute SMILE scores for answer evaluation.
     
@@ -178,6 +185,7 @@ def compute_smile_scores(questions: list[str], gt_answers: list[str],
         predictions: List of predicted answers
         synthetic_answers: List of pre-generated synthetic full-sentence answers.
                            If None, ground truth answers will be used.
+        model_type: "bert" or "phobert"
     
     Returns:
         Dictionary with SMILE metrics (avg, hm)
@@ -202,7 +210,6 @@ def compute_smile_scores(questions: list[str], gt_answers: list[str],
     
     # Prepare data: segment Vietnamese text
     smile_data = []
-    valid_indices = []
     
     for i, (q, gt, syn_ans, pred) in enumerate(zip(questions, gt_answers, synthetic_answers, predictions)):
         if not q or not gt or not pred:
@@ -215,13 +222,12 @@ def compute_smile_scores(questions: list[str], gt_answers: list[str],
         
         if q_seg and gt_seg and pred_seg and syn_ans_seg:
             smile_data.append((q_seg, gt_seg, syn_ans_seg, pred_seg))
-            valid_indices.append(i)
     
     if not smile_data:
         return {"SMILE_avg": 0.0, "SMILE_hm": 0.0}
     
     # Compute SMILE scores
-    smile = SharedSMILEModel.get_instance()
+    smile = SharedSMILEModel.get_instance(model_type=model_type)
     smile_data_array = np.array(smile_data)
     results = smile.generate_scores(smile_data_array)
     

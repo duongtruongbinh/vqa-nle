@@ -1,10 +1,10 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=0
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
 # Model Configuration
-MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-2B"
+MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
 MODEL_TYPE="internvl3"
 
 # Data Configuration

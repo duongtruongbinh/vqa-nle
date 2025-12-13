@@ -112,6 +112,14 @@ def get_grpo_system_prompt(question: str):
     
     Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
     Câu trả lời:""".strip()
+
+    system_instruction_intern2BR=f"""<image> You are a helpful visual language assistant, designed for structured reasoning.
+    When answering image-based questions, you must answer correctly in three stages, each stage following the required format:
+    <REASONING>[Provide a detailed, step-by-step analysis and reasoning to solve the problem.]</REASONING>
+    <CONCLUSION>[State the final answer as a word or phrase.]</CONCLUSION>
+    <EXPLANATION>[Synthesize the information from REASONING and provide a brief description of the analyzed features.] The image shows...</EXPLANATION>
+    Please apply this format meticulously to analyze the provided image and answer the question: {question}
+    Answer:""".strip()
     
     return system_instruction_vintern3BR
 

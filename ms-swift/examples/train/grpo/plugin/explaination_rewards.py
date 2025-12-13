@@ -71,7 +71,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.cider_scorer = Cider()
-        self.bertscore_metric = self.initialize_bertscore()
+        self.bertscore_metric = self.initialize_bertscore(model_name_or_path="google-bert/bert-base-uncased")
         
         # === CLIP INITIALIZATION (COMMENTED OUT) ===
         # clip_model_name = "/home/vlai-vqa-nle/.cache/huggingface/hub/models--openai--clip-vit-base-patch16/snapshots/57c216476eefef5ab752ec549e440a49ae4ae5f3"

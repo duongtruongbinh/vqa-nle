@@ -21,11 +21,13 @@ from typing import List, Set, Dict
 # Điền vào đây để chạy nhanh, không cần dùng command line
 FAILED_JSON_FILES = [
     "/home/vlai-vqa-nle/minhtq/vqa-nle/data/analysis/stage_1/failed_question_ids_stage1.json",
-    "/home/vlai-vqa-nle/minhtq/vqa-nle/data/analysis/stage_2/failed_question_ids_stage2.json"
+    "/home/vlai-vqa-nle/minhtq/vqa-nle/data/analysis/stage_2/failed_question_ids_stage2.json",
+    "/home/vlai-vqa-nle/minhtq/vqa-nle/data/analysis/stage_3/failed_question_ids_stage3.json"
 ]
 
 IMAGE_BASE_DIR = "/mnt/VLAI_data/COCO_Images"
 OUTPUT_DIR = "data/processed/curriculum_reasoning_failed"
+DEFAULT_REASONING_MAPPING_PATH = "data/processed/cocoa_reasoning/cocoa_reasoning.json"
 
 
 # ====================== CONSTANTS ======================
@@ -65,6 +67,21 @@ def load_failed_question_ids(file_paths: List[str]) -> Set[str]:
     return all_failed_ids
 
 
+def load_reasoning_mapping() -> Dict[str, str]:
+    """Tự động load reasoning mapping từ CoCoA nếu file tồn tại."""
+    if not os.path.exists(DEFAULT_REASONING_MAPPING_PATH):
+        return {}
+    
+    try:
+        with open(DEFAULT_REASONING_MAPPING_PATH, 'r', encoding='utf-8') as f:
+            mapping = json.load(f)
+        print(f"✅ Loaded {len(mapping)} CoCoA reasonings from {DEFAULT_REASONING_MAPPING_PATH}")
+        return mapping
+    except Exception as e:
+        print(f"⚠️  Error loading reasoning mapping: {e}")
+        return {}
+
+
 def load_vivqa_dataset() -> Dict[str, dict]:
     """Load ViVQA-X train dataset và index theo question_id."""
     data_path = "/mnt/VLAI_data/ViVQA-X/ViVQA-X_train.json"
@@ -101,44 +118,97 @@ def filter_dataset_by_question_ids(vivqa_data: Dict[str, dict], failed_ids: Set[
     return filtered_items
 
 
-def create_ms_swift_entry(item: dict, image_base_dir: str, image_dir: str) -> dict:
-    """Tạo entry theo format MS-Swift."""
-    explanation = (item['explanation'][0] if isinstance(item['explanation'], list) 
-                   and len(item['explanation']) > 0 else str(item['explanation']))
+def create_ms_swift_entry(
+    item: dict, 
+    image_base_dir: str, 
+    image_dir: str,
+    reasoning_mapping: Dict[str, str] = None
+) -> dict:
+    """Tạo entry theo format MS-Swift.
     
+    Args:
+        item: Data item từ ViVQA-X
+        image_base_dir: Base directory cho images
+        image_dir: Subdirectory (e.g., 'train2014')
+        reasoning_mapping: Optional mapping từ question_id -> CoCoA reasoning
+    """
+    qid = str(item.get('question_id', ''))
+    
+    # Dùng REASONING từ CoCoA nếu có, nếu không thì để trống
+    # Dùng REASONING từ CoCoA nếu có
+    if reasoning_mapping and qid in reasoning_mapping:
+        reasoning_content = reasoning_mapping[qid] # Đã bao gồm thẻ <REASONING>...</REASONING>
+    else:
+        # Fallback nếu không có reasoning
+        reasoning_content = "<REASONING>\nKhông có thông tin suy luận chi tiết.\n</REASONING>"
+    
+    # Lấy explanation đầu tiên
+    explanation_text = ""
+    if item.get('explanation') and isinstance(item['explanation'], list):
+         explanation_text = item['explanation'][0]
+    elif isinstance(item.get('explanation'), str):
+         explanation_text = item['explanation']
+
     image_path = os.path.join(image_base_dir, image_dir, item['image_name'])
     
+    # Format Solution khớp chính xác với USER_CONTENT_TEMPLATE
+    # 1. <REASONING>
+    # 2. <CONCLUSION> (= answer)
+    # 3. <EXPLANATION> (= explanation gốc)
+    solution_str = (f"{reasoning_content}\n"
+                    f"<CONCLUSION>\n{item['answer']}\n</CONCLUSION>\n"
+                    f"<EXPLANATION>\n{explanation_text}\n</EXPLANATION>")
+
     return {
         "messages": [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": USER_CONTENT_TEMPLATE.format(question=item['question'])}
+            {"role": "user", "content": USER_CONTENT_TEMPLATE.format(question=item['question'])},
+            {"role": "assistant", "content": solution_str}
         ],
-        "images": [image_path],
-        "solution": (f"<question_id>{item.get('question_id', '')}</question_id>"
-                     f"<questiontype>{item.get('question_type', '')}</questiontype>"
-                     f"<answer>{item['answer']}</answer>"
-                     f"<explain>{explanation}</explain>")
+        "images": [image_path]
     }
 
 
-def save_failed_dataset(filtered_items: List[dict], image_base_dir: str, output_dir: str):
-    """Lưu dataset đã lọc theo format MS-Swift JSONL."""
+def save_failed_dataset(
+    filtered_items: List[dict], 
+    image_base_dir: str, 
+    output_dir: str,
+    reasoning_mapping: Dict[str, str] = None
+):
+    """Lưu dataset đã lọc theo format MS-Swift JSONL.
+    
+    Args:
+        filtered_items: Danh sách items đã filter
+        image_base_dir: Base directory cho images
+        output_dir: Output directory
+        reasoning_mapping: Optional mapping từ question_id -> CoCoA reasoning
+    """
     os.makedirs(output_dir, exist_ok=True)
     
     output_path = os.path.join(output_dir, 'ViVQA-X_train_failed.jsonl')
     print(f"Saving to: {output_path}")
     
     saved_count = 0
+    with_cocoa_reasoning = 0
+    
     with open(output_path, 'w', encoding='utf-8') as f:
         for item in filtered_items:
             if not all(item.get(field) for field in ['image_name', 'question', 'answer', 'explanation']):
                 continue
             
-            entry = create_ms_swift_entry(item, image_base_dir, 'train2014')
+            entry = create_ms_swift_entry(item, image_base_dir, 'train2014', reasoning_mapping)
             f.write(json.dumps(entry, ensure_ascii=False) + '\n')
             saved_count += 1
+            
+            # Track how many used CoCoA reasoning
+            qid = str(item.get('question_id', ''))
+            if reasoning_mapping and qid in reasoning_mapping:
+                with_cocoa_reasoning += 1
     
     print(f"Saved {saved_count} entries")
+    if reasoning_mapping:
+        print(f"  - {with_cocoa_reasoning} with CoCoA REASONING")
+        print(f"  - {saved_count - with_cocoa_reasoning} with original explanation")
 
 
 def main():
@@ -150,7 +220,7 @@ def main():
                         help=f'Đường dẫn tới thư mục COCO images (default: {IMAGE_BASE_DIR})')
     parser.add_argument('--output_dir', type=str, default=OUTPUT_DIR,
                         help=f'Thư mục output (default: {OUTPUT_DIR})')
-    
+
     args = parser.parse_args()
     
     # Sử dụng FAILED_JSON_FILES nếu có, nếu không thì dùng command line args
@@ -171,6 +241,10 @@ def main():
     failed_ids = load_failed_question_ids(failed_json_files)
     print(f"Total unique failed IDs: {len(failed_ids)}")
     
+    # Load reasoning mapping (tự động nếu file tồn tại)
+    print(f"\nStep 1.5: Loading CoCoA reasoning mapping")
+    reasoning_mapping = load_reasoning_mapping()
+    
     # Load ViVQA-X train dataset
     print(f"\nStep 2: Loading ViVQA-X train dataset")
     vivqa_data = load_vivqa_dataset()
@@ -181,7 +255,7 @@ def main():
     
     # Save dataset
     print(f"\nStep 4: Saving dataset")
-    save_failed_dataset(filtered_items, args.image_base_dir, args.output_dir)
+    save_failed_dataset(filtered_items, args.image_base_dir, args.output_dir, reasoning_mapping)
     
     print("\n" + "=" * 60)
     print("HOÀN THÀNH!")

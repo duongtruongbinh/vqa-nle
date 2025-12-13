@@ -100,11 +100,38 @@ def normalize_answer(text: str) -> str:
     return " ".join(sorted(text.split()))
 
 
+def normalize_answer_vqax(text: str) -> str:
+    """
+    Normalize answer for exact matching.
+    
+    Handles:
+    - Text cleaning and lowercasing
+    - Boolean answer normalization (yes/no variants)
+    - Punctuation removal
+    - Word sorting for order-invariant comparison
+    
+    Args:
+        text: Raw answer text
+        
+    Returns:
+        Normalized answer string
+    """
+    if not text:
+        return ""
+    
+    text = clean_text(text).lower().strip().rstrip(".").replace('"', "").strip()
+    
+    # Remove punctuation and normalize whitespace
+    text = re.sub(r'[^\w\s]', '', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    # Sort words for order-invariant comparison
+    return " ".join(sorted(text.split()))
+
+
 def normalize_explanation(text: str) -> str:
     """
     Normalize explanation text.
-    
-    Removes common explanation prefixes like "because" or "vì".
     
     Args:
         text: Raw explanation text
@@ -115,11 +142,7 @@ def normalize_explanation(text: str) -> str:
     text = clean_text(text).strip().rstrip(".").strip()
     
     # Remove common prefixes
-    text_lower = text.lower()
-    if text_lower.startswith("because "):
-        text = text[8:].strip()
-    elif text_lower.startswith("vì "):
-        text = text[3:].strip()
+    text = text.lower()
     
     return text
 

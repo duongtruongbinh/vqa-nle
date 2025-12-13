@@ -37,46 +37,62 @@ from synthetic_answer_generator import (
 # SHARED BERTSCORE MODEL
 # ============================================================================
 
+# ============================================================================
+# SHARED BERTSCORE MODEL
+# ============================================================================
+
 class SharedBERTScoreModel:
     """
     Singleton for shared BERTScore model to avoid repeated initialization.
     
-    Uses PhoBERT-base for Vietnamese language BERTScore computation.
+    Uses PhoBERT-base or BERT-base for BERTScore computation.
     Supports both local cache and HuggingFace model loading.
     """
     
-    _instance = None
+    _instances = {}
     _device = None
-    _model_path = None
     
-    HF_MODEL_NAME = "vinai/phobert-base"
-    LOCAL_CACHE_DIR = "/mnt/dataset1/pretrained_fm/vinai/phobert-base"
+    # Model Paths
+    BERT_HF_NAME = "google-bert/bert-base-uncased"
+    BERT_LOCAL_PATH = "/mnt/dataset1/pretrained_fm/google-bert/bert-base-uncased"
+    
+    PHOBERT_HF_NAME = "vinai/phobert-base"
+    PHOBERT_LOCAL_PATH = "/mnt/dataset1/pretrained_fm/vinai/phobert-base"
     
     @classmethod
-    def get_model_path(cls) -> str:
-        """Get model path: use local cache if exists, otherwise use HuggingFace."""
-        if os.path.exists(cls.LOCAL_CACHE_DIR):
-            config_file = os.path.join(cls.LOCAL_CACHE_DIR, "config.json")
+    def get_model_path(cls, model_type: str) -> str:
+        """Get model path based on type."""
+        if model_type == "phobert":
+            target_dir = cls.PHOBERT_LOCAL_PATH
+            hf_name = cls.PHOBERT_HF_NAME
+        else:
+            target_dir = cls.BERT_LOCAL_PATH
+            hf_name = cls.BERT_HF_NAME
+            
+        if os.path.exists(target_dir):
+            config_file = os.path.join(target_dir, "config.json")
             has_model = (
-                os.path.exists(os.path.join(cls.LOCAL_CACHE_DIR, "pytorch_model.bin")) or 
-                os.path.exists(os.path.join(cls.LOCAL_CACHE_DIR, "model.safetensors"))
+                os.path.exists(os.path.join(target_dir, "pytorch_model.bin")) or 
+                os.path.exists(os.path.join(target_dir, "model.safetensors"))
             )
             
             if os.path.exists(config_file) and has_model:
-                return cls.LOCAL_CACHE_DIR
+                return target_dir
         
-        os.makedirs(cls.LOCAL_CACHE_DIR, exist_ok=True)
-        return cls.HF_MODEL_NAME
+        # If writing to cache is needed, we usually let library handle it or assume read-only
+        # Here we return the directory if it exists, else the HF name
+        return hf_name
     
     @classmethod
-    def get_instance(cls, device: str = "cuda") -> BERTScore:
+    def get_instance(cls, device: str = "cuda", model_type: str = "bert") -> BERTScore:
         """Get or initialize shared BERTScore model."""
-        if cls._instance is None or cls._device != device:
-            cls._device = device
-            cls._model_path = cls.get_model_path()
-            
-            cls._instance = BERTScore(
-                model_name_or_path=cls._model_path,
+        key = (device, model_type)
+        if key not in cls._instances:
+            print(f"Initializing SharedBERTScoreModel ({model_type}) on {device}...")
+            model_path = cls.get_model_path(model_type)
+             
+            cls._instances[key] = BERTScore(
+                model_name_or_path=model_path,
                 num_layers=12,
                 rescale_with_baseline=False,
                 device=device,
@@ -86,7 +102,7 @@ class SharedBERTScoreModel:
                 sync_on_compute=False
             )
         
-        return cls._instance
+        return cls._instances[key]
 
 
 # ============================================================================
@@ -101,21 +117,23 @@ class SharedSMILEModel:
     is used for evaluating answer quality in VQA tasks.
     """
     
-    _instance = None
+    _instances = {}
     
     @classmethod
-    def get_instance(cls):
+    def get_instance(cls, model_type: str = 'bert'):
         """Get or initialize shared SMILE model."""
-        if cls._instance is None:
-            print("😊 Initializing SMILE metric...")
-            cls._instance = SMILE(
-                emb_model='phobert',
+        if model_type not in cls._instances:
+            print(f"😊 Initializing SMILE metric with {model_type}...")
+            # For SMILE, 'bert' usually means bert-base-uncased, 'phobert' means vinai/phobert-base
+            # The SMILE library handles 'bert', 'roberta', 'phobert' etc passed to emb_model
+            cls._instances[model_type] = SMILE(
+                emb_model=model_type,
                 eval_metrics=['avg', 'hm'],
                 assign_bins=False,
                 use_exact_matching=True,
                 verbose=False
             )
-        return cls._instance
+        return cls._instances[model_type]
 
 
 # ============================================================================

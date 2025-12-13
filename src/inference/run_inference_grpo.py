@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 # Environment configuration
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 from models.utils import set_seed
 
@@ -25,6 +25,8 @@ MODELS = {
 
 # Default paths
 DEFAULT_IMAGE_FOLDER = "/mnt/VLAI_data/COCO_Images/val2014"
+#/mnt/VLAI_data/VQA-X/vqaX_test.json
+#/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json
 DEFAULT_DATA_PATH = "/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json"
 DEFAULT_OUTPUT_DIR = "src/inference/results/grpo/"
 
@@ -43,6 +45,14 @@ def import_model_class(model_key: str):
 
 def process_sample(model, item: dict, image_folder: Path) -> dict:
     """Process a single sample and return updated item."""
+    if "image_name" not in item and "image_id" in item:
+        # Construct image name for COCO 2014 (standard for VQA-X)
+        item["image_name"] = f"COCO_val2014_{int(item['image_id']):012d}.jpg"
+
+    if "answer" not in item and "answers" in item:
+         # Take the first answer for display purposes
+         item["answer"] = item["answers"][0]["answer"]
+
     img_path = image_folder / item["image_name"]
 
     if not img_path.exists():
@@ -57,7 +67,7 @@ def process_sample(model, item: dict, image_folder: Path) -> dict:
 
     print(f"Q: {item['question']}")
     print(f"Thinking: {think}")
-    print(f"Predicted: {answer} | GT: {item['answer']}")
+    print(f"Predicted: {answer} | GT: {item.get('answer', 'N/A')}")
     print(f"Explanation: {explanation}")
 
     return item
@@ -92,7 +102,16 @@ def main() -> int:
     # Load data
     print(f"📂 Loading data from {args.data_path}...")
     with open(args.data_path, "r", encoding="utf-8") as f:
-        data = json.load(f)[: args.limit]
+        raw_data = json.load(f)
+
+    # Handle VQA-X format (dict) and ViVQA-X format (list)
+    if isinstance(raw_data, dict):
+        data = list(raw_data.values())
+    else:
+        data = raw_data
+
+    # Limit samples
+    data = data[: args.limit]
 
     # Setup output
     output_dir = Path(args.output_dir)

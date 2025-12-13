@@ -102,12 +102,13 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
             current_idx += 1
 
     # Compute NLG scores for explanations
-    nlg_scores = get_nlg_scores(all_gt_expls, all_pred_expls, device)
+    nlg_scores = get_nlg_scores(all_gt_expls, all_pred_expls, device, model_type='phobert')
     
     # Compute SMILE scores for answers (Overall)
     smile_scores = compute_smile_scores(
         all_questions, all_gt_answers, all_pred_answers, 
-        synthetic_answers=all_synthetic_answers
+        synthetic_answers=all_synthetic_answers,
+        model_type='phobert'
     )
     
     results = {
@@ -120,14 +121,15 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
     
     # Compute per-answer-type scores
     for ans_type, data_type in by_type.items():
-        nlg = get_nlg_scores(data_type["gt_expls"], data_type["pred_expls"], device)
+        nlg = get_nlg_scores(data_type["gt_expls"], data_type["pred_expls"], device, model_type='phobert')
         
         # Get synthetic answers for this subgroup if available
         subgroup_syn_ans = data_type.get("synthetic_answers", None)
         
         smile = compute_smile_scores(
             data_type["questions"], data_type["gt_answers"], data_type["pred_answers"],
-            synthetic_answers=subgroup_syn_ans
+            synthetic_answers=subgroup_syn_ans,
+            model_type='phobert'
         )
         
         results["by_answer_type"][ans_type] = {
@@ -145,7 +147,7 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
 # ============================================================================
 
 # List of files to evaluate (empty = all JSON files in input-dir)
-FILES_TO_EVALUATE = ['1_250_curr_anstype_ver3.json']
+FILES_TO_EVALUATE = ['4_250_curr_anstype_ver3.json']
 
 
 def main():

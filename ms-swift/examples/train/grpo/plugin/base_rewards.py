@@ -13,12 +13,12 @@ class BaseRewardScorer:
     _model_path = None
     
     @classmethod
-    def initialize_bertscore(cls, model_name_or_path="google-bert/bert-base-uncased"):
+    def initialize_bertscore(cls, model_name_or_path="vinai/phobert-base"):
         """
         Khởi tạo shared BERTScore model với tham số model path tùy chỉnh.
         """
         if cls._shared_bertscore is None or cls._model_path != model_name_or_path:
-            cls._device = "cuda" if torch.cuda.is_available() else "cpu"
+            cls._device = "cuda:0" if torch.cuda.is_available() else "cpu"
             cls._model_path = model_name_or_path
             cls._shared_bertscore = BERTScore(
                 model_name_or_path=model_name_or_path,
@@ -34,7 +34,7 @@ class BaseRewardScorer:
     
     @classmethod
     def calculate_bertscore_batch(cls, ground_truths: dict, predictions: dict, 
-                                model_name_or_path="google-bert/bert-base-uncased") -> dict:
+                                model_name_or_path="vinai/phobert-base") -> dict:
         """
         Tính BERTScore cho batch predictions bằng cách xử lý từng sample riêng biệt.
         Đảm bảo mỗi sample được tính độc lập, không bị ảnh hưởng bởi samples khác.
