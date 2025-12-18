@@ -13,6 +13,9 @@ import os
 import json
 import argparse
 from typing import List, Set, Dict
+from dotenv import load_dotenv
+
+
 
 
 # ====================== CONFIG - ĐIỀN VÀO ĐÂY ======================

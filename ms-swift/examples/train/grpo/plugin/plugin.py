@@ -142,41 +142,47 @@ orms['custom_format_reward_ViVQA_X_Only_Think_Answer'] = CustomFormatReward_ViVQ
 
 class CustomFormatReward_ViVQA_X_Only_Explain_Answer(ORM):
     def __call__(self, completions: List[str], **kwargs) -> List[float]:
-
-        completion_contents = completions
-
-        # Regex cho từng cặp thẻ
-        pat_think = re.compile(r"<explain>.*?</explain>", re.DOTALL)
-        pat_answer = re.compile(r"<answer>.*?</answer>", re.DOTALL)
+        REQUIRED_TAGS = ["CONCLUSION", "EXPLANATION"]
+        num_tags = len(REQUIRED_TAGS)
+        
+        BASE_WEIGHT = 1.0 / num_tags if num_tags > 0 else 0.0
+        PENALTY_FACTOR = (BASE_WEIGHT / num_tags * 2) if num_tags > 0 else 0.0
         
         scores = []
-        for content in completion_contents:
-            if len(content) == 0 or not content.strip():
-                    scores.append(-1.0)
-                    continue
-            n_pair_think = len(pat_think.findall(content))
-            n_pair_answer = len(pat_answer.findall(content))
 
-            n_think_open   = len(re.findall(r"<explain>", content))
-            n_think_close  = len(re.findall(r"</explain>", content))
-            n_answer_open  = len(re.findall(r"<answer>", content))
-            n_answer_close = len(re.findall(r"</answer>", content))
-            # base score
-            b_think = 0.5 if n_pair_think >= 1 else (0.25 if n_think_open or n_think_close == 1 else 0.0)
-            b_answer = 0.5 if n_pair_answer >= 1 else (0.25 if n_answer_open or n_answer_close == 1 else 0.0)
-            b_total = b_think + b_answer
+        for content in completions:
+            # Xử lý trường hợp rỗng
+            if not content or not content.strip():
+                scores.append(0.0)
+                continue
             
-            # penalty score
-            # Đếm số thẻ mở/đóng riêng lẻ
-            # Thẻ đơn dư = (mở + đóng) - 2 (không âm)
-            think_singles   = max(0, n_think_open   + n_think_close   - 2 )
-            answer_singles  = max(0, n_answer_open  + n_answer_close  - 2 )
+            b_total = 0.0  # Tổng điểm thưởng
+            p_total = 0.0  # Tổng điểm phạt
 
-            p_think = think_singles * (1/6)
-            p_answer = answer_singles * (1/6)
-            p_total = p_think + p_answer
-            total = float(b_total - p_total)
+            for tag in REQUIRED_TAGS:
+                # Đếm số thẻ
+                n_open = len(re.findall(fr"<{tag}>", content))
+                n_close = len(re.findall(fr"</{tag}>", content))
+                n_pair = len(re.findall(fr"<{tag}>.*?</{tag}>", content, re.DOTALL))
+
+                # Tính điểm thưởng
+                if n_pair >= 1:
+                    b_tag = BASE_WEIGHT  # Full điểm
+                elif n_open > 0 or n_close > 0:
+                    b_tag = BASE_WEIGHT * 0.5  # Nửa điểm
+                else:
+                    b_tag = 0.0
+                
+                b_total += b_tag
+
+                # Tính điểm phạt
+                excess_count = max(0, n_open + n_close - 2)
+                p_total += excess_count * PENALTY_FACTOR
+
+            # Tổng kết và chuẩn hóa
+            total = max(0.0, min(1.0, b_total - p_total))
             scores.append(total)
+
         return scores
 
     
@@ -449,7 +455,7 @@ class CustomReasoningReward(ORM):
 # Register reward function
 orms['custom_reasoning_reward'] = CustomReasoningReward
 
-NUM_GENERATIONS = 8
+NUM_GENERATIONS = int(os.getenv("NUM_GENERATIONS", 8))
 class CustomExplainationReward(ORM):
     def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
         contents = completions
@@ -484,7 +490,7 @@ class CustomExplainationReward(ORM):
 
         # Extract explanations (same as before)
         for content, sol in zip(contents, solution):
-            sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
+            sol_match = re.search(r'<EXPLANATION>(.*?)</EXPLANATION>', sol, re.DOTALL)
             gt_explanation = sol_match.group(1).strip() if sol_match else ""
             ground_truths_list.append([gt_explanation]) # Ensure scorer expects List[List[str]]
 
@@ -581,73 +587,6 @@ class CustomExplainationRewardOnlyThinkAnswer(ORM):
         return rewards
 
 orms['custom_explaination_reward_only_think_answer'] = CustomExplainationRewardOnlyThinkAnswer
-
-class CustomExplainationRewardOnlyExplainAnswer(ORM):
-    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
-        contents = completions
-        scorer = initialize_explanation_customized_scorer(alpha=0.5)
-        
-        ground_truths_list = []
-        predictions_list = []
-        image_paths_list = [] # Initialize list for image paths
-        print(f"num_generations in explaination reward: {NUM_GENERATIONS}")
-        prompt_ids = [i // NUM_GENERATIONS for i in range(len(completions))]
-        # --- MODIFIED: Extract image paths from list[dict] structure ---
-        if 'images' in kwargs:
-            batch_image_data = kwargs['images'] # This is likely List[List[Dict[str, str]]]
-            if len(batch_image_data) != len(contents):
-                print(f"Error in explanation_reward: Mismatch between image data count ({len(batch_image_data)}) and completions count ({len(contents)}).")
-                return [0.0] * len(contents)
-
-            for img_data_list in batch_image_data:
-                # Expecting img_data_list to be like [{'bytes': None, 'path': '...'}]
-                if isinstance(img_data_list, list) and len(img_data_list) > 0 and \
-                   isinstance(img_data_list[0], dict) and 'path' in img_data_list[0]:
-                    image_paths_list.append(img_data_list[0]['path']) # Extract the path from the dict
-                else:
-                    # Handle unexpected format within the batch element
-                    print(f"Warning: Unexpected image data format found: {img_data_list}. Appending None.")
-                    image_paths_list.append(None) # Use None or "" as a placeholder
-
-        else:
-            print("Error in explanation_reward: 'images' key not found in kwargs.")
-            return [0.0] * len(contents)
-        # --- END MODIFIED ---
-
-        # Extract explanations (same as before)
-        for content, sol in zip(contents, solution):
-            sol_match = re.search(r'<explain>(.*?)</explain>', sol, re.DOTALL)
-            gt_explanation = sol_match.group(1).strip() if sol_match else ""
-            ground_truths_list.append([gt_explanation]) # Ensure scorer expects List[List[str]]
-
-            content_match = re.search(r'<explain>(.*?)</explain>', content, re.DOTALL)
-            pred_explanation = content_match.group(1).strip() if content_match else ""
-            predictions_list.append(pred_explanation)
-
-        # Ensure lists are consistent before scoring
-        if not (len(predictions_list) == len(ground_truths_list) == len(image_paths_list)):
-             print("Error: Length mismatch between predictions, ground truths, and image paths after processing.")
-             return [0.0] * len(contents)
-
-        # Call the scorer
-        try:
-            rewards = scorer.explanation_rewards(
-                ground_truths=ground_truths_list,
-                predictions=predictions_list,
-                image_paths=image_paths_list,
-                prompt_ids=prompt_ids
-            )
-            if len(rewards) != len(contents):
-                print(f"Error: Scorer returned {len(rewards)} rewards, expected {len(contents)}.")
-                rewards = [0.0] * len(contents)
-
-        except Exception as e:
-            print(f"Error during scorer.explanation_rewards calculation: {e}")
-            rewards = [0.0] * len(contents)
-
-        return rewards
-
-orms['custom_explaination_reward_only_explain_answer'] = CustomExplainationRewardOnlyExplainAnswer
 
 
 class CustomExplainationReward_Stage3(ORM):
@@ -751,7 +690,7 @@ def initialize_caption_customized_scorer():
         print("Initializing CaptionRewardScorer (BERTScore with COCO)...")
 
         caption_scorer = CaptionRewardScorer(
-            model_name_or_path="google-bert/bert-base-uncased",  # Hoặc PhoBERT nếu caption tiếng Việt
+            model_name_or_path="bert",
             coco_train_path="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/coco/coco_train2014_with_captions.json",
             coco_val_path="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/coco/coco_val2014_with_captions.json"
         )
@@ -1812,3 +1751,67 @@ class CustomCtxManager(ContextManager):
 
 
 context_managers['custom_ctx'] = CustomCtxManager
+
+
+# ==============================================================================
+# BASIC REWARD FUNCTIONS (Added per request)
+# ==============================================================================
+
+class BasicAccuracyReward(ORM):
+    """
+    Accuracy Reward (Answer Reward)
+    Mục đích: Đánh giá xem đáp án cuối cùng của mô hình (<CONCLUSION>) có khớp với đáp án chuẩn (ground truth) hay không.
+    """
+    def __call__(self, completions: List[str], solution: List[str], **kwargs) -> List[float]:
+        rewards = []
+        for content, sol in zip(completions, solution):
+            # 1. Extract content within <CONCLUSION> tags
+            # Sử dụng re.DOTALL để match cả newline, re.IGNORECASE cho thẻ
+            match = re.search(r'<CONCLUSION>(.*?)</CONCLUSION>', content, re.DOTALL | re.IGNORECASE)
+            
+            if match:
+                pred_answer = match.group(1).strip()
+                gt_answer = str(sol).strip()
+                
+                # 2. Compare with ground truth (case-insensitive)
+                # Đây là so sánh cơ bản (exact match)
+                if pred_answer.lower() == gt_answer.lower():
+                    rewards.append(1.0)
+                else:
+                    rewards.append(0.0)
+            else:
+                # Nếu không tìm thấy thẻ CONCLUSION hoặc format sai -> 0 điểm
+                rewards.append(0.0)
+                
+        return rewards
+
+class BasicFormatReward(ORM):
+    """
+    Format Reward
+    Yêu cầu cấu trúc đầy đủ gồm cả hai cặp thẻ:
+    - <REASONING> ... </REASONING>
+    - <CONCLUSION> ... </CONCLUSION>
+    """
+    def __call__(self, completions: List[str], **kwargs) -> List[float]:
+        rewards = []
+        
+        # Regex patterns
+        pat_reasoning = re.compile(r"<REASONING>.*?</REASONING>", re.DOTALL | re.IGNORECASE)
+        pat_conclusion = re.compile(r"<CONCLUSION>.*?</CONCLUSION>", re.DOTALL | re.IGNORECASE)
+        
+        for content in completions:
+            # Check sự tồn tại của cả 2 thẻ
+            has_reasoning = bool(pat_reasoning.search(content))
+            has_conclusion = bool(pat_conclusion.search(content))
+            
+            if has_reasoning and has_conclusion:
+                rewards.append(1.0)
+            else:
+                rewards.append(0.0)
+                
+        return rewards
+
+
+# Register basic rewards
+orms['basic_accuracy_reward'] = BasicAccuracyReward
+orms['basic_format_reward'] = BasicFormatReward

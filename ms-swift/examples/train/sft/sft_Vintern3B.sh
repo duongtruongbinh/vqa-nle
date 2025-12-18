@@ -9,21 +9,22 @@ EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
 LEARNING_RATE=1e-7
-MAX_STEPS=2000
+MAX_STEPS=1000
 
 SAVE_STEPS=150
 LOGGING_STEPS=1
 EVAL_STEPS=1
 
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/sft/ViVQA-X_train_msswift_fixed.jsonl"
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/sft/ViVQA-X_train_msswift.jsonl"
 OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/sft/output/dat-vinternvl3B"
 
 
-CUDA_VISIBLE_DEVICES=2 \
+CUDA_VISIBLE_DEVICES=1 \
 swift sft \
     --use_hf=1 \
     --model "$MODEL_ID_OR_PATH" \
     --model_type "$MODEL_TYPE" \
+    --attn_impl flash_attention_2 \
     --train_type lora \
     --dataset "$TRAIN_DATASET_PATH" \
     --torch_dtype bfloat16 \
@@ -31,8 +32,8 @@ swift sft \
     --per_device_train_batch_size $BATCH_SIZE_PER_DEVICE \
     --per_device_eval_batch_size 1 \
     --learning_rate $LEARNING_RATE \
-    --lora_rank 8 \
-    --lora_alpha 16 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
     --eval_steps $EVAL_STEPS \
@@ -49,4 +50,3 @@ swift sft \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
     --report_to wandb \
-    --resume_from_checkpoint "$OUTPUT_DIR/v1-20251124-140140/checkpoint-1450" \

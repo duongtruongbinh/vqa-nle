@@ -7,7 +7,7 @@ from transformers import AutoModel, AutoTokenizer
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 from .base_model import VQAModel
-from .utils import get_system_prompt, parse_output, get_grpo_system_prompt, parse_output_grpo, get_grpo_OTA_system_prompt, parse_output_grpo_OTA, get_grpo_OEA_system_prompt, parse_output_grpo_OEA
+from .utils import get_system_prompt, parse_output, get_grpo_system_prompt, parse_output_grpo, get_grpo_OTA_system_prompt, parse_output_grpo_OTA, get_grpo_OEA_system_prompt, parse_output_grpo_OEA, get_sft_explain_answer_system_prompt, parse_output_sft_explain_answer
 
 
 IMAGENET_MEAN = (0.485, 0.456, 0.406)
@@ -82,7 +82,7 @@ class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
         #self.model_path = '5CD-AI/Vintern-3B-R-beta' OpenGVLab/InternVL3-1B-Instruct
-        self.model_path = 'OpenGVLab/InternVL3-1B-Instruct'
+        self.model_path = '5CD-AI/Vintern-3B-R-beta'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)
@@ -94,6 +94,7 @@ class InternVLModel(VQAModel):
             torch_dtype=torch.bfloat16,
             low_cpu_mem_usage=True,
             trust_remote_code=True,
+            attn_implementation="flash_attention_2"
         ).to(device)
 
         self.model.eval()
@@ -166,3 +167,24 @@ class InternVLModel(VQAModel):
                 generation_config={"max_new_tokens": 600, "pad_token_id": self.tokenizer.eos_token_id}
             )
         return parse_output_grpo_OEA(response) 
+
+    def infer_sft_explain_answer(self, question: str, image_path: str) -> tuple[str, str]:
+        pixel_values = self._load_image(image_path).to(torch.bfloat16).to(device)
+        system_prompt, user_content_template = get_sft_explain_answer_system_prompt(question)
+        
+        # InternVL prompt structure often requires <image> tag
+        prompt = f"{system_prompt}\n<image>\n{user_content_template}"
+
+        with torch.no_grad():
+            response = self.model.chat(
+                self.tokenizer,
+                pixel_values,
+                prompt,
+                generation_config={
+                    "max_new_tokens": 1024,
+                    "do_sample": False,
+                    "pad_token_id": self.tokenizer.eos_token_id,
+                    "eos_token_id": self.tokenizer.eos_token_id,
+                }
+            )
+        return parse_output_sft_explain_answer(response) 

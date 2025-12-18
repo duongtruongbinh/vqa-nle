@@ -12,7 +12,7 @@ import sys
 
 import torch
 from tqdm import tqdm
-from torchmetrics.text import BERTScore
+import bert_score
 
 # Add SMILE metric path
 SMILE_PATH = '/home/vlai-vqa-nle/minhtq/vqa-nle/smile-metric-qna-eval'
@@ -38,71 +38,62 @@ from synthetic_answer_generator import (
 # ============================================================================
 
 # ============================================================================
-# SHARED BERTSCORE MODEL
+# SHARED BERTSCORE MODEL (using bert-score library)
 # ============================================================================
 
 class SharedBERTScoreModel:
     """
-    Singleton for shared BERTScore model to avoid repeated initialization.
+    Singleton using original bert-score library (more stable).
     
     Uses PhoBERT-base or BERT-base for BERTScore computation.
-    Supports both local cache and HuggingFace model loading.
     """
     
-    _instances = {}
-    _device = None
+    _scorers = {}  # Cache BERTScorer objects
     
-    # Model Paths
-    BERT_HF_NAME = "google-bert/bert-base-uncased"
-    BERT_LOCAL_PATH = "/mnt/dataset1/pretrained_fm/google-bert/bert-base-uncased"
-    
-    PHOBERT_HF_NAME = "vinai/phobert-base"
-    PHOBERT_LOCAL_PATH = "/mnt/dataset1/pretrained_fm/vinai/phobert-base"
+    # Model mapping
+    MODEL_MAPPING = {
+        'phobert': 'vinai/phobert-base',
+        'bert': 'bert-base-uncased'
+    }
     
     @classmethod
-    def get_model_path(cls, model_type: str) -> str:
-        """Get model path based on type."""
-        if model_type == "phobert":
-            target_dir = cls.PHOBERT_LOCAL_PATH
-            hf_name = cls.PHOBERT_HF_NAME
-        else:
-            target_dir = cls.BERT_LOCAL_PATH
-            hf_name = cls.BERT_HF_NAME
+    def get_scorer(cls, model_type: str = "bert", device: str = "cuda"):
+        """Get or create cached BERTScorer."""
+        key = (model_type, device)
+        if key not in cls._scorers:
+            model_name = cls.MODEL_MAPPING.get(model_type, model_type)
             
-        if os.path.exists(target_dir):
-            config_file = os.path.join(target_dir, "config.json")
-            has_model = (
-                os.path.exists(os.path.join(target_dir, "pytorch_model.bin")) or 
-                os.path.exists(os.path.join(target_dir, "model.safetensors"))
-            )
-            
-            if os.path.exists(config_file) and has_model:
-                return target_dir
-        
-        # If writing to cache is needed, we usually let library handle it or assume read-only
-        # Here we return the directory if it exists, else the HF name
-        return hf_name
-    
-    @classmethod
-    def get_instance(cls, device: str = "cuda", model_type: str = "bert") -> BERTScore:
-        """Get or initialize shared BERTScore model."""
-        key = (device, model_type)
-        if key not in cls._instances:
-            print(f"Initializing SharedBERTScoreModel ({model_type}) on {device}...")
-            model_path = cls.get_model_path(model_type)
-             
-            cls._instances[key] = BERTScore(
-                model_name_or_path=model_path,
+            cls._scorers[key] = bert_score.BERTScorer(
+                model_type=model_name,
                 num_layers=12,
-                rescale_with_baseline=False,
+                batch_size=64,
+                nthreads=4,
+                all_layers=False,
+                idf=False,
                 device=device,
-                truncation=True,
-                max_length=256,
-                dist_sync_on_step=False,
-                sync_on_compute=False
+                lang=None,
+                rescale_with_baseline=False
             )
         
-        return cls._instances[key]
+        return cls._scorers[key]
+    
+    @classmethod
+    def compute_scores(cls, predictions: list, references: list, 
+                       model_type: str = "bert", device: str = "cuda"):
+        """
+        Compute BERTScore with automatic caching.
+        
+        Returns:
+            Dict with 'precision', 'recall', 'f1' (each as mean value)
+        """
+        scorer = cls.get_scorer(model_type, device)
+        P, R, F1 = scorer.score(predictions, references)
+        
+        return {
+            'precision': P.mean().item(),
+            'recall': R.mean().item(), 
+            'f1': F1.mean().item()
+        }
 
 
 # ============================================================================
@@ -123,9 +114,6 @@ class SharedSMILEModel:
     def get_instance(cls, model_type: str = 'bert'):
         """Get or initialize shared SMILE model."""
         if model_type not in cls._instances:
-            print(f"😊 Initializing SMILE metric with {model_type}...")
-            # For SMILE, 'bert' usually means bert-base-uncased, 'phobert' means vinai/phobert-base
-            # The SMILE library handles 'bert', 'roberta', 'phobert' etc passed to emb_model
             cls._instances[model_type] = SMILE(
                 emb_model=model_type,
                 eval_metrics=['avg', 'hm'],
@@ -164,13 +152,13 @@ class SharedSyntheticAnswerGenerator:
         if model_path is None:
             model_path = cls.DEFAULT_MODEL_PATH
         
-        print(f"🤖 Initializing Synthetic Answer Generator with {model_path}...")
+        print(f"Initializing Synthetic Answer Generator with {model_path}...")
         cls._model, cls._tokenizer, cls._device = load_qwen_text_model(
             model_path=model_path,
             device=torch.device(device)
         )
         cls._initialized = True
-        print("✅ Synthetic Answer Generator initialized!")
+        print("Synthetic Answer Generator initialized")
     
     @classmethod
     def is_initialized(cls) -> bool:

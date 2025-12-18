@@ -6,7 +6,6 @@ import warnings
 from datetime import datetime
 from PIL import Image
 from torchmetrics.multimodal import CLIPScore
-from torchmetrics.text import BERTScore
 
 from pycocoevalcap.cider.cider import Cider
 from pycocoevalcap.tokenizer.ptbtokenizer import PTBTokenizer
@@ -21,20 +20,20 @@ import py_vncorenlp
 os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
-def set_up_visegmenter():
-    """Initialize VnCoreNLP word segmenter for Vietnamese text."""
-    vncorenlp_dir = '/home/vlai-vqa-nle/minhtq/vqa-nle/vncorenlp_models'
-    if not os.path.exists(vncorenlp_dir):
-        os.makedirs(vncorenlp_dir)
+_rdrsegmenter = None
 
-    rdrsegmenter = py_vncorenlp.VnCoreNLP(
-        annotators=["wseg"], 
-        save_dir='/home/vlai-vqa-nle/minhtq/vqa-nle/src/inference/vncorenlp_models'
-    )
-    return rdrsegmenter
-
-
-rdrsegmenter = set_up_visegmenter()
+def get_segmenter():
+    """Lazy initialization của VnCoreNLP segmenter - chỉ load khi cần."""
+    global _rdrsegmenter
+    if _rdrsegmenter is None:
+        vncorenlp_dir = '/home/vlai-vqa-nle/minhtq/vqa-nle/vncorenlp_models'
+        if not os.path.exists(vncorenlp_dir):
+            os.makedirs(vncorenlp_dir)
+        _rdrsegmenter = py_vncorenlp.VnCoreNLP(
+            annotators=["wseg"], 
+            save_dir='/home/vlai-vqa-nle/minhtq/vqa-nle/src/inference/vncorenlp_models'
+        )
+    return _rdrsegmenter
 
 
 def segment_text(text: str) -> str:
@@ -42,7 +41,8 @@ def segment_text(text: str) -> str:
     if not text:
         return ""
     try:
-        sentences = rdrsegmenter.word_segment(text)
+        segmenter = get_segmenter()
+        sentences = segmenter.word_segment(text)
         segmented_text = " ".join([" ".join(sentence) for sentence in sentences])
         return segmented_text
     except Exception as e:
@@ -71,7 +71,7 @@ class ExplanationRewardScorer(BaseRewardScorer):
         self.device = "cuda" if torch.cuda.is_available() else "cpu"
 
         self.cider_scorer = Cider()
-        self.bertscore_metric = self.initialize_bertscore(model_name_or_path="google-bert/bert-base-uncased")
+        self.bertscore_metric = self.initialize_bertscore(model_name_or_path="phobert")
         
         # === CLIP INITIALIZATION (COMMENTED OUT) ===
         # clip_model_name = "/home/vlai-vqa-nle/.cache/huggingface/hub/models--openai--clip-vit-base-patch16/snapshots/57c216476eefef5ab752ec549e440a49ae4ae5f3"
@@ -206,6 +206,10 @@ class ExplanationRewardScorer(BaseRewardScorer):
         
         # Calculate BERTScore for non-empty predictions
         bert_scores_dict = self.calculate_bertscore_batch(gts_dict, preds_dict)
+        
+        # Clear cache sau mỗi batch để tránh memory leak
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
         # === CLIP SCORE CALCULATION (COMMENTED OUT) ===
         # clip_scores_raw_dict = self.calculate_clip_batch(paths_dict, preds_dict)

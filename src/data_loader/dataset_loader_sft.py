@@ -2,27 +2,24 @@ import os
 import json
 
 
-system_instruction_vintern3BR = """<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời và giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp.
-    Câu hỏi: {question}
-    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
-    <think>Giải thích một câu ngắn gọn chứng minh câu trả lời</think>""".strip()
+SYSTEM_PROMPT = """<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc."""
 
-SYSTEM_PROMPTS = """<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời và giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp."""
-USER_PROMPTS = """
-Câu hỏi: {question}
-    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-    <think>Quá trình suy luận chi tiết dẫn đến câu trả lời cuối cùng</think>
-    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
+USER_CONTENT_TEMPLATE = """Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong hai giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+<CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+<EXPLANATION>[Giải thích một câu ngắn gọn chứng minh câu trả lời.] Hình ảnh cho thấy...</EXPLANATION>
+
+Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+Câu trả lời:
 """
+
 
 def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/mnt/VLAI_data/COCO_Images"):
     """
-    Tạo file JSONL theo format của MS-Swift với system prompt và user content riêng biệt
-    Format: {"messages": [...], "images": [...], "target_answer": "..."}
+    Tạo file JSONL theo format của MS-Swift với system, user, và assistant messages.
+    Format: {"messages": [system, user, assistant], "images": [...]}
     """
-
     data_dir = "/mnt/VLAI_data/ViVQA-X"
+    
     if split == 'train':
         data_path = os.path.join(data_dir, 'ViVQA-X_train.json')
         image_dir = 'train2014'
@@ -41,15 +38,18 @@ def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/m
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, f'ViVQA-X_{split}_msswift.jsonl')
 
+    count = 0
     with open(output_file, 'w', encoding='utf-8') as f_out:
-        for idx, item in enumerate(raw_data):
+        for item in raw_data:
             image_name = item.get('image_name')
-            image_id = item.get('image_id')
             question = item.get('question')
             answer = item.get('answer')
             explanations = item.get('explanation')
 
-            if not all([image_name, question, answer, explanations, explanations[0]]):
+            if not all([image_name, question, answer, explanations]):
+                continue
+            
+            if not explanations or not explanations[0]:
                 continue
 
             explanation = explanations[0]
@@ -57,29 +57,29 @@ def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/m
             # Construct absolute image path
             absolute_image_path = os.path.join(image_base_dir, image_dir, image_name)
 
-            # Format user content using the instruction template
-            user_content = system_instruction_vintern3BR.format(question=question)
+            # Format user content
+            user_content = USER_CONTENT_TEMPLATE.format(question=question)
 
-            # Format câu trả lời đầy đủ (assistant response)
-            # Note: The instruction asks for <REASONING>, <answer>, <explain>.
-            # We only have answer and explanation. We will provide what we have.
-            full_response = f"<answer>{answer}</answer><explain>{explanation}</explain>"
+            # Format assistant response với CONCLUSION và EXPLANATION tags
+            assistant_response = (
+                f"<CONCLUSION>\n{answer}\n</CONCLUSION>\n"
+                f"<EXPLANATION>\n{explanation}\n</EXPLANATION>"
+            )
 
-            # MS-Swift format
-            system_prompt = SYSTEM_PROMPTS
-            user_content = USER_PROMPTS.format(question = question)
+            # MS-Swift SFT format - CẦN CÓ ASSISTANT MESSAGE
             entry = {
                 "messages": [
-                    {"role": "system", "content": system_prompt},
+                    {"role": "system", "content": SYSTEM_PROMPT},
                     {"role": "user", "content": user_content},
+                    {"role": "assistant", "content": assistant_response} 
                 ],
-                "images": [absolute_image_path], 
-                "solution": full_response
+                "images": [absolute_image_path]
             }
 
             f_out.write(json.dumps(entry, ensure_ascii=False) + '\n')
+            count += 1
 
-    print(f"Created {output_file}")
+    print(f"Created {output_file} with {count} samples")
     return output_file
 
 

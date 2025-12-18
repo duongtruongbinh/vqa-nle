@@ -8,7 +8,7 @@ from tqdm import tqdm
 
 # Environment configuration
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 from models.utils import set_seed
 
@@ -26,7 +26,7 @@ MODELS = {
 # Default paths
 DEFAULT_IMAGE_FOLDER = "/mnt/VLAI_data/COCO_Images/val2014"
 #/mnt/VLAI_data/VQA-X/vqaX_test.json
-#/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json
+#/mnt/VLAI_data/VQA-X/vqaX_test.json
 DEFAULT_DATA_PATH = "/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json"
 DEFAULT_OUTPUT_DIR = "src/inference/results/grpo/"
 
@@ -111,7 +111,7 @@ def main() -> int:
         data = raw_data
 
     # Limit samples
-    data = data[: args.limit]
+    # data = data[: args.limit]
 
     # Setup output
     output_dir = Path(args.output_dir)

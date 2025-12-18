@@ -1,6 +1,7 @@
 import string
 import re
 import unicodedata
+import torch
 from base_rewards import BaseRewardScorer
 from pycocoevalcap.rouge.rouge import Rouge
 def normalize_answer(text: str) -> str:
@@ -53,7 +54,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
                   alpha=0.5 => 50% BERTScore, 50% ROUGE-L
             threshold: Ngưỡng tối thiểu, nếu reward < threshold thì gán -1.0
         """
-        self.initialize_bertscore(model_name_or_path="google-bert/bert-base-uncased")
+        self.initialize_bertscore(model_name_or_path="phobert")
         self.rouge_scorer = Rouge()
         self.alpha = alpha
         self.threshold = threshold
@@ -118,7 +119,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
         Single sample version - tính hybrid reward cho một sample.
         """
         # Extract answers
-        sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
+        sol_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", solution, flags=re.DOTALL | re.IGNORECASE)
         ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
         content_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", completion, flags=re.DOTALL | re.IGNORECASE)
@@ -161,7 +162,7 @@ class AccuracyRewardScorer(BaseRewardScorer):
         empty_indices = set()  # Track các index có answer rỗng
         
         for i, (completion, solution) in enumerate(zip(completions, solutions)):
-            sol_match = re.search(r"<answer>(.*?)</answer>", solution, flags=re.DOTALL | re.IGNORECASE)
+            sol_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", solution, flags=re.DOTALL | re.IGNORECASE)
             ground_truth = sol_match.group(1).strip() if sol_match else solution.strip()
 
             content_match = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", completion, flags=re.DOTALL | re.IGNORECASE)
@@ -181,6 +182,10 @@ class AccuracyRewardScorer(BaseRewardScorer):
         # Tính cả ROUGE-L và BERTScore batch với cleaned text (chỉ cho non-empty)
         rouge_scores = self.calculate_rouge_batch(gts_dict, preds_dict)
         bert_scores = self.calculate_bertscore_batch(gts_dict, preds_dict)
+        
+        # Clear cache để tránh memory leak
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
         # Kết hợp scores với trọng số alpha
         rewards = []
@@ -218,7 +223,7 @@ class CaptionRewardScorer(BaseRewardScorer):
     """
     
     def __init__(self, 
-                 model_name_or_path="google-bert/bert-base-uncased",
+                 model_name_or_path="bert",
                  coco_train_path="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/coco/coco_train2014_with_captions.json",
                  coco_val_path="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/coco/coco_val2014_with_captions.json"):
         """

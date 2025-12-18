@@ -1,19 +1,14 @@
 import os
 import json
 
+SYSTEM_PROMPT = """<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc."""
 
-# system_instruction_vintern3BR = """<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời và giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp.
-#     Câu hỏi: {question}
-#     Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-#     <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
-#     <think>Giải thích một câu ngắn gọn chứng minh câu trả lời</think>""".strip()
+USER_CONTENT_TEMPLATE = """Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong hai giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+<CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+<EXPLANATION>[Giải thích một câu ngắn gọn chứng minh câu trả lời.] Hình ảnh cho thấy...</EXPLANATION>
 
-SYSTEM_PROMPTS = """<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời và giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp."""
-USER_PROMPTS = """
-Câu hỏi: {question}
-    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
-    <explain>Giải thích một câu ngắn gọn chứng minh câu trả lời</explain>
+Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+Câu trả lời:
 """
 
 def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/mnt/VLAI_data/COCO_Images"):
@@ -63,11 +58,11 @@ def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/m
             # Format câu trả lời đầy đủ (assistant response)
             # Note: The instruction asks for <REASONING>, <answer>, <explain>.
             # We only have answer and explanation. We will provide what we have.
-            full_response = f"<answer>{answer}</answer><explain>{explanation}</explain>"
+            full_response = f"<CONCLUSION>{answer}</CONCLUSION><EXPLANATION>{explanation}</EXPLANATION>"
 
             # MS-Swift format
-            system_prompt = SYSTEM_PROMPTS
-            user_content = USER_PROMPTS.format(question = question)
+            system_prompt = SYSTEM_PROMPT
+            user_content = USER_CONTENT_TEMPLATE.format(question = question)
             entry = {
                 "messages": [
                     {"role": "system", "content": system_prompt},

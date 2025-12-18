@@ -92,7 +92,7 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
     if not hypotheses:
         return []
     
-    bertscore = SharedBERTScoreModel.get_instance(device=device, model_type=model_type)
+    scorer = SharedBERTScoreModel.get_scorer(model_type=model_type, device=device)
     max_scores = []
     
     for hyp, refs in zip(hypotheses, references):
@@ -102,18 +102,11 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
             max_scores.append(0.0)
             continue
         
-        # Dynamic batch: repeat hypothesis for each reference
+        # BERTScorer.score() expects (candidates, references)
         batch_cands = [hyp] * len(valid_refs)
-        batch_refs = valid_refs
+        P, R, F1 = scorer.score(batch_cands, valid_refs)
         
-        bertscore.reset()
-        bertscore.update(batch_cands, batch_refs)
-        result = bertscore.compute()
-        
-        f1_scores = result['f1'].cpu().tolist()
-        if isinstance(f1_scores, float):
-            f1_scores = [f1_scores]
-        
+        f1_scores = F1.cpu().tolist()
         max_scores.append(max(f1_scores) * 100)
     
     return max_scores

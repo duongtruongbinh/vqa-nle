@@ -27,8 +27,9 @@ from uqlm import BlackBoxUQ
 # ==================== CONFIG ====================
 
 # Model settings (đọc từ environment hoặc dùng default)
+load_dotenv()
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 GEMINI_MODEL = "gemini-2.5-pro"
-GEMINI_API_KEY = "AIzaSyDIJcFFF5pfgtmMJgPZ4fbCFvJ_AEBIThY"
 
 
 # CoCoA settings

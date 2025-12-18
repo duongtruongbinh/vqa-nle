@@ -22,18 +22,14 @@ class PhoBERTWrapper:
     """
     def __init__(self, model_name, device):
         from transformers import RobertaModel, AutoTokenizer
-        local_model_path = "/mnt/dataset1/pretrained_fm/vinai/phobert-base"
-        print(f"Loading PhoBERT from local path: {local_model_path}")
+        
+        print(f"Loading PhoBERT from HuggingFace: {model_name}")
         
         self.tokenizer = AutoTokenizer.from_pretrained(
-            local_model_path,
-            local_files_only=True,
+            model_name,
             trust_remote_code=True
         )
-        self.model = RobertaModel.from_pretrained(
-            local_model_path,
-            local_files_only=True
-        )
+        self.model = RobertaModel.from_pretrained(model_name)
         self.device = device
         self.model.to(device)
         self.model.eval()
@@ -160,11 +156,14 @@ class SMILE:
             # model.max_seq_length = 8192
             return model
         
-        elif emb_model == 'phobert':
+        elif emb_model in ['phobert', 'vinai/phobert-base']:
             return PhoBERTWrapper('vinai/phobert-base', self.device)
         
+        elif emb_model in ['bert', 'google-bert/bert-base-uncased']:
+            # Note: Raw BERT embeddings might not be optimal for semantic similarity compared to SBERT models
+            return SentenceTransformer('google-bert/bert-base-uncased', device=self.device)
+            
         else:
-            # Default fallback
             print(f"Warning: Unknown embedding model '{emb_model}'. Using default multilingual model.")
             return SentenceTransformer('sentence-transformers/paraphrase-multilingual-mpnet-base-v2', device=self.device)
         

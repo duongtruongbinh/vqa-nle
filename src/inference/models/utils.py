@@ -125,22 +125,42 @@ def get_grpo_system_prompt(question: str):
 
 
 def get_grpo_OTA_system_prompt(question: str):
-    system_instruction_vintern3BR = f"""<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời các câu hỏi dựa trên nội dung của hình ảnh được cung cấp.
-    Câu hỏi: {question}
-    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-    <think>Quá trình suy luận chi tiết dẫn đến câu trả lời cuối cùng</think>
-    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>""".strip()
+    system_instruction_vintern3BR = f"""<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc.
+    Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong hai giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+    <REASONING>[Đưa ra phân tích lập luận chi tiết, từng bước để giải quyết vấn đề.]</REASONING>
+    <CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+
+    Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+    Câu trả lời:""".strip()
     
     return system_instruction_vintern3BR
 
 def get_grpo_OEA_system_prompt(question: str):
-    system_instruction_vintern3BR = f"""<image>Bạn là hệ thống Visual Question Answering (VQA). Nhiệm vụ của bạn là trả lời giải thích các câu hỏi dựa trên nội dung của hình ảnh được cung cấp.
-    Câu hỏi: {question}
-    Vui lòng trả lời câu hỏi sau dựa trên hình ảnh. Hãy trả lời theo định dạng sau:
-    <answer>Câu trả lời (một từ hoặc cụm từ ngắn)</answer>
-    <explain>Giải thích một câu ngắn gọn chứng minh câu trả lời</explain>""".strip()
+    system_instruction_vintern3BR = f"""<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc.
+    Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong hai giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+    <CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+    <EXPLANATION>[Giải thích một câu ngắn gọn chứng minh câu trả lời.] Hình ảnh cho thấy...</EXPLANATION>
+
+    Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+    Câu trả lời:""".strip()
     
     return system_instruction_vintern3BR
+
+def get_sft_explain_answer_system_prompt(question: str):
+    """
+    Returns (system_prompt, user_content) for SFT Explain + Answer mode
+    """
+    system_prompt = """<image> Bạn là một trợ lý ngôn ngữ thị giác hữu ích, được thiết kế cho suy luận có cấu trúc."""
+    
+    user_content_template = f"""Khi trả lời các câu hỏi về hình ảnh, bạn phải trả lời chính xác trong hai giai đoạn, mỗi giai đoạn bắt buộc phải tuân theo format:
+    <CONCLUSION>[Nêu câu trả lời cuối cùng là một từ hoặc cụm từ.]</CONCLUSION>
+    <EXPLANATION>[Tổng hợp các thông tin từ REASONING và cho ra câu mô tả ngắn gọn các phân tích đặc điểm.] Hình ảnh cho thấy...</EXPLANATION>
+
+    Vui lòng áp dụng định dạng này một cách tỉ mỉ để phân tích hình ảnh được cung cấp và trả lời câu hỏi: {question}
+    Câu trả lời:"""
+    
+    return system_prompt, user_content_template
+
 
 def parse_output(response: str) -> tuple[str, str]:
     """
@@ -244,41 +264,35 @@ def parse_output_grpo(response: str) -> tuple[str, str, str]:
 def parse_output_grpo_OTA(response: str) -> tuple[str, str]:
     """
     Trích xuất (think, answer) từ output của model
-    dựa trên format thẻ <think>, <answer>.
-    - Sử dụng re.DOTALL để xử lý nội dung đa dòng bên trong thẻ.
-    - Robust khi thẻ bị thiếu hoặc không có nội dung.
+    dựa trên format thẻ <REASONING>, <CONCLUSION>.
     """
     text = (response or "").strip()
     think, answer = "", ""
 
-    # 1. Trích xuất nội dung thẻ <think>
-    m_think = re.search(r"<think>(.*?)</think>", text, re.DOTALL)
+    # 1. Trích xuất nội dung thẻ <REASONING>
+    m_think = re.search(r"<REASONING>(.*?)</REASONING>", text, re.DOTALL)
     if m_think:
         think = m_think.group(1).strip()
+    else:
+        # Fallback
+        m_think = re.search(r"<REASONING>(.*?)(?=<CONCLUSION>|$)", text, re.DOTALL)
+        if m_think:
+            think = m_think.group(1).strip()
 
-    # 2. Trích xuất nội dung thẻ <answer>
-    m_ans = re.search(r"<answer>(.*?)</answer>", text, re.DOTALL)
+    # 2. Trích xuất nội dung thẻ <CONCLUSION>
+    m_ans = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", text, re.DOTALL)
     if m_ans:
         answer = m_ans.group(1).strip()
+    else:
+         # Fallback
+        m_ans = re.search(r"<CONCLUSION>(.*?)$", text, re.DOTALL)
+        if m_ans:
+            answer = m_ans.group(1).strip()
 
-    # 4. Fallback: (Ít quan trọng hơn khi dùng thẻ, nhưng vẫn giữ lại)
-    #    Nếu không tìm thấy bất kỳ thẻ nào
-    if not think and not answer:
-        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        non_tag_lines = [ln for ln in lines if not ln.startswith('<')]
-        
-        if len(non_tag_lines) >= 1:
-            # Không thể biết dòng đầu là think hay answer,
-            # nhưng ta gán nó cho answer theo logic cũ.
-            answer = non_tag_lines[0]
-        if len(non_tag_lines) >= 2:
-            think = non_tag_lines[1]
-        # Không có fallback rõ ràng cho 'think'
-
-    # 5. Debug (Giữ lại từ hàm gốc của bạn) 
+    # Fallback debug
     if think.strip() == "" and answer.strip() != "":
         print("="*50)
-        print(f"DEBUG (grpo): Không tìm thấy 'think' hoặc 'think' rỗng.\nResponse:\n{response}")
+        print(f"DEBUG (grpo OTA): Không tìm thấy 'REASONING' hoặc rỗng.\nResponse:\n{response}")
         print("="*50)
         
     return think, answer
@@ -286,41 +300,74 @@ def parse_output_grpo_OTA(response: str) -> tuple[str, str]:
 def parse_output_grpo_OEA(response: str) -> tuple[str, str]:
     """
     Trích xuất (answer, explanation) từ output của model
-    dựa trên format thẻ <answer>, <explain>.
-    - Sử dụng re.DOTALL để xử lý nội dung đa dòng bên trong thẻ.
-    - Robust khi thẻ bị thiếu hoặc không có nội dung.
+    dựa trên format thẻ <CONCLUSION>, <EXPLANATION>.
     """
     text = (response or "").strip()
     answer, explanation = "", ""
 
-    # 1. Trích xuất nội dung thẻ <answer>
-    m_ans = re.search(r"<answer>(.*?)</answer>", text, re.DOTALL)
+    # 1. Trích xuất nội dung thẻ <CONCLUSION>
+    m_ans = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", text, re.DOTALL)
     if m_ans:
         answer = m_ans.group(1).strip()
+    else:
+        # Fallback
+        m_ans = re.search(r"<CONCLUSION>(.*?)(?=<EXPLANATION>|$)", text, re.DOTALL)
+        if m_ans:
+            answer = m_ans.group(1).strip()
 
-    # 2. Trích xuất nội dung thẻ <explain>
-    m_exp = re.search(r"<explain>(.*?)</explain>", text, re.DOTALL)
+    # 2. Trích xuất nội dung thẻ <EXPLANATION>
+    m_exp = re.search(r"<EXPLANATION>(.*?)</EXPLANATION>", text, re.DOTALL)
     if m_exp:
         explanation = m_exp.group(1).strip()
+    else:
+         # Fallback
+        m_exp = re.search(r"<EXPLANATION>(.*?)$", text, re.DOTALL)
+        if m_exp:
+            explanation = m_exp.group(1).strip()
 
-    # 4. Fallback: (Ít quan trọng hơn khi dùng thẻ, nhưng vẫn giữ lại)
-    #    Nếu không tìm thấy bất kỳ thẻ nào
-    if not answer and not explanation:
-        lines = [ln.strip() for ln in text.splitlines() if ln.strip()]
-        non_tag_lines = [ln for ln in lines if not ln.startswith('<')]
-        
-        if len(non_tag_lines) >= 1:
-            # Không thể biết dòng đầu là think hay answer,
-            # nhưng ta gán nó cho answer theo logic cũ.
-            answer = non_tag_lines[0]
-        if len(non_tag_lines) >= 2:
-            explanation = non_tag_lines[1]
-        # Không có fallback rõ ràng cho 'think'
-
-    # 5. Debug (Giữ lại từ hàm gốc của bạn) 
+    # Fallback debug 
     if explanation.strip() == "" and answer.strip() != "":
         print("="*50)
-        print(f"DEBUG (grpo): Không tìm thấy 'explain' hoặc 'explain' rỗng.\nResponse:\n{response}")
+        print(f"DEBUG (grpo OEA): Không tìm thấy 'EXPLANATION' hoặc rỗng.\nResponse:\n{response}")
         print("="*50)
         
     return explanation, answer
+
+def parse_output_sft_explain_answer(response: str) -> tuple[str, str]:
+    """
+    Trích xuất (answer, explanation) từ output SFT với thẻ <CONCLUSION> và <EXPLANATION>.
+    """
+    text = (response or "").strip()
+    answer, explanation = "", ""
+
+    # 1. Trích xuất nội dung thẻ <CONCLUSION>
+    m_ans = re.search(r"<CONCLUSION>(.*?)</CONCLUSION>", text, re.DOTALL)
+    if m_ans:
+        answer = m_ans.group(1).strip()
+    else:
+        # Fallback: có thẻ mở nhưng không có thẻ đóng
+        m_ans_open = re.search(r"<CONCLUSION>(.*?)(?=<EXPLANATION>|$)", text, re.DOTALL)
+        if m_ans_open:
+            answer = m_ans_open.group(1).strip()
+
+    # 2. Trích xuất nội dung thẻ <EXPLANATION>
+    m_exp = re.search(r"<EXPLANATION>(.*?)</EXPLANATION>", text, re.DOTALL)
+    if m_exp:
+        explanation = m_exp.group(1).strip()
+    else:
+        # Fallback: có thẻ mở nhưng không có thẻ đóng
+        m_exp_open = re.search(r"<EXPLANATION>(.*?)$", text, re.DOTALL)
+        if m_exp_open:
+            explanation = m_exp_open.group(1).strip()
+            
+    # Fallback cho trường hợp không tìm thấy thẻ (vẫn giữ logic fallback đơn giản hoặc báo lỗi)
+    if not answer and not explanation:
+         # Thử dùng regex đơn giản cho trường hợp model không output thẻ
+         pass
+
+    if explanation.strip() == "" and answer.strip() != "":
+         print("="*50)
+         print(f"DEBUG (SFT): Không tìm thấy 'EXPLANATION' hoặc rỗng.\nResponse:\n{response}")
+         print("="*50)
+         
+    return answer, explanation

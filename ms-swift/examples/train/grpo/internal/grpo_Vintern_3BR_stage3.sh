@@ -28,7 +28,7 @@ MAX_COMPLETION_LENGTH=1024
 
 # Training Schedule
 EPOCHS=1
-MAX_STEPS=250
+MAX_STEPS=500
 SAVE_STEPS=50
 LOGGING_STEPS=1
 EVAL_STEPS=1
@@ -43,8 +43,8 @@ swift rlhf \
     --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_reasoning_reward \
     --reward_weights 1 1 1 \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 16 \
+    --lora_rank 16 \
+    --lora_alpha 32 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -75,7 +75,9 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true \
-    --failed_prompts_log $FAILED_PROMPTS_LOG
+    --failed_prompts_log $FAILED_PROMPTS_LOG \
+    --resume_only_model true \
+    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/curr_nouns/stage3/v10-20251214-181737/checkpoint-450"
 
 
 
