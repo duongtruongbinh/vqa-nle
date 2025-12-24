@@ -1,15 +1,14 @@
 """Run inference with GRPO-trained VQA models."""
-
-import argparse
-import json
 import os
-from pathlib import Path
-from tqdm import tqdm
-
 # Environment configuration
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
+import argparse
+import json
+
+from pathlib import Path
+from tqdm import tqdm
 from models.utils import set_seed
 
 MODELS = {
@@ -26,7 +25,7 @@ MODELS = {
 # Default paths
 DEFAULT_IMAGE_FOLDER = "/mnt/VLAI_data/COCO_Images/val2014"
 #/mnt/VLAI_data/VQA-X/vqaX_test.json
-#/mnt/VLAI_data/VQA-X/vqaX_test.json
+
 DEFAULT_DATA_PATH = "/mnt/VLAI_data/ViVQA-X/ViVQA-X_test.json"
 DEFAULT_OUTPUT_DIR = "src/inference/results/grpo/"
 

@@ -2,18 +2,20 @@ import os
 import json
 import argparse
 from tqdm import tqdm
-from models.utils import set_seed
+from .models.utils import set_seed
+import importlib
+
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
-os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 MODELS = {
-    "internvl": "models.internvl.InternVLModel",
-    "molmo": "models.molmo.MolmoModel", 
-    "qwenvl": "models.qwenvl.QwenVLModel",
-    "videollama": "models.videollama.VideoLLaMAModel",
-    "phi": "models.phi.PhiModel",
-    "ovis": "models.ovis.OvisModel",
-    "minicpm": "models.minicpm.MiniCPMModel",
-    "vintern1b": "models.vintern1b.Vintern1BModel"
+    "internvl": ".models.internvl.InternVLModel",
+    "molmo": ".models.molmo.MolmoModel", 
+    "qwenvl": ".models.qwenvl.QwenVLModel",
+    "videollama": ".models.videollama.VideoLLaMAModel",
+    "phi": ".models.phi.PhiModel",
+    "ovis": ".models.ovis.OvisModel",
+    "minicpm": ".models.minicpm.MiniCPMModel",
+    "vintern1b": ".models.vintern1b.Vintern1BModel"
 }
 
 
@@ -34,7 +36,7 @@ def import_model_class(model_key: str):
     
     try:
         print(f"📦 Importing {class_name} from {module_path}...")
-        module = __import__(module_path, fromlist=[class_name])
+        module = importlib.import_module(module_path, package='src.inference')
         model_class = getattr(module, class_name)
         return model_class
     except ImportError as e:
@@ -76,7 +78,7 @@ def main():
     with open(args.data_path, 'r', encoding='utf-8') as f:
         data = json.load(f)
         
-    data = data[:300]
+    # data = data[:300]
     os.makedirs(args.output_dir, exist_ok=True)
     if args.output_name:
         # Nếu người dùng cung cấp tên, sử dụng nó. Thêm .json nếu chưa có.

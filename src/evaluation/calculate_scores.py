@@ -1,5 +1,5 @@
 import os
-# os.environ["CUDA_VISIBLE_DEVICES"] = "2"
+os.environ["CUDA_VISIBLE_DEVICES"] = "1"
 os.environ['PYTORCH_CUDA_ALLOC_CONF'] = 'expandable_segments:True'
 
 import json
@@ -15,7 +15,7 @@ from .nlg_metrics import get_nlg_scores, compute_smile_scores
 
 YES_SET = {"yes", "true", "correct", "có", "đúng", "vâng"}
 NO_SET = {"no", "false", "incorrect", "không", "sai"}
-FILES_TO_EVALUATE = ['sft_answer_explain.json']
+FILES_TO_EVALUATE = ['intern_ds_1000_vivqax.json']
 
 
 def normalize_unsorted(text):
@@ -46,7 +46,7 @@ def check_accuracy(pred_ans, gt_ans, raw_pred, raw_gt):
     return gt_unsorted and gt_unsorted in c_pred_nopunct
 
 
-def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: bool = False) -> dict:
+def evaluate_file(json_path: str, device: str = "cuda") -> dict:
     with open(json_path, "r", encoding="utf-8") as f:
         data = json.load(f)
     
@@ -73,6 +73,7 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
             by_type[ans_type] = {
                 "gt_expls": [], "pred_expls": [],
                 "questions": [], "gt_answers": [], "pred_answers": [],
+                "synthetic_answers": [],
                 "total": 0, "correct": 0
             }
         
@@ -87,25 +88,23 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
             correct += 1
             by_type[ans_type]["correct"] += 1
     
-    all_synthetic_answers = None
-    if use_synthetic_answers:
-        if not SharedSyntheticAnswerGenerator.is_initialized():
-            SharedSyntheticAnswerGenerator.initialize()
-        
-        all_synthetic_answers = SharedSyntheticAnswerGenerator.generate_batch(
-            questions=all_questions, answers=all_gt_answers,
-            max_new_tokens=128, show_progress=True
-        )
-        
-        current_idx = 0
-        for item in data:
-            ans_type = item["answer_type"]
-            if "synthetic_answers" not in by_type[ans_type]:
-                by_type[ans_type]["synthetic_answers"] = []
-            by_type[ans_type]["synthetic_answers"].append(all_synthetic_answers[current_idx])
-            current_idx += 1
+    if not SharedSyntheticAnswerGenerator.is_initialized():
+        SharedSyntheticAnswerGenerator.initialize()
     
+    all_synthetic_answers = SharedSyntheticAnswerGenerator.generate_batch(
+        questions=all_questions, answers=all_gt_answers,
+        max_new_tokens=128, show_progress=True
+    )
+    
+    current_idx = 0
+    for item in data:
+        ans_type = item.get("answer_type", "other")
+        by_type[ans_type]["synthetic_answers"].append(all_synthetic_answers[current_idx])
+        current_idx += 1
+    
+    # Compute NLG scores (Traditional + BERTScore)
     nlg_scores = get_nlg_scores(all_gt_expls, all_pred_expls, device, model_type='phobert')
+    
     smile_scores = compute_smile_scores(
         all_questions, all_gt_answers, all_pred_answers,
         synthetic_answers=all_synthetic_answers, model_type='phobert'
@@ -121,10 +120,12 @@ def evaluate_file(json_path: str, device: str = "cuda", use_synthetic_answers: b
     
     for ans_type, data_type in by_type.items():
         nlg = get_nlg_scores(data_type["gt_expls"], data_type["pred_expls"], device, model_type='phobert')
+        
         smile = compute_smile_scores(
             data_type["questions"], data_type["gt_answers"], data_type["pred_answers"],
             synthetic_answers=data_type.get("synthetic_answers"), model_type='phobert'
         )
+            
         results["by_answer_type"][ans_type] = {
             "accuracy": (data_type["correct"] / data_type["total"] * 100),
             "total_examples": data_type["total"],
@@ -139,13 +140,10 @@ def main():
     parser = argparse.ArgumentParser(description="Evaluate VQA predictions")
     parser.add_argument("--input-dir", type=str, default="src/inference/results/grpo")
     parser.add_argument("--device", type=str, default="cuda:0")
-    parser.add_argument("--no-synthetic-answers", action="store_true", default=False)
     parser.add_argument("--syn_ans_model_path", type=str, default=None)
     parser.add_argument("--filenames", nargs="+", default=[])
     parser.add_argument("--output-file", type=str, default=None)
     args = parser.parse_args()
-    
-    use_synthetic_answers = not args.no_synthetic_answers
     
     if args.filenames:
         files = [f if f.endswith(".json") else f"{f}.json" for f in args.filenames]
@@ -155,17 +153,22 @@ def main():
         files = sorted([f for f in os.listdir(args.input_dir)
                         if f.endswith(".json") and "_score" not in f and "summary" not in f])
     
-    SharedBERTScoreModel.get_scorer(model_type='phobert', device=args.device)
+    print("🔧 Initializing BERTScore model...")
+    SharedBERTScoreModel.get_scorer(model_type='phobert', device='cpu')
+    
+    print("🔧 Initializing SMILE model...")
     SharedSMILEModel.get_instance(model_type='phobert')
-    if use_synthetic_answers:
-        SharedSyntheticAnswerGenerator.initialize(model_path=args.syn_ans_model_path, device=args.device)
+    print("🔧 Initializing Synthetic Answer Generator...")
+    SharedSyntheticAnswerGenerator.initialize(model_path=args.syn_ans_model_path, device=args.device)
     
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     all_rows = []
     
     for fname in files:
         fpath = os.path.join(args.input_dir, fname)
-        result = evaluate_file(fpath, device=args.device, use_synthetic_answers=use_synthetic_answers)
+        print(f"\n� Evaluating: {fname}")
+        
+        result = evaluate_file(fpath, device=args.device)
         model_name = os.path.splitext(fname)[0]
         
         all_rows.append({
