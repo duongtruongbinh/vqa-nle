@@ -1,2 +1,0 @@
-model,total,correct,accuracy,BLEU-1,BLEU-2,BLEU-3,BLEU-4,METEOR,ROUGE_L,CIDEr,BERTScore_F1
-checkpoint-1000-merged,300,131,43.67,28.03,14.73,7.91,4.1,20.64,20.69,19.38,36.99

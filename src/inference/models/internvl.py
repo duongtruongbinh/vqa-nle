@@ -81,8 +81,8 @@ def dynamic_preprocess(image: Image.Image, min_num: int = 1, max_num: int = 12, 
 class InternVLModel(VQAModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        #self.model_path = '5CD-AI/Vintern-3B-R-beta' OpenGVLab/InternVL3-1B-Instruct
-        self.model_path = '5CD-AI/Vintern-3B-R-beta'
+        #self.model_path = '5CD-AI/Vintern-3B-R-beta' 'OpenGVLab/InternVL3_5-2B'
+        self.model_path = '/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/sft/output/merged/8000_vintern_answer_explain'
         self._set_clean_model_name()
         self.image_size = 448
         self.transform = build_transform(self.image_size)

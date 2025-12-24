@@ -1,6 +1,7 @@
 export HF_ENDPOINT="https://huggingface.co"
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
-MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
+# "OpenGVLab/InternVL3_5-2B", "5CD-AI/Vintern-3B-R-beta"
+MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-2B"
 MODEL_TYPE="internvl3"
 
 MAX_LENGTH=4096
@@ -9,17 +10,16 @@ EPOCHS=1
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
 LEARNING_RATE=1e-7
-MAX_STEPS=1000
+MAX_STEPS=8000
 
-SAVE_STEPS=150
+SAVE_STEPS=50
 LOGGING_STEPS=1
-EVAL_STEPS=1
 
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/sft/ViVQA-X_train_msswift.jsonl"
-OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/sft/output/dat-vinternvl3B"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/sft/output/"
 
 
-CUDA_VISIBLE_DEVICES=1 \
+CUDA_VISIBLE_DEVICES=0 \
 swift sft \
     --use_hf=1 \
     --model "$MODEL_ID_OR_PATH" \
@@ -30,13 +30,12 @@ swift sft \
     --torch_dtype bfloat16 \
     --num_train_epochs $EPOCHS \
     --per_device_train_batch_size $BATCH_SIZE_PER_DEVICE \
-    --per_device_eval_batch_size 1 \
     --learning_rate $LEARNING_RATE \
     --lora_rank 32 \
     --lora_alpha 64 \
+    --freeze_vit True \
     --target_modules all-linear \
     --gradient_accumulation_steps $GRAD_ACCUM_STEPS \
-    --eval_steps $EVAL_STEPS \
     --save_steps $SAVE_STEPS \
     --max_steps $MAX_STEPS \
     --save_total_limit 2 \

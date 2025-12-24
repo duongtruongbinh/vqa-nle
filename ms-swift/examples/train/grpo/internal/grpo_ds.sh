@@ -1,10 +1,10 @@
 #!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
 # --- Cấu hình ---
-export CUDA_VISIBLE_DEVICES=1  # Chỉ định GPU muốn sử dụng
+export CUDA_VISIBLE_DEVICES=2  # Chỉ định GPU muốn sử dụng
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="5CD-AI/Vintern-3B-R-beta"
+MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-2B"
 MODEL_TYPE="internvl3"
 TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/standard_vivqax/ViVQA-X_train_msswift.jsonl"
 PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
@@ -18,7 +18,7 @@ TEMPERATURE=0.9
 EPOCHS=2
 BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=1000
+MAX_STEPS=2000
 LEARNING_RATE=1e-5
 
 SAVE_STEPS=50
@@ -70,5 +70,6 @@ swift rlhf \
     --quant_bits 4 \
     --bnb_4bit_quant_type nf4 \
     --bnb_4bit_compute_dtype bfloat16 \
-    --gradient_checkpointing true\
-    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/standard/v2-20251215-141650/checkpoint-800"
+    --gradient_checkpointing true \
+    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/standard/v1-20251223-184215/checkpoint-1850"
+    

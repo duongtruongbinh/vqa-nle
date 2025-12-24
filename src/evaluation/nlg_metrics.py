@@ -8,6 +8,7 @@ This module provides functions for computing various NLG metrics:
 """
 
 import numpy as np
+import torch
 
 from pycocoevalcap.bleu.bleu import Bleu
 from pycocoevalcap.meteor.meteor import Meteor
@@ -21,6 +22,7 @@ from .text_preprocessing import (
     truncate_sentence,
     preprocess_vietnamese_text,
     normalize_answer,
+    sanitize_text_for_bert,
 )
 
 
@@ -68,9 +70,6 @@ def compute_traditional_metrics(gts: dict, res: dict) -> dict[str, float]:
 # BERTSCORE
 # ============================================================================
 
-# ============================================================================
-# BERTSCORE
-# ============================================================================
 
 def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]], 
                               device: str = "cuda", model_type: str = "bert") -> list[float]:
@@ -80,34 +79,72 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
     For each hypothesis, computes BERTScore against all its references
     and returns the maximum F1 score.
     
-    Args:
-        hypotheses: List of predicted texts
-        references: List of reference lists (each sample can have multiple refs)
-        device: Device for computation ("cuda" or "cpu")
-        model_type: "bert" or "phobert"
-        
-    Returns:
-        List of max F1 scores (scaled to 0-100)
+    Uses aggressive input sanitization to prevent CUDA errors.
     """
     if not hypotheses:
         return []
     
-    scorer = SharedBERTScoreModel.get_scorer(model_type=model_type, device=device)
-    max_scores = []
+    # Prepare all valid pairs with aggressive sanitization
+    all_cands, all_refs = [], []
+    sample_indices = []
     
-    for hyp, refs in zip(hypotheses, references):
-        valid_refs = [r for r in refs if r.strip()]
+    for idx, (hyp, refs) in enumerate(zip(hypotheses, references)):
+        hyp_clean = sanitize_text_for_bert(hyp)
+        valid_refs = [sanitize_text_for_bert(r) for r in refs if r and r.strip()]
         
-        if not hyp.strip() or not valid_refs:
-            max_scores.append(0.0)
+        # Additional sanitization
+        hyp_clean = ''.join(ch for ch in hyp_clean if ord(ch) < 65536)
+        valid_refs = [''.join(ch for ch in ref if ord(ch) < 65536) for ref in valid_refs]
+        
+        if not valid_refs or hyp_clean == "." or len(hyp_clean.strip()) == 0:
             continue
         
-        # BERTScorer.score() expects (candidates, references)
-        batch_cands = [hyp] * len(valid_refs)
-        P, R, F1 = scorer.score(batch_cands, valid_refs)
+        for ref in valid_refs:
+            if ref != "." and len(ref.strip()) > 0:
+                all_cands.append(hyp_clean)
+                all_refs.append(ref)
+                sample_indices.append(idx)
+    
+    max_scores = [0.0] * len(hypotheses)
+    
+    if not all_cands:
+        return max_scores
+    
+    try:
+        # Clear CUDA cache
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
         
-        f1_scores = F1.cpu().tolist()
-        max_scores.append(max(f1_scores) * 100)
+        scorer = SharedBERTScoreModel.get_scorer(model_type=model_type, device=device)
+        
+        # Process in batches with error handling
+        batch_size = 128
+        all_f1_scores = []
+        
+        for i in range(0, len(all_cands), batch_size):
+            batch_cands = all_cands[i:i+batch_size]
+            batch_refs = all_refs[i:i+batch_size]
+            
+            try:
+                P, R, F1 = scorer.score(batch_cands, batch_refs)
+                all_f1_scores.extend(F1.cpu().tolist())
+            except Exception as batch_error:
+                print(f"Warning: BERTScore batch {i//batch_size} failed: {batch_error}")
+                # Append zeros for failed batch
+                all_f1_scores.extend([0.0] * len(batch_cands))
+                
+                # Clear CUDA cache after error
+                if torch.cuda.is_available():
+                    try:
+                        torch.cuda.empty_cache()
+                    except:
+                        pass
+        
+        # Assign scores
+        for i, f1 in zip(sample_indices, all_f1_scores):
+            max_scores[i] = max(max_scores[i], f1 * 100)
+    except Exception as e:
+        print(f"Warning: BERTScore computation failed: {e}")
     
     return max_scores
 
@@ -115,6 +152,25 @@ def compute_bertscore_max_ref(hypotheses: list[str], references: list[list[str]]
 # ============================================================================
 # COMBINED NLG SCORES
 # ============================================================================
+
+def _preprocess_for_metrics(text: str, max_len: int = 150) -> str:
+    """
+    Preprocess text for NLG metrics in one pass.
+    
+    Pipeline: truncate -> Vietnamese segmentation -> sanitize
+    
+    Args:
+        text: Input text
+        max_len: Maximum words to keep
+        
+    Returns:
+        Preprocessed text ready for metrics
+    """
+    text = truncate_sentence(text, max_len)
+    text = preprocess_vietnamese_text(text)
+    text = sanitize_text_for_bert(text)
+    return text
+
 
 def get_nlg_scores(references: list[list[str]], hypotheses: list[str], 
                    device: str = "cuda", max_len: int = 150, model_type: str = "bert") -> dict[str, float]:
@@ -133,15 +189,11 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str],
     Returns:
         Dictionary with all metric scores
     """
-    # Truncate texts
-    hypotheses = [truncate_sentence(h, max_len) for h in hypotheses]
-    references = [[truncate_sentence(r, max_len) for r in refs] for refs in references]
+    # Preprocess all texts in one pass
+    hypotheses = [_preprocess_for_metrics(h, max_len) for h in hypotheses]
+    references = [[_preprocess_for_metrics(r, max_len) for r in refs] for refs in references]
     
-    # Preprocess Vietnamese text
-    hypotheses = [preprocess_vietnamese_text(h) for h in hypotheses]
-    references = [[preprocess_vietnamese_text(r) for r in refs] for refs in references]
-    
-    # Prepare data for traditional metrics
+    # Prepare data for traditional metrics (need clean_text for proper tokenization)
     gts = {i: [clean_text(r) for r in refs] for i, refs in enumerate(references)}
     res = {i: [clean_text(hyp)] for i, hyp in enumerate(hypotheses)}
     
@@ -158,6 +210,35 @@ def get_nlg_scores(references: list[list[str]], hypotheses: list[str],
 # ============================================================================
 # SMILE METRIC
 # ============================================================================
+
+def _preprocess_for_smile(text: str) -> str:
+    """
+    Preprocess text for SMILE metric.
+    
+    Pipeline: validate -> clean -> remove non-BMP -> Vietnamese segmentation
+    
+    Returns empty string for invalid input (caller should skip).
+    """
+    if not text or not text.strip():
+        return ""
+    
+    # Remove null bytes
+    text = text.replace('\x00', '').strip()
+    if not text:
+        return ""
+    
+    # Remove chars outside BMP (emoji, special symbols) - PhoBERT can't handle them
+    text = ''.join(ch for ch in text if ord(ch) < 65536)
+    if not text.strip():
+        return ""
+    
+    text = clean_text(text)
+    if not text:
+        return ""
+    
+    text = segment_vietnamese(text)
+    return text if text and text.strip() else ""
+
 
 def compute_smile_scores(questions: list[str], gt_answers: list[str], 
                          predictions: list[str], 
@@ -205,29 +286,52 @@ def compute_smile_scores(questions: list[str], gt_answers: list[str],
     smile_data = []
     
     for i, (q, gt, syn_ans, pred) in enumerate(zip(questions, gt_answers, synthetic_answers, predictions)):
-        if not q or not gt or not pred:
+        # Skip if any raw field is empty or whitespace-only
+        if not q or not q.strip() or not gt or not gt.strip() or not pred or not pred.strip():
             continue
         
-        q_seg = segment_vietnamese(clean_text(q))
-        gt_seg = segment_vietnamese(clean_text(gt))
-        syn_ans_seg = segment_vietnamese(clean_text(syn_ans))
-        pred_seg = segment_vietnamese(clean_text(pred))
-        
-        if q_seg and gt_seg and pred_seg and syn_ans_seg:
-            smile_data.append((q_seg, gt_seg, syn_ans_seg, pred_seg))
+        try:
+            # Preprocess all fields in one pass
+            q_seg = _preprocess_for_smile(q)
+            gt_seg = _preprocess_for_smile(gt)
+            syn_ans_seg = _preprocess_for_smile(syn_ans)
+            pred_seg = _preprocess_for_smile(pred)
+            
+            # Ensure all segmented texts are non-empty
+            if all(text and text.strip() for text in [q_seg, gt_seg, syn_ans_seg, pred_seg]):
+                smile_data.append((q_seg, gt_seg, syn_ans_seg, pred_seg))
+        except Exception as e:
+            print(f"Warning: SMILE preprocessing failed for sample {i}: {e}")
     
     if not smile_data:
         return {"SMILE_avg": 0.0, "SMILE_hm": 0.0}
     
-    # Compute SMILE scores
-    smile = SharedSMILEModel.get_instance(model_type=model_type)
-    smile_data_array = np.array(smile_data)
-    results = smile.generate_scores(smile_data_array)
+    # Clear any previous CUDA errors before SMILE computation
+    if torch.cuda.is_available():
+        try:
+            torch.cuda.synchronize()
+            torch.cuda.empty_cache()
+        except:
+            pass
     
-    return {
-        "SMILE_avg": float(np.mean(results['avg'])) * 100,
-        "SMILE_hm": float(np.mean(results['hm'])) * 100,
-    }
+    # Compute SMILE scores with error handling
+    try:
+        smile = SharedSMILEModel.get_instance(model_type=model_type)
+        smile_data_array = np.array(smile_data)
+        results = smile.generate_scores(smile_data_array)
+        
+        return {
+            "SMILE_avg": float(np.mean(results['avg'])) * 100,
+            "SMILE_hm": float(np.mean(results['hm'])) * 100,
+        }
+    except (RuntimeError, torch.cuda.CudaError) as e:
+        print(f"Warning: SMILE computation failed with CUDA error: {e}")
+        print("Returning zero scores for SMILE metrics.")
+        return {"SMILE_avg": 0.0, "SMILE_hm": 0.0}
+    except Exception as e:
+        print(f"Warning: SMILE computation failed: {e}")
+        print("Returning zero scores for SMILE metrics.")
+        return {"SMILE_avg": 0.0, "SMILE_hm": 0.0}
 
 
 # ============================================================================

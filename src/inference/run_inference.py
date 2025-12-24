@@ -2,27 +2,29 @@ import os
 import json
 import argparse
 from tqdm import tqdm
-from models.utils import set_seed
+from .models.utils import set_seed
 
 os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "expandable_segments:True"
 os.environ["CUDA_VISIBLE_DEVICES"] = "2"
 
 MODELS = {
-    "internvl": "models.internvl.InternVLModel",
-    "molmo": "models.molmo.MolmoModel", 
-    "qwenvl": "models.qwenvl.QwenVLModel",
-    "videollama": "models.videollama.VideoLLaMAModel",
-    "phi": "models.phi.PhiModel",
-    "ovis": "models.ovis.OvisModel",
-    "minicpm": "models.minicpm.MiniCPMModel",
-    "vintern1b": "models.vintern1b.Vintern1BModel"
+    "internvl": ".models.internvl.InternVLModel",
+    "molmo": ".models.molmo.MolmoModel", 
+    "qwenvl": ".models.qwenvl.QwenVLModel",
+    "videollama": ".models.videollama.VideoLLaMAModel",
+    "phi": ".models.phi.PhiModel",
+    "ovis": ".models.ovis.OvisModel",
+    "minicpm": ".models.minicpm.MiniCPMModel",
+    "vintern1b": ".models.vintern1b.Vintern1BModel"
 }
+
+import importlib
 
 def get_model_class(model_key: str):
     if model_key not in MODELS:
         raise ValueError(f"Unknown model: {model_key}")
     module_path, class_name = MODELS[model_key].rsplit('.', 1)
-    module = __import__(module_path, fromlist=[class_name])
+    module = importlib.import_module(module_path, package='src.inference')
     return getattr(module, class_name)
 
 def main():

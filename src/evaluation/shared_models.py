@@ -12,7 +12,6 @@ import sys
 
 import torch
 from tqdm import tqdm
-import bert_score
 
 # Add SMILE metric path
 SMILE_PATH = '/home/vlai-vqa-nle/minhtq/vqa-nle/smile-metric-qna-eval'
@@ -37,61 +36,83 @@ from synthetic_answer_generator import (
 # SHARED BERTSCORE MODEL
 # ============================================================================
 
-# ============================================================================
-# SHARED BERTSCORE MODEL (using bert-score library)
-# ============================================================================
-
 class SharedBERTScoreModel:
-    """
-    Singleton using original bert-score library (more stable).
     
-    Uses PhoBERT-base or BERT-base for BERTScore computation.
-    """
+    _scorers = {}
     
-    _scorers = {}  # Cache BERTScorer objects
-    
-    # Model mapping
     MODEL_MAPPING = {
         'phobert': 'vinai/phobert-base',
         'bert': 'bert-base-uncased'
     }
     
     @classmethod
-    def get_scorer(cls, model_type: str = "bert", device: str = "cuda"):
-        """Get or create cached BERTScorer."""
-        key = (model_type, device)
-        if key not in cls._scorers:
-            model_name = cls.MODEL_MAPPING.get(model_type, model_type)
-            
-            cls._scorers[key] = bert_score.BERTScorer(
-                model_type=model_name,
-                num_layers=12,
-                batch_size=64,
-                nthreads=4,
-                all_layers=False,
-                idf=False,
-                device=device,
-                lang=None,
-                rescale_with_baseline=False
-            )
+    def _sanitize_for_bertscore(cls, text: str) -> str:
+        """Remove ký tự gây index out of bounds."""
+        if not text or not isinstance(text, str):
+            return "."
         
-        return cls._scorers[key]
+        text = ''.join(ch for ch in text if ord(ch) >= 32 and ord(ch) < 65536)
+        text = ' '.join(text.split())
+        
+        return text if text else "."
+    
+    @classmethod
+    def _fix_tokenizer(cls, tokenizer):
+        """Fix pad_token_id cho PhoBERT - fix chính cho index out of bounds."""
+        if tokenizer.pad_token is None:
+            tokenizer.pad_token = "<pad>"
+        
+        if tokenizer.pad_token_id is None:
+            tokenizer.pad_token_id = 1
+        
+        return tokenizer
+    
+    @classmethod
+    def get_scorer(cls, model_type: str = "phobert", device: str = "cuda"):
+        """Get or create cached BERTScorer."""
+        import bert_score
+        from transformers import AutoTokenizer
+        
+        key = (model_type, device)
+        if key in cls._scorers:
+            return cls._scorers[key]
+        
+        model_name = cls.MODEL_MAPPING.get(model_type, model_type)
+        
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        tokenizer = cls._fix_tokenizer(tokenizer)
+        
+        scorer = bert_score.BERTScorer(
+            model_type=model_name,
+            num_layers=12,
+            batch_size=32,
+            nthreads=4,
+            all_layers=False,
+            idf=False,
+            device=device,
+            lang=None,
+            rescale_with_baseline=False
+        )
+        
+        scorer._tokenizer = tokenizer
+        
+        cls._scorers[key] = scorer
+        return scorer
     
     @classmethod
     def compute_scores(cls, predictions: list, references: list, 
-                       model_type: str = "bert", device: str = "cuda"):
-        """
-        Compute BERTScore with automatic caching.
+                       model_type: str = "phobert", device: str = "cuda"):
+        """Compute BERTScore with basic sanitization."""
+        clean_preds = [cls._sanitize_for_bertscore(p) for p in predictions]
+        clean_refs = [cls._sanitize_for_bertscore(r) for r in references]
         
-        Returns:
-            Dict with 'precision', 'recall', 'f1' (each as mean value)
-        """
         scorer = cls.get_scorer(model_type, device)
-        P, R, F1 = scorer.score(predictions, references)
+        
+        P, R, F1 = scorer.score(clean_preds, clean_refs)
         
         return {
             'precision': P.mean().item(),
-            'recall': R.mean().item(), 
+            'recall': R.mean().item(),
             'f1': F1.mean().item()
         }
 
@@ -152,13 +173,11 @@ class SharedSyntheticAnswerGenerator:
         if model_path is None:
             model_path = cls.DEFAULT_MODEL_PATH
         
-        print(f"Initializing Synthetic Answer Generator with {model_path}...")
         cls._model, cls._tokenizer, cls._device = load_qwen_text_model(
             model_path=model_path,
             device=torch.device(device)
         )
         cls._initialized = True
-        print("Synthetic Answer Generator initialized")
     
     @classmethod
     def is_initialized(cls) -> bool:
@@ -197,8 +216,7 @@ class SharedSyntheticAnswerGenerator:
         for q, a in iterator:
             try:
                 syn_ans = cls.generate_synthetic_answer(q, a, max_new_tokens)
-            except Exception as e:
-                print(f"Warning: Error generating synthetic answer: {e}. Using original answer.")
+            except Exception:
                 syn_ans = a
             synthetic_answers.append(syn_ans)
         

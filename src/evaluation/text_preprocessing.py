@@ -215,6 +215,40 @@ def preprocess_vietnamese_text(text: str) -> str:
     return tokenized_text
 
 
+def sanitize_text_for_bert(text: str) -> str:
+    """
+    Sanitize text for BERT-based models to prevent CUDA errors.
+    
+    Removes null bytes, control characters, surrogate pairs, and handles empty strings.
+    Uses "." as fallback for empty strings (valid token in all vocabularies).
+    
+    Args:
+        text: Input text
+        
+    Returns:
+        Sanitized text safe for BERT tokenization
+    """
+    if not text or not text.strip():
+        return "."
+    
+    # Remove null bytes
+    text = text.replace('\x00', '')
+    
+    # Remove chars outside BMP (emoji, special symbols) which can cause tokenizer errors
+    text = ''.join(ch for ch in text if ord(ch) < 65536)
+    
+    # Remove control characters (except common whitespace)
+    text = ''.join(ch for ch in text if unicodedata.category(ch) != 'Cc' or ch in '\n\r\t ')
+    
+    # Remove surrogate pairs (can cause encoding issues)
+    text = text.encode('utf-8', errors='ignore').decode('utf-8')
+    
+    # Normalize whitespace
+    text = ' '.join(text.split())
+    
+    return text if text else "."
+
+
 # ============================================================================
 # MODULE EXPORTS
 # ============================================================================
@@ -227,4 +261,5 @@ __all__ = [
     "truncate_sentence",
     "ensure_list",
     "preprocess_vietnamese_text",
+    "sanitize_text_for_bert",
 ]

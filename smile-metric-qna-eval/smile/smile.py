@@ -40,42 +40,115 @@ class PhoBERTWrapper:
         if isinstance(sentences, str):
             sentences = [sentences]
         
-        all_embeddings = []
+        # Validate and sanitize inputs
+        valid_sentences = []
+        for s in sentences:
+            if isinstance(s, str) and s.strip():
+                # Remove non-BMP characters (emoji, special symbols)
+                s_clean = ''.join(ch for ch in s if ord(ch) < 65536)
+                # Remove null bytes
+                s_clean = s_clean.replace('\x00', '').strip()
+                if s_clean:
+                    valid_sentences.append(s_clean)
+                else:
+                    valid_sentences.append(".")  # Placeholder for empty
+            else:
+                valid_sentences.append(".")
         
-        iterator = range(0, len(sentences), batch_size)
+        all_embeddings = []
+        iterator = range(0, len(valid_sentences), batch_size)
         if show_progress_bar:
             iterator = tqdm(iterator, desc="Encoding")
         
         with torch.no_grad():
             for i in iterator:
-                batch = sentences[i:i+batch_size]
+                batch = valid_sentences[i:i+batch_size]
                 
-                # Tokenize
-                encoded = self.tokenizer(
-                    batch,
-                    padding=True,
-                    truncation=True,
-                    max_length=256,
-                    return_tensors='pt'
-                )
+                try:
+                    # Tokenize
+                    encoded = self.tokenizer(
+                        batch,
+                        padding=True,
+                        truncation=True,
+                        max_length=256,
+                        return_tensors='pt'
+                    )
+                    
+                    # Validate token IDs before moving to CUDA
+                    input_ids = encoded['input_ids']
+                    vocab_size = getattr(self.tokenizer, 'vocab_size', 64000)
+                    
+                    if (input_ids >= vocab_size).any() or (input_ids < 0).any():
+                        print(f"Warning: Invalid token IDs in batch {i//batch_size}. Clamping to valid range.")
+                        input_ids = torch.clamp(input_ids, 0, vocab_size - 1)
+                        encoded['input_ids'] = input_ids
+                    
+                    # Move to device
+                    encoded = {k: v.to(self.device) for k, v in encoded.items()}
+                    
+                    # Get model output
+                    outputs = self.model(**encoded)
+                    
+                    # Mean pooling
+                    attention_mask = encoded['attention_mask']
+                    token_embeddings = outputs.last_hidden_state
+                    input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+                    embeddings = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+                    
+                    # Normalize if requested
+                    if normalize_embeddings:
+                        embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                    
+                    all_embeddings.append(embeddings.cpu())
                 
-                # Move to device
-                encoded = {k: v.to(self.device) for k, v in encoded.items()}
-                
-                # Get model output
-                outputs = self.model(**encoded)
-                
-                # Mean pooling
-                attention_mask = encoded['attention_mask']
-                token_embeddings = outputs.last_hidden_state
-                input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
-                embeddings = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
-                
-                # Normalize if requested
-                if normalize_embeddings:
-                    embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
-                
-                all_embeddings.append(embeddings.cpu())
+                except (RuntimeError, torch.cuda.CudaError) as e:
+                    print(f"CUDA error in batch {i//batch_size}: {e}")
+                    print("Clearing CUDA cache and retrying on CPU...")
+                    
+                    # Clear CUDA cache
+                    torch.cuda.empty_cache()
+                    
+                    try:
+                        # Retry on CPU
+                        cpu_device = torch.device('cpu')
+                        encoded = self.tokenizer(
+                            batch,
+                            padding=True,
+                            truncation=True,
+                            max_length=256,
+                            return_tensors='pt'
+                        )
+                        
+                        # Clamp token IDs
+                        vocab_size = getattr(self.tokenizer, 'vocab_size', 64000)
+                        encoded['input_ids'] = torch.clamp(encoded['input_ids'], 0, vocab_size - 1)
+                        
+                        # Move model to CPU temporarily
+                        original_device = next(self.model.parameters()).device
+                        self.model.to(cpu_device)
+                        
+                        outputs = self.model(**encoded)
+                        
+                        attention_mask = encoded['attention_mask']
+                        token_embeddings = outputs.last_hidden_state
+                        input_mask_expanded = attention_mask.unsqueeze(-1).expand(token_embeddings.size()).float()
+                        embeddings = torch.sum(token_embeddings * input_mask_expanded, 1) / torch.clamp(input_mask_expanded.sum(1), min=1e-9)
+                        
+                        if normalize_embeddings:
+                            embeddings = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+                        
+                        all_embeddings.append(embeddings)
+                        
+                        # Move model back to original device
+                        self.model.to(original_device)
+                        print(f"CPU fallback succeeded for batch {i//batch_size}")
+                        
+                    except Exception as cpu_error:
+                        print(f"CPU fallback failed: {cpu_error}. Using zero embeddings for batch {i//batch_size}")
+                        # Return zero embeddings as last resort
+                        embedding_dim = 768
+                        zero_emb = torch.zeros((len(batch), embedding_dim))
+                        all_embeddings.append(zero_emb)
         
         # Concatenate all batches
         all_embeddings = torch.cat(all_embeddings, dim=0)

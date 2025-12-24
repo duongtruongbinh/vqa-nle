@@ -1,8 +1,8 @@
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+
 import torch
 import bert_score
-import os
-
-os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 
 
 class BaseRewardScorer:
@@ -88,11 +88,4 @@ class BaseRewardScorer:
             for i, id_ in enumerate(valid_ids):
                 bert_scores_dict[id_] = F1[i].item()
             
-            # Giải phóng tensors
-            del P, R, F1
-        
-        # Clear CUDA cache để tránh memory tích lũy
-        if torch.cuda.is_available():
-            torch.cuda.empty_cache()
-        
         return bert_scores_dict

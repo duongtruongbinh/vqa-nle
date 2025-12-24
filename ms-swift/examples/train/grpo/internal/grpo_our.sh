@@ -1,41 +1,42 @@
-#!/bin/bash
 export HF_ENDPOINT="https://huggingface.co"
 # --- Cấu hình ---
-export CUDA_VISIBLE_DEVICES=2  # Chỉ định GPU muốn sử dụng
+export CUDA_VISIBLE_DEVICES=2
 export PYTORCH_CUDA_ALLOC_CONF=expandable_segments:True
 
-MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-4B-Instruct" # Model ID trên Hugging Face
+MODEL_ID_OR_PATH="OpenGVLab/InternVL3_5-2B"
 MODEL_TYPE="internvl3"
-TRAIN_DATASET_PATH="/home/vlai-vqa-nle/phatdat/ms-swift/data_custom/ViVQA-X_train_grpo.jsonl"
-VAL_DATASET_PATH="/home/vlai-vqa-nle/phatdat/ms-swift/examples/custom/data_custom/ViVQA-X_train_grpo.jsonl" # Tập validation
-PLUGIN_PATH="/home/vlai-vqa-nle/phatdat/ms-swift/examples/train/grpo/plugin/plugin.py"
-OUTPUT_DIR="/home/vlai-vqa-nle/phatdat/ms-swift/examples/train/grpo/output" # Đường dẫn tương đối
+TRAIN_DATASET_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/data/processed/standard_vivqax/ViVQA-X_train_msswift.jsonl"
+PLUGIN_PATH="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/plugin/plugin.py"
+OUTPUT_DIR="/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/our"
 
 # --- Tham số GRPO & Huấn luyện ---
-MAX_LENGTH=1024
+MAX_LENGTH=4096
 MAX_COMPLETION_LENGTH=1024
 NUM_GENERATIONS=4
 TEMPERATURE=0.9
-EPOCHS=1
-BATCH_SIZE_PER_DEVICE=1
+EPOCHS=2
+BATCH_SIZE_PER_DEVICE=2
 GRAD_ACCUM_STEPS=4
-MAX_STEPS=500
+MAX_STEPS=2000
 LEARNING_RATE=1e-5
 
 SAVE_STEPS=50
-LOGGING_STEPS=5
-EVAL_STEPS=5 # **Thêm:** Đặt tần suất đánh giá (thường bằng logging_steps hoặc save_steps)
-# --eval_dataset "$VAL_DATASET_PATH" \
+LOGGING_STEPS=1
+EVAL_STEPS=1
+
 swift rlhf \
     --rlhf_type grpo \
     --model_type "$MODEL_TYPE" \
     --model "$MODEL_ID_OR_PATH" \
+    --use_vllm false \
+    --attn_impl flash_attention_2 \
+    --use_hf true \
     --dataset "$TRAIN_DATASET_PATH" \
     --external_plugins "$PLUGIN_PATH" \
-    --reward_funcs custom_format_reward custom_accuracy_reward \
+    --reward_funcs custom_format_reward_ver3 custom_accuracy_reward custom_explaination_reward \
     --train_type lora \
-    --lora_rank 8 \
-    --lora_alpha 32 \
+    --lora_rank 32 \
+    --lora_alpha 64 \
     --target_modules all-linear \
     --freeze_vit True \
     --output_dir "$OUTPUT_DIR" \
@@ -61,14 +62,12 @@ swift rlhf \
     --save_only_model false \
     --save_total_limit 2 \
     --warmup_ratio 0.05 \
-    --dataloader_num_workers 1 \
-    --dataset_num_proc 1 \
+    --dataloader_num_workers 16 \
+    --dataset_num_proc 16 \
     --report_to wandb \
     --quant_method bnb \
     --quant_bits 4 \
     --bnb_4bit_quant_type nf4 \
     --bnb_4bit_compute_dtype bfloat16 \
-    --gradient_checkpointing true \
-    # --ref_model id_hoặc_path_đến_model_SFT_ban_đầu # Nên chỉ định ref_model
-
-echo "Hoàn thành huấn luyện GRPO LoRA!"
+    --gradient_checkpointing true\
+    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/our/intern_1000/checkpoint-1000"

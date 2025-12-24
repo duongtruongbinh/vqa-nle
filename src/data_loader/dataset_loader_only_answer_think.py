@@ -56,13 +56,12 @@ def create_jsonl_for_msswift(split="train", output_file=None, image_base_dir="/m
             # user_content = system_instruction_vintern3BR.format(question=question)
 
             # Format câu trả lời đầy đủ (assistant response)
-            # Note: The instruction asks for <REASONING>, <answer>, <explain>.
-            # We only have answer and explanation. We will provide what we have.
-            full_response = f"<CONCLUSION>{answer}</CONCLUSION><REASONING>{explanation}</REASONING>"
+            # Prompt asks for REASONING then CONCLUSION
+            full_response = f"<REASONING>{explanation}</REASONING>\n<CONCLUSION>{answer}</CONCLUSION>"
 
             # MS-Swift format
-            system_prompt = SYSTEM_PROMPTS
-            user_content = USER_PROMPTS.format(question = question)
+            system_prompt = SYSTEM_PROMPT
+            user_content = USER_CONTENT_TEMPLATE.format(question = question)
             entry = {
                 "messages": [
                     {"role": "system", "content": system_prompt},
