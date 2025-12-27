@@ -145,7 +145,7 @@ def generate_synthetic_answer_qwen_text(
         {"role": "user", "content": user_content}
     ]
     
-    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
+    text = tokenizer.apply_chat_template(messages, tokenize=False, add_generation_prompt=True, enable_thinking=False)
     inputs = tokenizer(text, return_tensors="pt").to(device)
     
     with torch.no_grad():

@@ -15,7 +15,12 @@ from .nlg_metrics import get_nlg_scores, compute_smile_scores
 
 YES_SET = {"yes", "true", "correct", "có", "đúng", "vâng"}
 NO_SET = {"no", "false", "incorrect", "không", "sai"}
-FILES_TO_EVALUATE = ['intern_ds_1000_vivqax.json']
+FILES_TO_EVALUATE = ['8000_intern_answer_explain_sft.json','8000_vintern_answer_explain_sft.json']
+FILES_TO_EVALUATE = ['internvl_our_2000_vivqax.json','vintern_our_2000_vivqax.json']
+FILES_TO_EVALUATE = ['internvl3_5_2b_base.json','vintern_vivqax_base_fulltags.json']
+FILES_TO_EVALUATE = ['InternVL3_5-8B.json','Ovis2.5-9B.json','Qwen2.5-VL-7B-Instruct.json']
+FILES_TO_EVALUATE = ['vinternvl_ds_2000_vivqax.json']
+FILES_TO_EVALUATE = ['internvl_ds_2000_vivqax.json']
 
 
 def normalize_unsorted(text):

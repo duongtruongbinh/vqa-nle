@@ -162,7 +162,7 @@ class SharedSyntheticAnswerGenerator:
     _device = None
     _initialized = False
     
-    DEFAULT_MODEL_PATH = "/mnt/dataset1/pretrained_fm/Qwen_Qwen3-4B-Instruct-2507"
+    DEFAULT_MODEL_PATH = "/mnt/dataset1/pretrained_fm/Qwen_Qwen3-8B"
     
     @classmethod
     def initialize(cls, model_path: str = None, device: str = "cuda"):
