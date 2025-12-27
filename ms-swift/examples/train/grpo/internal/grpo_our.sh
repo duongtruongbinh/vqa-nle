@@ -70,4 +70,4 @@ swift rlhf \
     --bnb_4bit_quant_type nf4 \
     --bnb_4bit_compute_dtype bfloat16 \
     --gradient_checkpointing true\
-    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/our/intern_1000/checkpoint-1000"
+    --resume_from_checkpoint "/home/vlai-vqa-nle/minhtq/vqa-nle/ms-swift/examples/train/grpo/output/our/v0-20251224-003319/checkpoint-1750"
